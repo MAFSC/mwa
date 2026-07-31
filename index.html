@@ -220,11 +220,19 @@
     </div>
 </div>
 
+<!-- Ethers.js library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.16.0/ethers.min.js">
 </script>
 
 <script type="text/javascript">
     (function() {
+        // Проверяем, что ethers загружен
+        if (typeof ethers === 'undefined') {
+            document.getElementById('statusMessage').textContent = '❌ ethers library not loaded. Please refresh.';
+            document.getElementById('statusMessage').className = 'status-message error';
+            return;
+        }
+
         // ---- Конфигурация контрактов ----
         const VAULT_ADDRESS = '0xdd6fc829709F47c6e9D764dc65B4324DF851fA40';
         const TOKEN_ADDRESS = '0xdBB8401ee6c808c747578C680e6b65AEFBAc6484';
@@ -456,6 +464,8 @@
         }
 
         updateLaunchButton();
+
+        console.log('MWA app initialized');
 
     })();
 </script>
