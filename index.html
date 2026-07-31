@@ -4,17 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MWA — Launch Meme Token</title>
-    <!-- Подключение шрифта "Courier New" как на печатной машинке -->
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Courier New', Courier, monospace;
-            background-color: #ffffff;
+            background: #ffffff;
             color: #222222;
             min-height: 100vh;
             display: flex;
@@ -22,16 +20,14 @@
             align-items: center;
             padding: 20px;
         }
-
         .container {
             max-width: 600px;
             width: 100%;
             padding: 30px 25px;
             border: 2px solid #222222;
-            background-color: #ffffff;
-            box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.1);
         }
-
         h1 {
             font-size: 28px;
             font-weight: 700;
@@ -41,7 +37,6 @@
             margin-bottom: 25px;
             text-transform: uppercase;
         }
-
         .wallet-section {
             display: flex;
             justify-content: space-between;
@@ -50,12 +45,10 @@
             border-bottom: 1px solid #cccccc;
             margin-bottom: 30px;
         }
-
         .wallet-status {
             font-size: 14px;
             color: #555555;
         }
-
         #connectButton {
             font-family: 'Courier New', Courier, monospace;
             background: #222222;
@@ -68,23 +61,18 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
         #connectButton:hover {
             background: #444444;
         }
-
         #connectButton.connected {
             background: #2a7d4f;
         }
-
         #connectButton.connected:hover {
             background: #1f5f3b;
         }
-
         .form-group {
             margin-bottom: 22px;
         }
-
         label {
             display: block;
             font-size: 14px;
@@ -93,7 +81,6 @@
             letter-spacing: 0.3px;
             text-transform: uppercase;
         }
-
         input, select {
             font-family: 'Courier New', Courier, monospace;
             width: 100%;
@@ -104,24 +91,17 @@
             transition: border 0.2s, background 0.2s;
             border-radius: 0;
         }
-
         input:focus, select:focus {
             outline: none;
             border-color: #222222;
             background: #ffffff;
         }
-
-        input::placeholder {
-            color: #aaaaaa;
-        }
-
         .hint {
             display: block;
             margin-top: 5px;
             font-size: 12px;
             color: #666666;
         }
-
         .launch-fee {
             background: #f0f0f0;
             padding: 12px 15px;
@@ -129,7 +109,6 @@
             border-left: 4px solid #222222;
             margin: 20px 0 25px 0;
         }
-
         #launchButton {
             font-family: 'Courier New', Courier, monospace;
             width: 100%;
@@ -144,16 +123,13 @@
             transition: background 0.2s, opacity 0.2s;
             letter-spacing: 1px;
         }
-
         #launchButton:hover:not(:disabled) {
             background: #000000;
         }
-
         #launchButton:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-
         .status-message {
             margin-top: 20px;
             padding: 12px;
@@ -163,17 +139,14 @@
             min-height: 50px;
             word-break: break-word;
         }
-
         .status-message.error {
             border-left-color: #c0392b;
             background: #fdf0ed;
         }
-
         .status-message.success {
             border-left-color: #2a7d4f;
             background: #edf7f2;
         }
-
         .footer {
             margin-top: 30px;
             font-size: 12px;
@@ -182,29 +155,9 @@
             border-top: 1px solid #dddddd;
             padding-top: 20px;
         }
-
-        a {
-            color: #222222;
-            text-decoration: underline;
-            text-underline-offset: 2px;
-        }
-
-        a:hover {
-            color: #000000;
-        }
-
-        /* Для чекбоксов и радио, если понадобятся — добавим базовый стиль */
-        select {
-            appearance: auto;
-        }
-
         @media (max-width: 480px) {
-            .container {
-                padding: 20px 15px;
-            }
-            h1 {
-                font-size: 22px;
-            }
+            .container { padding: 20px 15px; }
+            h1 { font-size: 22px; }
         }
     </style>
 </head>
@@ -213,30 +166,35 @@
 <div class="container">
     <h1>⌨️ MWA · LAUNCH</h1>
 
-    <!-- Подключение кошелька -->
     <div class="wallet-section">
         <span class="wallet-status" id="walletStatus">⛓️ Not connected</span>
         <button id="connectButton">Connect MetaMask</button>
     </div>
 
-    <!-- Форма создания мем-токена -->
     <form id="launchForm" autocomplete="off">
         <div class="form-group">
             <label for="tokenName">Token Name</label>
             <input type="text" id="tokenName" placeholder="e.g. My Meme Token" maxlength="60" required>
         </div>
-
         <div class="form-group">
             <label for="tokenSymbol">Token Symbol</label>
             <input type="text" id="tokenSymbol" placeholder="e.g. MEME" maxlength="20" required>
         </div>
-
         <div class="form-group">
             <label for="totalSupply">Total Supply</label>
             <input type="number" id="totalSupply" placeholder="e.g. 1000000" min="1" step="1" required>
             <span class="hint">Number of tokens to mint.</span>
         </div>
-
+        <div class="form-group">
+            <label for="rwaAmount">RWA Amount (in wei)</label>
+            <input type="text" id="rwaAmount" placeholder="e.g. 0x4563918244f3ffff" value="0x4563918244f3ffff" required>
+            <span class="hint">Amount of RWA tokens to lock. Use wei format.</span>
+        </div>
+        <div class="form-group">
+            <label for="assetAddress">RWA Asset Address</label>
+            <input type="text" id="assetAddress" placeholder="0x..." value="0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E" required>
+            <span class="hint">Address of the RWA token (AMD/TSLA/AAPL).</span>
+        </div>
         <div class="form-group">
             <label for="lockDuration">Lock / Redemption Period (seconds)</label>
             <select id="lockDuration" required>
@@ -258,28 +216,43 @@
 
     <div id="statusMessage" class="status-message">⏳ Awaiting connection and form input...</div>
     <div class="footer">
-        <a href="#" target="_blank">Testnet only</a> · MWA protocol · ⚙️ v0.1
+        <a href="#" target="_blank">Testnet only</a> · MWA protocol · ⚙️ v0.2
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.16.0/ethers.min.js">
+</script>
+
 <script type="text/javascript">
     (function() {
-        // Элементы DOM
+        // ---- Конфигурация контрактов ----
+        const VAULT_ADDRESS = '0xdd6fc829709F47c6e9D764dc65B4324DF851fA40';
+        const TOKEN_ADDRESS = '0xdBB8401ee6c808c747578C680e6b65AEFBAc6484';
+
+        // ---- ABI контракта Vault ----
+        const VAULT_ABI = [
+            "function depositRWA(address assetAddress, uint256 assetAmount, uint256 tokenAmount, uint256 lockDurationMonths) external"
+        ];
+
+        // ---- Элементы DOM ----
         const connectBtn = document.getElementById('connectButton');
         const walletStatus = document.getElementById('walletStatus');
         const launchBtn = document.getElementById('launchButton');
         const statusMsg = document.getElementById('statusMessage');
         const launchForm = document.getElementById('launchForm');
 
-        // Поля формы
         const tokenName = document.getElementById('tokenName');
         const tokenSymbol = document.getElementById('tokenSymbol');
         const totalSupply = document.getElementById('totalSupply');
+        const rwaAmount = document.getElementById('rwaAmount');
+        const assetAddress = document.getElementById('assetAddress');
         const lockDuration = document.getElementById('lockDuration');
 
-        // Состояние
+        // ---- Состояние ----
+        let signer = null;
         let userAddress = null;
         let isConnected = false;
+        let vaultContract = null;
 
         // ---- Вспомогательные функции ----
         function setStatus(text, type = 'info') {
@@ -290,7 +263,6 @@
         }
 
         function updateLaunchButton() {
-            // Доступен только если кошелек подключен и все поля заполнены
             if (!isConnected) {
                 launchBtn.disabled = true;
                 return;
@@ -298,16 +270,18 @@
             const name = tokenName.value.trim();
             const symbol = tokenSymbol.value.trim();
             const supply = totalSupply.value.trim();
-            if (name.length > 0 && symbol.length > 0 && supply.length > 0 && parseInt(supply) > 0) {
+            const rwa = rwaAmount.value.trim();
+            const asset = assetAddress.value.trim();
+            if (name.length > 0 && symbol.length > 0 && supply.length > 0 && parseInt(supply) > 0 && rwa.length > 0 && asset
+                .length > 0) {
                 launchBtn.disabled = false;
             } else {
                 launchBtn.disabled = true;
             }
         }
 
-        // ---- Подключение к MetaMask (Robinhood Testnet) ----
+        // ---- Подключение к MetaMask ----
         async function connectWallet() {
-            // Проверяем наличие MetaMask
             if (typeof window.ethereum === 'undefined') {
                 setStatus('❌ MetaMask not detected. Please install it.', 'error');
                 return;
@@ -316,28 +290,21 @@
             try {
                 setStatus('⏳ Connecting...', 'info');
 
-                // Запрашиваем аккаунты
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 if (accounts.length === 0) {
                     setStatus('❌ No accounts found.', 'error');
                     return;
                 }
 
-                const address = accounts[0];
-                userAddress = address;
-                isConnected = true;
+                userAddress = accounts[0];
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                signer = await provider.getSigner();
 
-                // Обновляем UI
-                walletStatus.textContent = `🔗 ${address.slice(0, 6)}...${address.slice(-4)}`;
-                connectBtn.textContent = 'Connected ✓';
-                connectBtn.classList.add('connected');
-                setStatus(`✅ Connected: ${address}`, 'success');
-
-                // Проверяем сеть (Robinhood Testnet = chainId 46630)
-                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-                if (chainId !== '0xb5fe') { // 46630 в hex
+                // Проверяем сеть
+                const network = await provider.getNetwork();
+                const chainId = Number(network.chainId);
+                if (chainId !== 46630) {
                     setStatus('⚠️ Please switch to Robinhood Testnet (Chain ID: 46630).', 'error');
-                    // Предложим переключить сеть
                     try {
                         await window.ethereum.request({
                             method: 'wallet_switchEthereumChain',
@@ -345,7 +312,6 @@
                         });
                         setStatus('✅ Switched to Robinhood Testnet.', 'success');
                     } catch (switchError) {
-                        // Если сеть не добавлена, предложим добавить
                         if (switchError.code === 4902) {
                             try {
                                 await window.ethereum.request({
@@ -354,11 +320,7 @@
                                         chainId: '0xb5fe',
                                         chainName: 'Robinhood Testnet',
                                         rpcUrls: ['https://rpc.testnet.chain.robinhood.com'],
-                                        nativeCurrency: {
-                                            name: 'ETH',
-                                            symbol: 'ETH',
-                                            decimals: 18
-                                        },
+                                        nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
                                         blockExplorerUrls: ['https://explorer.testnet.chain.robinhood.com']
                                     }]
                                 });
@@ -369,12 +331,39 @@
                         } else {
                             setStatus('❌ Failed to switch network. Please switch manually.', 'error');
                         }
+                        return;
                     }
-                } else {
-                    setStatus(`✅ Connected to Robinhood Testnet. Address: ${address}`, 'success');
                 }
 
+                // Инициализируем контракт Vault
+                vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
+
+                isConnected = true;
+                walletStatus.textContent = `🔗 ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+                connectBtn.textContent = 'Connected ✓';
+                connectBtn.classList.add('connected');
+                setStatus(`✅ Connected: ${userAddress}`, 'success');
+
                 updateLaunchButton();
+
+                // Обработчики событий MetaMask
+                window.ethereum.on('accountsChanged', (accounts) => {
+                    if (accounts.length > 0) {
+                        connectWallet();
+                    } else {
+                        isConnected = false;
+                        userAddress = null;
+                        walletStatus.textContent = '⛓️ Not connected';
+                        connectBtn.textContent = 'Connect MetaMask';
+                        connectBtn.classList.remove('connected');
+                        setStatus('⛓️ Wallet disconnected.', 'info');
+                        updateLaunchButton();
+                    }
+                });
+
+                window.ethereum.on('chainChanged', () => {
+                    if (isConnected) connectWallet();
+                });
 
             } catch (error) {
                 console.error('Connection error:', error);
@@ -388,112 +377,85 @@
             }
         }
 
-        // Обработчик кнопки Connect
         connectBtn.addEventListener('click', connectWallet);
 
-        // ---- Обработчики формы для проверки заполнения ----
-        [tokenName, tokenSymbol, totalSupply].forEach(el => {
+        // ---- Обработчики формы ----
+        [tokenName, tokenSymbol, totalSupply, rwaAmount, assetAddress].forEach(el => {
             el.addEventListener('input', updateLaunchButton);
         });
         lockDuration.addEventListener('change', updateLaunchButton);
 
-        // ---- Запуск (Launch) ----
+        // ---- Реальный запуск токена ----
         launchForm.addEventListener('submit', async function(event) {
             event.preventDefault();
 
-            if (!isConnected || !userAddress) {
+            if (!isConnected || !vaultContract || !signer) {
                 setStatus('❌ Please connect your wallet first.', 'error');
                 return;
             }
 
-            // Собираем данные
             const name = tokenName.value.trim();
             const symbol = tokenSymbol.value.trim();
-            const supply = totalSupply.value.trim();
+            const supply = parseInt(totalSupply.value.trim());
+            const rwa = rwaAmount.value.trim();
+            const asset = assetAddress.value.trim();
             const duration = parseInt(lockDuration.value);
 
-            if (!name || !symbol || !supply || isNaN(duration)) {
+            if (!name || !symbol || isNaN(supply) || supply <= 0 || !rwa || !asset || isNaN(duration) || duration < 60 ||
+                duration > 600) {
                 setStatus('❌ Please fill all fields correctly.', 'error');
                 return;
             }
 
-            const supplyNum = parseInt(supply);
-            if (supplyNum <= 0) {
-                setStatus('❌ Total supply must be greater than 0.', 'error');
-                return;
+            let assetAmountWei;
+            if (rwa.startsWith('0x')) {
+                assetAmountWei = BigInt(rwa);
+            } else {
+                assetAmountWei = BigInt(rwa);
             }
 
-            if (duration < 60 || duration > 600) {
-                setStatus('❌ Lock period must be between 60 and 600 seconds.', 'error');
-                return;
-            }
+            setStatus(`⏳ Launching token "${name}" (${symbol}) with supply ${supply}, lock ${duration}s...`, 'info');
+            launchBtn.disabled = true;
 
-            // Здесь будет логика создания токена (заглушка)
-            setStatus(`⏳ Launching token "${name}" (${symbol}) with supply ${supplyNum}, lock ${duration}s...`, 'info');
-
-            // Эмуляция транзакции
             try {
-                // Здесь нужно вставить реальный вызов смарт-контракта
-                // Пример эмуляции (уберите в продакшене):
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                // РЕАЛЬНЫЙ ВЫЗОВ КОНТРАКТА
+                const tx = await vaultContract.depositRWA(
+                    asset,
+                    assetAmountWei,
+                    supply,
+                    duration, { gasLimit: 500000 }
+                );
 
-                // Имитация успеха
-                setStatus(`✅ Token "${name}" launched successfully! TX: 0x123...abc (simulated)`, 'success');
+                setStatus(`⏳ Transaction sent: ${tx.hash}. Waiting for confirmation...`, 'info');
+                const receipt = await tx.wait();
 
-                // (Опционально) сбросить форму
-                // launchForm.reset();
-                // updateLaunchButton();
-
-            } catch (err) {
-                console.error('Launch error:', err);
-                setStatus(`❌ Launch failed: ${err.message || 'Unknown error'}`, 'error');
+                if (receipt.status === 1) {
+                    setStatus(`✅ Token "${name}" (${symbol}) launched successfully! TX: ${tx.hash}`, 'success');
+                } else {
+                    setStatus(`❌ Transaction failed. Status: ${receipt.status}`, 'error');
+                }
+            } catch (error) {
+                console.error('Launch error:', error);
+                let errorMsg = error.message || 'Unknown error';
+                if (error.reason) errorMsg = error.reason;
+                setStatus(`❌ Launch failed: ${errorMsg}`, 'error');
+            } finally {
+                launchBtn.disabled = false;
             }
         });
 
-        // ---- Инициализация ----
-        updateLaunchButton();
-
-        // Проверяем, был ли уже подключен кошелек (MetaMask может восстановить сессию)
+        // ---- Автоподключение ----
         if (typeof window.ethereum !== 'undefined') {
             window.ethereum.request({ method: 'eth_accounts' })
                 .then(accounts => {
                     if (accounts && accounts.length > 0) {
-                        // Автоматически подключаемся, если уже есть аккаунты
-                        // Не вызываем connectWallet() автоматически, т.к. это может быть нежелательно
-                        // Показываем статус, но пользователь должен нажать кнопку сам.
-                        walletStatus.textContent = `⛓️ ${accounts[0].slice(0,6)}...${accounts[0].slice(-4)} (inactive)`;
-                        connectBtn.textContent = 'Re-connect';
-                        // Можно активировать кнопку после ручного подтверждения
+                        setTimeout(connectWallet, 500);
                     }
                 })
                 .catch(() => {});
         }
 
-        // Обработка изменения аккаунта/сети в MetaMask
-        if (typeof window.ethereum !== 'undefined') {
-            window.ethereum.on('accountsChanged', (accounts) => {
-                if (accounts.length > 0) {
-                    // Переподключение
-                    connectWallet();
-                } else {
-                    // Кошелек отключили
-                    isConnected = false;
-                    userAddress = null;
-                    walletStatus.textContent = '⛓️ Not connected';
-                    connectBtn.textContent = 'Connect MetaMask';
-                    connectBtn.classList.remove('connected');
-                    setStatus('⛓️ Wallet disconnected.', 'info');
-                    updateLaunchButton();
-                }
-            });
-
-            window.ethereum.on('chainChanged', () => {
-                // При смене сети перепроверяем состояние
-                if (isConnected) {
-                    connectWallet();
-                }
-            });
-        }
+        updateLaunchButton();
 
     })();
 </script>
