@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MWA — Launch Meme Token</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #ffffff;
+            color: #222222;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            padding: 30px 25px;
+            border: 2px solid #222222;
+            background-color: #ffffff;
+            box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            border-bottom: 2px solid #222222;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+        }
+
+        .wallet-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: #f8f8f8;
+            margin-bottom: 20px;
+        }
+
+        .wallet-status {
+            font-size: 14px;
+            color: #555555;
+            word-break: break-all;
+        }
+
+        #connectButton {
+            font-family: 'Courier New', Courier, monospace;
+            background: #222222;
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        #connectButton:hover {
+            background: #444444;
+        }
+
+        #connectButton.connected {
+            background: #2a7d4f;
+        }
+
+        #connectButton.connected:hover {
+            background: #1f5f3b;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #cccccc;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        input, select {
+            font-family: 'Courier New', Courier, monospace;
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 15px;
+            border: 1px solid #888888;
+            background: #fafafa;
+            transition: border 0.2s, background 0.2s;
+            border-radius: 0;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #222222;
+            background: #ffffff;
+        }
+
+        .hint {
+            display: block;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #666666;
+        }
+
+        .launch-fee {
+            background: #f0f0f0;
+            padding: 12px 15px;
+            font-size: 15px;
+            border-left: 4px solid #222222;
+            margin: 15px 0 20px 0;
+        }
+
+        .action-button {
+            font-family: 'Courier New', Courier, monospace;
+            width: 100%;
+            padding: 14px;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: #222222;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, opacity 0.2s;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        .action-button:hover:not(:disabled) {
+            background: #000000;
+        }
+
+        .action-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-message {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f4f4f4;
+            font-size: 14px;
+            border-left: 4px solid #888888;
+            min-height: 30px;
+            word-break: break-word;
+        }
+
+        .status-message.error {
+            border-left-color: #c0392b;
+            background: #fdf0ed;
+        }
+
+        .status-message.success {
+            border-left-color: #2a7d4f;
+            background: #edf7f2;
+        }
+
+        .status-message.pending {
+            border-left-color: #f39c12;
+            background: #fef9e7;
+        }
+
+        #tokenInfoContainer {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px solid #222222;
+            background-color: #f8f8f8;
+            font-family: 'Courier New', monospace;
+        }
+
+        #tokenInfoContainer h3 {
+            margin: 0 0 10px 0;
+        }
+
+        #tokenInfoContainer p {
+            margin: 5px 0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 20px;
+            background: #f8f8f8;
+            padding: 12px 15px;
+            font-size: 14px;
+            margin: 10px 0 15px 0;
+        }
+
+        .info-grid .label {
+            font-weight: 700;
+        }
+
+        .info-grid .value {
+            text-align: right;
+            word-break: break-all;
+        }
+
+        .footer {
+            margin-top: 25px;
+            font-size: 12px;
+            color: #888888;
+            text-align: center;
+            border-top: 1px solid #dddddd;
+            padding-top: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 3px;
+            }
+            .info-grid .value {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⌨️ MWA · LAUNCH</h1>
+
+    <!-- Wallet connection -->
+    <div class="wallet-section">
+        <span class="wallet-status" id="walletStatus">⛓️ Not connected</span>
+        <button id="connectButton">Connect MetaMask</button>
+    </div>
+
+    <!-- Launch Form -->
+    <div class="section">
+        <div class="section-title">📥 Create Meme Token</div>
+        <form id="launchForm" autocomplete="off">
+            <div class="form-group">
+                <label for="tokenName">Token Name</label>
+                <input type="text" id="tokenName" placeholder="e.g. My Meme Token" maxlength="60" required>
+            </div>
+
+            <div class="form-group">
+                <label for="tokenSymbol">Token Symbol</label>
+                <input type="text" id="tokenSymbol" placeholder="e.g. MEME" maxlength="20" required>
+            </div>
+
+            <div class="form-group">
+                <label for="tokenSupply">Total Supply</label>
+                <input type="number" id="tokenSupply" placeholder="e.g. 1000000" value="1000000" min="1" step="1" required>
+                <span class="hint">Number of MWA tokens to mint.</span>
+            </div>
+
+            <div class="form-group">
+                <label for="assetAmount">RWA Amount (in wei)</label>
+                <input type="text" id="assetAmount" placeholder="e.g. 5000000000000000000 (5 tokens with 18 decimals)" value="0x4563918244f3ffff" required>
+                <span class="hint">Amount of RWA tokens to lock.</span>
+            </div>
+
+            <div class="form-group">
+                <label for="lockDuration">Lock / Redemption Period (seconds)</label>
+                <select id="lockDuration" required>
+                    <option value="60">60 sec</option>
+                    <option value="120">120 sec</option>
+                    <option value="180">180 sec</option>
+                    <option value="300" selected>300 sec</option>
+                    <option value="600">600 sec</option>
+                </select>
+                <span class="hint">Time until you must buy back the tokens (60–600 sec).</span>
+            </div>
+
+            <div class="form-group">
+                <label for="tokenSelect">Select RWA Token (ERC-20)</label>
+                <select id="tokenSelect" required>
+                    <option value="">-- Select a token from your wallet --</option>
+                </select>
+                <span class="hint">Tokens you hold in your wallet on Robinhood Testnet.</span>
+            </div>
+
+            <div class="launch-fee">
+                ⚡ This will call <strong>depositRWA()</strong> on the Vault contract.
+            </div>
+
+            <button type="submit" class="action-button" id="launchButton" disabled>🚀 Launch Token</button>
+        </form>
+    </div>
+
+    <!-- Token Info Display -->
+    <div id="tokenInfoContainer" style="display: none;"></div>
+
+    <!-- Status -->
+    <div id="statusMessage" class="status-message">⏳ Connect wallet and fill in the form...</div>
+
+    <!-- Contract Info -->
+    <div id="contractInfo" class="info-grid" style="display: none;">
+        <span class="label">Vault Address:</span>
+        <span class="value" id="vaultAddressDisplay">0xdd6fc829709F47c6e9D764dc65B4324DF851fA40</span>
+        <span class="label">MWA Token:</span>
+        <span class="value" id="tokenAddressDisplay">0xdBB8401ee6c808c747578C680e6b65AEFBAc6484</span>
+        <span class="label">Your MWA Balance:</span>
+        <span class="value" id="balanceDisplay">0</span>
+    </div>
+
+    <div class="footer">
+        Testnet only · MWA protocol · ⚙️ v1.0
+    </div>
+</div>
+
+<!-- Ethers.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.16.0/ethers.min.js"></script>
+
+<script>
+    (function() {
+        // ---- CONTRACT CONFIGURATION ----
+        const VAULT_ADDRESS = '0xdd6fc829709F47c6e9D764dc65B4324DF851fA40';
+        const TOKEN_ADDRESS = '0xdBB8401ee6c808c747578C680e6b65AEFBAc6484';
+
+        // ---- CHAINLINK ORACLE ADDRESSES (Robinhood Mainnet) ----
+        // You can change this to any asset from the list
+        const PRICE_FEED_ADDRESS = '0x379EC4f7C378F34a1B47E4F3cbeBCbAC3E8E9F15'; // NVDA
+
+        // ---- ABIs ----
+        const VAULT_ABI = [
+            "function depositRWA(address assetAddress, uint256 assetAmount, uint256 tokenAmount, uint256 lockDurationMonths) external",
+            "function redeemRWA(uint256 depositId) external",
+            "function getDeposit(uint256 depositId) external view returns (tuple(address assetAddress, uint256 assetAmount, uint256 tokenAmount, uint256 redemptionDeadline, bool isRedeemed, bool isClaimed))",
+            "function depositCounter() external view returns (uint256)"
+        ];
+
+        const TOKEN_ABI = [
+            "function balanceOf(address owner) view returns (uint256)",
+            "function approve(address spender, uint256 amount) returns (bool)"
+        ];
+
+        const PRICE_FEED_ABI = [
+            "function latestRoundData() external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)"
+        ];
+
+        // ---- DOM Elements ----
+        const connectBtn = document.getElementById('connectButton');
+        const walletStatus = document.getElementById('walletStatus');
+        const statusMsg = document.getElementById('statusMessage');
+
+        const launchForm = document.getElementById('launchForm');
+        const launchBtn = document.getElementById('launchButton');
+
+        const tokenName = document.getElementById('tokenName');
+        const tokenSymbol = document.getElementById('tokenSymbol');
+        const tokenSupply = document.getElementById('tokenSupply');
+        const assetAmount = document.getElementById('assetAmount');
+        const lockDuration = document.getElementById('lockDuration');
+        const tokenSelect = document.getElementById('tokenSelect');
+
+        const balanceDisplay = document.getElementById('balanceDisplay');
+        const vaultAddressDisplay = document.getElementById('vaultAddressDisplay');
+        const tokenAddressDisplay = document.getElementById('tokenAddressDisplay');
+        const contractInfo = document.getElementById('contractInfo');
+        const tokenInfoContainer = document.getElementById('tokenInfoContainer');
+
+        // ---- State ----
+        let signer = null;
+        let vaultContract = null;
+        let tokenContract = null;
+        let userAddress = null;
+        let isConnected = false;
+        let provider = null;
+
+        // ---- Helper Functions ----
+        function setStatus(text, type = 'info') {
+            statusMsg.textContent = text;
+            statusMsg.className = 'status-message';
+            if (type === 'error') statusMsg.classList.add('error');
+            else if (type === 'success') statusMsg.classList.add('success');
+            else if (type === 'pending') statusMsg.classList.add('pending');
+        }
+
+        function updateUI() {
+            const connected = isConnected && signer;
+            launchBtn.disabled = !connected;
+            if (connected) {
+                contractInfo.style.display = 'grid';
+                vaultAddressDisplay.textContent = VAULT_ADDRESS;
+                tokenAddressDisplay.textContent = TOKEN_ADDRESS;
+                updateBalance();
+                loadUserTokens();
+            } else {
+                contractInfo.style.display = 'none';
+            }
+        }
+
+        async function updateBalance() {
+            if (!isConnected || !tokenContract || !userAddress) return;
+            try {
+                const balance = await tokenContract.balanceOf(userAddress);
+                balanceDisplay.textContent = balance.toString();
+            } catch (e) {
+                balanceDisplay.textContent = 'Error';
+                console.error('Balance fetch error:', e);
+            }
+        }
+
+        // ---- Load User Tokens ----
+        async function loadUserTokens() {
+            if (!isConnected || !provider || !userAddress) return;
+
+            try {
+                setStatus('⏳ Loading your tokens...', 'pending');
+                const tokenList = [
+                    { address: '0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E', symbol: 'AMD', decimals: 18 },
+                    { address: '0x71178BAc73cBeb415514eB542a8995b82669778d', symbol: 'TSLA', decimals: 18 },
+                    { address: '0x7dF7F09271136b49bD1E44937FA758264024858C', symbol: 'AAPL', decimals: 18 }
+                ];
+
+                const tokenBalances = await Promise.all(
+                    tokenList.map(async (token) => {
+                        try {
+                            const contract = new ethers.Contract(token.address, [
+                                "function balanceOf(address) view returns (uint256)"
+                            ], provider);
+                            const balance = await contract.balanceOf(userAddress);
+                            if (balance > 0) {
+                                return { ...token, balance: balance.toString() };
+                            }
+                            return null;
+                        } catch (e) {
+                            return null;
+                        }
+                    })
+                );
+
+                const userTokens = tokenBalances.filter(t => t !== null);
+
+                tokenSelect.innerHTML = '<option value="">-- Select a token from your wallet --</option>';
+                if (userTokens.length === 0) {
+                    tokenSelect.innerHTML = '<option value="">-- No tokens found in your wallet --</option>';
+                    setStatus('ℹ️ No RWA tokens found in your wallet. Please get test tokens from faucet.', 'info');
+                } else {
+                    userTokens.forEach(token => {
+                        const option = document.createElement('option');
+                        option.value = token.address;
+                        const balanceInEth = ethers.formatUnits(token.balance, token.decimals);
+                        option.textContent = `${token.symbol} (${balanceInEth} tokens) - ${token.address.slice(0, 6)}...${token.address.slice(-4)}`;
+                        tokenSelect.appendChild(option);
+                    });
+                    setStatus(`✅ Loaded ${userTokens.length} tokens from your wallet`, 'success');
+                }
+
+                if (userTokens.length === 1) {
+                    tokenSelect.value = userTokens[0].address;
+                }
+
+                launchBtn.disabled = false;
+
+            } catch (error) {
+                console.error('Error loading tokens:', error);
+                setStatus('⚠️ Could not load tokens. Please select manually.', 'error');
+            }
+        }
+
+        // ---- Connect to MetaMask ----
+        async function connectWallet() {
+            if (typeof window.ethereum === 'undefined') {
+                setStatus('❌ MetaMask not detected. Please install it.', 'error');
+                return;
+            }
+
+            try {
+                setStatus('⏳ Connecting...', 'pending');
+                provider = new ethers.BrowserProvider(window.ethereum);
+                const accounts = await provider.send("eth_requestAccounts", []);
+                if (accounts.length === 0) {
+                    setStatus('❌ No accounts found.', 'error');
+                    return;
+                }
+
+                userAddress = accounts[0];
+                signer = await provider.getSigner();
+
+                const network = await provider.getNetwork();
+                const chainId = Number(network.chainId);
+                if (chainId !== 46630) {
+                    setStatus(`⚠️ Please switch to Robinhood Testnet (Chain ID: 46630). Current: ${chainId}`, 'error');
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0xb5fe' }],
+                        });
+                        provider = new ethers.BrowserProvider(window.ethereum);
+                        signer = await provider.getSigner();
+                        setStatus('✅ Switched to Robinhood Testnet.', 'success');
+                    } catch (switchError) {
+                        if (switchError.code === 4902) {
+                            try {
+                                await window.ethereum.request({
+                                    method: 'wallet_addEthereumChain',
+                                    params: [{
+                                        chainId: '0xb5fe',
+                                        chainName: 'Robinhood Testnet',
+                                        rpcUrls: ['https://rpc.testnet.chain.robinhood.com'],
+                                        nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                                        blockExplorerUrls: ['https://explorer.testnet.chain.robinhood.com']
+                                    }]
+                                });
+                                setStatus('✅ Robinhood Testnet added. Please reconnect.', 'success');
+                                return;
+                            } catch (addError) {
+                                setStatus('❌ Failed to add Robinhood Testnet. Please add manually.', 'error');
+                                return;
+                            }
+                        } else {
+                            setStatus('❌ Failed to switch network. Please switch manually.', 'error');
+                            return;
+                        }
+                    }
+                }
+
+                vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
+                tokenContract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
+
+                isConnected = true;
+                walletStatus.textContent = `🔗 ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+                connectBtn.textContent = 'Connected ✓';
+                connectBtn.classList.add('connected');
+                setStatus(`✅ Connected: ${userAddress}`, 'success');
+
+                updateUI();
+
+                window.ethereum.on('accountsChanged', (accounts) => {
+                    if (accounts.length > 0) {
+                        connectWallet();
+                    } else {
+                        isConnected = false;
+                        signer = null;
+                        userAddress = null;
+                        walletStatus.textContent = '⛓️ Not connected';
+                        connectBtn.textContent = 'Connect MetaMask';
+                        connectBtn.classList.remove('connected');
+                        setStatus('⛓️ Wallet disconnected.', 'info');
+                        updateUI();
+                    }
+                });
+
+                window.ethereum.on('chainChanged', () => {
+                    if (isConnected) connectWallet();
+                });
+
+            } catch (error) {
+                console.error('Connection error:', error);
+                setStatus(`❌ Connection failed: ${error.message || 'Unknown error'}`, 'error');
+                isConnected = false;
+                signer = null;
+                userAddress = null;
+                connectBtn.textContent = 'Connect MetaMask';
+                connectBtn.classList.remove('connected');
+                walletStatus.textContent = '⛓️ Not connected';
+                updateUI();
+            }
+        }
+
+        connectBtn.addEventListener('click', connectWallet);
+
+        // ---- Display Token Info ----
+        async function displayTokenInfo(name, symbol, amount, assetPrice) {
+            const pricePerToken = assetPrice > 0 ? assetPrice / amount : 0;
+            
+            tokenInfoContainer.style.display = 'block';
+            tokenInfoContainer.innerHTML = `
+                <h3>✅ New Token Created!</h3>
+                <p><strong>Name:</strong> ${name} (${symbol})</p>
+                <p><strong>Total Supply:</strong> ${amount.toLocaleString()} MWA</p>
+                <p><strong>Price per Token:</strong> $${pricePerToken.toFixed(6)}</p>
+                <p><strong>Total Asset Value:</strong> $${assetPrice.toFixed(2)}</p>
+                <p style="font-size: 11px; color: #888; margin: 5px 0 0 0;">Price anchored to Chainlink oracle</p>
+            `;
+        }
+
+        // ---- Launch Handler ----
+        launchForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            if (!isConnected || !vaultContract || !signer) {
+                setStatus('❌ Please connect your wallet first.', 'error');
+                return;
+            }
+
+            const name = tokenName.value.trim();
+            const symbol = tokenSymbol.value.trim();
+            const supply = tokenSupply.value.trim();
+            const assetAmt = assetAmount.value.trim();
+            const duration = parseInt(lockDuration.value);
+            const selectedToken = tokenSelect.value;
+
+            if (!name || !symbol || !supply || !assetAmt || !selectedToken) {
+                setStatus('❌ Please fill all fields correctly.', 'error');
+                return;
+            }
+
+            const supplyNum = parseInt(supply);
+            if (supplyNum <= 0) {
+                setStatus('❌ Total supply must be greater than 0.', 'error');
+                return;
+            }
+
+            if (duration < 60 || duration > 600) {
+                setStatus('❌ Lock period must be between 60 and 600 seconds.', 'error');
+                return;
+            }
+
+            let assetAmountWei;
+            if (assetAmt.startsWith('0x')) {
+                assetAmountWei = BigInt(assetAmt);
+            } else {
+                assetAmountWei = BigInt(assetAmt);
+            }
+
+            setStatus(`⏳ Calling depositRWA() for ${supplyNum} tokens...`, 'pending');
+            launchBtn.disabled = true;
+
+            try {
+                const tx = await vaultContract.depositRWA(
+                    selectedToken,
+                    assetAmountWei,
+                    supplyNum,
+                    duration,
+                    { gasLimit: 500000 }
+                );
+
+                setStatus(`⏳ Transaction sent: ${tx.hash}. Waiting for confirmation...`, 'pending');
+                const receipt = await tx.wait();
+
+                if (receipt.status === 1) {
+                    // Get price from Chainlink
+                    let assetPrice = 0;
+                    try {
+                        const priceFeed = new ethers.Contract(PRICE_FEED_ADDRESS, PRICE_FEED_ABI, provider);
+                        const priceData = await priceFeed.latestRoundData();
+                        assetPrice = Number(priceData.answer) / 1e8;
+                    } catch (priceError) {
+                        console.warn('Could not fetch price from Chainlink:', priceError);
+                        assetPrice = 0;
+                    }
+
+                    await displayTokenInfo(name, symbol, supplyNum, assetPrice);
+                    await updateBalance();
+                    setStatus(`✅ Deposit successful! Tx: ${tx.hash}`, 'success');
+                } else {
+                    setStatus(`❌ Transaction failed. Status: ${receipt.status}`, 'error');
+                }
+            } catch (error) {
+                console.error('Deposit error:', error);
+                let errorMsg = error.message || 'Unknown error';
+                if (error.reason) errorMsg = error.reason;
+                setStatus(`❌ Deposit failed: ${errorMsg}`, 'error');
+            } finally {
+                launchBtn.disabled = false;
+            }
+        });
+
+        // ---- Initialization ----
+        vaultAddressDisplay.textContent = VAULT_ADDRESS;
+        tokenAddressDisplay.textContent = TOKEN_ADDRESS;
+
+        if (typeof window.ethereum !== 'undefined') {
+            window.ethereum.request({ method: 'eth_accounts' })
+                .then(accounts => {
+                    if (accounts && accounts.length > 0) {
+                        connectWallet();
+                    }
+                })
+                .catch(() => {});
+        }
+
+        document.querySelectorAll('#launchForm input, #launchForm select').forEach(el => {
+            el.addEventListener('input', () => {
+                if (isConnected) {
+                    launchBtn.disabled = false;
+                }
+            });
+        });
+
+        updateUI();
+    })();
+</script>
+
+</body>
+</html>
