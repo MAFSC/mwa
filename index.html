@@ -350,89 +350,23 @@
         </div>
     </div>
 
-    <!-- Ethers.js - Multiple sources with fallback -->
+    <!-- Ethers.js - using the version that worked before -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.16.0/ethers.min.js">
+    </script>
+
     <script>
-        // Функция для загрузки ethers.js с резервными источниками
-        function loadEthers() {
-            return new Promise((resolve, reject) => {
-                // Проверяем, загружена ли уже библиотека
-                if (typeof ethers !== 'undefined') {
-                    resolve();
-                    return;
-                }
+        // Simple and direct approach that worked in the first version
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded');
 
-                // Список источников для загрузки
-                const sources = [
-                    'https://cdnjs.cloudflare.com/ajax/libs/ethers/6.16.0/ethers.min.js',
-                    'https://cdn.jsdelivr.net/npm/ethers@6.16.0/dist/ethers.min.js',
-                    'https://unpkg.com/ethers@6.16.0/dist/ethers.min.js'
-                ];
-
-                let currentIndex = 0;
-
-                function tryLoadNext() {
-                    if (currentIndex >= sources.length) {
-                        reject(new Error('All sources failed to load ethers.js'));
-                        return;
-                    }
-
-                    const script = document.createElement('script');
-                    script.src = sources[currentIndex];
-                    script.onload = function() {
-                        // Даем время на инициализацию
-                        setTimeout(() => {
-                            if (typeof ethers !== 'undefined') {
-                                resolve();
-                            } else {
-                                currentIndex++;
-                                tryLoadNext();
-                            }
-                        }, 200);
-                    };
-                    script.onerror = function() {
-                        currentIndex++;
-                        tryLoadNext();
-                    };
-                    document.head.appendChild(script);
-                }
-
-                tryLoadNext();
-            });
-        }
-
-        // Загружаем ethers и запускаем приложение
-        let appInitialized = false;
-
-        function initApp() {
-            if (appInitialized) return;
+            // Check if ethers is loaded
             if (typeof ethers === 'undefined') {
-                document.getElementById('statusMessage').textContent = '❌ Error: ethers library not loaded. Please refresh.';
+                document.getElementById('statusMessage').textContent = '❌ Ethers library not loaded. Please refresh.';
                 document.getElementById('statusMessage').className = 'status-message error';
                 return;
             }
-            appInitialized = true;
-            main();
-        }
 
-        // Запускаем загрузку
-        loadEthers()
-            .then(() => {
-                console.log('ethers.js loaded successfully');
-                initApp();
-            })
-            .catch((err) => {
-                console.error('Failed to load ethers:', err);
-                document.getElementById('statusMessage').textContent = '❌ Failed to load required library. Please check internet connection and refresh.';
-                document.getElementById('statusMessage').className = 'status-message error';
-            });
-
-        // Если ethers уже загружен (например, из кэша)
-        if (typeof ethers !== 'undefined') {
-            initApp();
-        }
-
-        function main() {
-            'use strict';
+            console.log('ethers loaded successfully');
 
             // ---- CONTRACT CONFIGURATION ----
             const VAULT_ADDRESS = '0xdd6fc829709F47c6e9D764dc65B4324DF851fA40';
@@ -773,7 +707,7 @@
             });
 
             updateUI();
-        }
+        });
     </script>
 
 </body>
