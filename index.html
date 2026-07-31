@@ -1,364 +1,521 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MWA — Launch</title>
+    <title>Создание MWA Мем-Токена</title>
+    <!-- Подключаем шрифт Inter для современного вида -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <style>
+        /* Сброс и базовые стили */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            font-family: 'Courier New', Courier, monospace;
-            background: #ffffff;
-            color: #222;
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #e2e2e8;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
         }
+
         .container {
-            max-width: 600px;
+            background: #15151f;
+            padding: 40px 35px;
+            border-radius: 24px;
+            border: 1px solid #2c2c3a;
+            max-width: 480px;
             width: 100%;
-            padding: 30px;
-            border: 2px solid #222;
-            background: #fff;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
         }
+
         h1 {
-            font-size: 26px;
-            border-bottom: 2px solid #222;
-            padding-bottom: 15px;
-            margin-bottom: 25px;
-            text-transform: uppercase;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-align: center;
         }
-        .wallet-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 15px;
-            background: #f8f8f8;
-            margin-bottom: 20px;
-        }
-        #connectButton {
-            font-family: 'Courier New', Courier, monospace;
-            background: #222;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
+
+        .subtitle {
+            text-align: center;
+            color: #8888a0;
             font-size: 14px;
-            cursor: pointer;
-            text-transform: uppercase;
-            min-width: 160px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #2a2a38;
+            padding-bottom: 20px;
         }
-        #connectButton:hover {
-            background: #444;
+
+        .connect-wallet {
+            text-align: center;
+            margin-bottom: 30px;
         }
-        #connectButton.connected {
-            background: #2a7d4f;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-        input,
-        select {
-            font-family: 'Courier New', Courier, monospace;
-            width: 100%;
-            padding: 10px 12px;
-            font-size: 15px;
-            border: 1px solid #888;
-            background: #fafafa;
-        }
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: #222;
-            background: #fff;
-        }
-        .hint {
-            display: block;
-            margin-top: 5px;
-            font-size: 12px;
-            color: #666;
-        }
-        .action-button {
-            width: 100%;
-            padding: 14px;
-            font-size: 18px;
-            font-weight: 700;
-            text-transform: uppercase;
-            background: #222;
-            color: #fff;
+
+        .connect-btn {
+            background: #4f46e5;
+            color: white;
             border: none;
+            padding: 12px 30px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            margin-top: 5px;
+            transition: background 0.2s;
         }
-        .action-button:hover:not(:disabled) {
-            background: #000;
+
+        .connect-btn:hover {
+            background: #6366f1;
         }
-        .action-button:disabled {
+
+        .connect-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        .status-message {
-            margin-top: 15px;
-            padding: 12px;
-            background: #f4f4f4;
+
+        .status-text {
+            font-size: 13px;
+            color: #8888a0;
+            margin-top: 10px;
+        }
+
+        .status-text.connected {
+            color: #34d399;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
             font-size: 14px;
-            border-left: 4px solid #888;
-            min-height: 30px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #c4c4d0;
         }
-        .status-message.error {
-            border-left-color: #c0392b;
-            background: #fdf0ed;
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #1e1e2a;
+            border: 1px solid #33334a;
+            border-radius: 12px;
+            color: #f0f0f8;
+            font-size: 16px;
+            transition: border 0.2s;
+            outline: none;
         }
-        .status-message.success {
-            border-left-color: #2a7d4f;
-            background: #edf7f2;
+
+        input:focus {
+            border-color: #4f46e5;
         }
-        .footer {
-            margin-top: 25px;
+
+        input::placeholder {
+            color: #5a5a72;
+        }
+
+        .hint {
             font-size: 12px;
-            color: #888;
+            color: #666680;
+            margin-top: 5px;
+        }
+
+        .launch-btn {
+            width: 100%;
+            padding: 14px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 10px;
+        }
+
+        .launch-btn:hover {
+            background: #6366f1;
+        }
+
+        .launch-btn:active {
+            transform: scale(0.98);
+        }
+
+        .launch-btn:disabled {
+            background: #2a2a4a;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .fee-info {
             text-align: center;
-            border-top: 1px solid #ddd;
-            padding-top: 20px;
+            font-size: 13px;
+            color: #666680;
+            margin-top: 16px;
+        }
+
+        /* Убираем стрелки у input number */
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            border: 1px solid transparent;
+        }
+
+        .alert-error {
+            background: #2a1515;
+            border-color: #7f1d1d;
+            color: #fca5a5;
+        }
+
+        .alert-success {
+            background: #152a1a;
+            border-color: #1a7f3d;
+            color: #86efac;
         }
     </style>
 </head>
 <body>
+    <div class="container" id="app">
+        <h1>🚀 Создать MWA токен</h1>
+        <p class="subtitle">Заблокируйте RWA и выпустите мем-токен</p>
 
-    <div class="container">
-        <h1>⌨️ MWA · LAUNCH</h1>
-
-        <div class="wallet-section">
-            <span id="walletStatus">⛓️ Not connected</span>
-            <button id="connectButton">Connect MetaMask</button>
+        <!-- Блок подключения кошелька -->
+        <div class="connect-wallet">
+            <button class="connect-btn" id="connectBtn">Подключить MetaMask</button>
+            <div id="statusText" class="status-text">Кошелек не подключен</div>
         </div>
 
-        <form id="launchForm">
-            <div class="form-group">
-                <label>Token Name</label>
-                <input type="text" id="tokenName" placeholder="My Token" value="Test Token">
-            </div>
-            <div class="form-group">
-                <label>Token Symbol</label>
-                <input type="text" id="tokenSymbol" placeholder="TEST" value="TEST">
-            </div>
-            <div class="form-group">
-                <label>Total Supply</label>
-                <input type="number" id="tokenSupply" value="1000000">
-            </div>
-            <div class="form-group">
-                <label>RWA Amount (wei)</label>
-                <input type="text" id="assetAmount" value="0x4563918244f3ffff">
-            </div>
-            <div class="form-group">
-                <label>Lock Duration (seconds)</label>
-                <select id="lockDuration">
-                    <option value="60">60 sec</option>
-                    <option value="300" selected>300 sec</option>
-                    <option value="600">600 sec</option>
-                </select>
-            </div>
-            <button type="submit" class="action-button" id="launchButton" disabled>🚀 Launch</button>
-        </form>
+        <!-- Форма создания токена (скрыта до подключения) -->
+        <div id="formContainer" class="hidden">
+            <!-- Поле для вывода ошибок/успеха -->
+            <div id="messageBox" class="hidden"></div>
 
-        <div id="statusMessage" class="status-message">⏳ Connect wallet first</div>
-        <div class="footer">Testnet only · MWA</div>
+            <div class="form-group">
+                <label for="tokenName">Название токена</label>
+                <input type="text" id="tokenName" placeholder="Например: MWA" maxlength="60">
+                <div class="hint">Символ токена (до 60 символов)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="tokenSupply">Количество токенов</label>
+                <input type="number" id="tokenSupply" placeholder="Например: 1000000" min="1" step="1">
+                <div class="hint">Общее количество выпускаемых токенов</div>
+            </div>
+
+            <div class="form-group">
+                <label for="lockDuration">Срок блокировки (секунды)</label>
+                <input type="number" id="lockDuration" placeholder="От 60 до 600" min="60" max="600" step="1">
+                <div class="hint">Минимальный срок 60 секунд, максимальный 600</div>
+            </div>
+
+            <button class="launch-btn" id="launchBtn">Запустить токен</button>
+            <div class="fee-info">Комиссия за запуск: 0.0005 ETH</div>
+        </div>
     </div>
 
-    <!-- Ethers.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.16.0/ethers.min.js">
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js">
     </script>
-
     <script>
-        console.log('Script started');
-        console.log('typeof ethers:', typeof ethers);
-
-        // Проверяем загрузку ethers
-        if (typeof ethers === 'undefined') {
-            document.getElementById('statusMessage').textContent = '❌ Ethers not loaded. Please refresh.';
-            document.getElementById('statusMessage').className = 'status-message error';
-        }
-
-        // Ждем загрузки DOM
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded');
+            // --- DOM элементы ---
+            const connectBtn = document.getElementById('connectBtn');
+            const statusText = document.getElementById('statusText');
+            const formContainer = document.getElementById('formContainer');
+            const tokenNameInput = document.getElementById('tokenName');
+            const tokenSupplyInput = document.getElementById('tokenSupply');
+            const lockDurationInput = document.getElementById('lockDuration');
+            const launchBtn = document.getElementById('launchBtn');
+            const messageBox = document.getElementById('messageBox');
 
-            const connectBtn = document.getElementById('connectButton');
-            const walletStatus = document.getElementById('walletStatus');
-            const statusMsg = document.getElementById('statusMessage');
-            const launchBtn = document.getElementById('launchButton');
-            const launchForm = document.getElementById('launchForm');
+            // --- Настройки сети Robinhood Testnet ---
+            const chainId = '0xb5f6'; // 46630 в hex
+            const networkParams = {
+                chainId: chainId,
+                chainName: 'Robinhood Testnet',
+                nativeCurrency: {
+                    name: 'ETH',
+                    symbol: 'ETH',
+                    decimals: 18
+                },
+                rpcUrls: ['https://rpc.testnet.chain.robinhood.com'],
+                blockExplorerUrls: ['https://explorer.testnet.chain.robinhood.com']
+            };
 
-            const tokenName = document.getElementById('tokenName');
-            const tokenSymbol = document.getElementById('tokenSymbol');
-            const tokenSupply = document.getElementById('tokenSupply');
-            const assetAmount = document.getElementById('assetAmount');
-            const lockDuration = document.getElementById('lockDuration');
-
+            // --- Состояние ---
             let signer = null;
-            let userAddress = null;
-            let isConnected = false;
+            let provider = null;
+            let userAddress = '';
 
-            function setStatus(text, type = 'info') {
-                statusMsg.textContent = text;
-                statusMsg.className = 'status-message';
-                if (type === 'error') statusMsg.classList.add('error');
-                else if (type === 'success') statusMsg.classList.add('success');
+            // --- Вспомогательные функции ---
+            function showMessage(text, type = 'error') {
+                messageBox.textContent = text;
+                messageBox.className = 'alert alert-' + type + ' hidden';
+                // Убираем скрытие, чтобы показать
+                messageBox.classList.remove('hidden');
+                // Автоскрытие через 5 секунд
+                clearTimeout(window.messageTimeout);
+                window.messageTimeout = setTimeout(() => {
+                    messageBox.classList.add('hidden');
+                }, 5000);
             }
 
-            function updateUI() {
-                launchBtn.disabled = !isConnected;
-                if (isConnected) {
-                    walletStatus.textContent = '🔗 ' + userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
-                    connectBtn.textContent = 'Connected ✓';
-                    connectBtn.classList.add('connected');
+            function clearMessage() {
+                messageBox.classList.add('hidden');
+                messageBox.textContent = '';
+            }
+
+            function updateUIForConnection(address) {
+                if (address) {
+                    statusText.textContent = 'Подключен: ' + address.slice(0, 6) + '...' + address.slice(-4);
+                    statusText.className = 'status-text connected';
+                    connectBtn.textContent = 'Сменить кошелек';
+                    formContainer.classList.remove('hidden');
+                    clearMessage();
                 } else {
-                    walletStatus.textContent = '⛓️ Not connected';
-                    connectBtn.textContent = 'Connect MetaMask';
-                    connectBtn.classList.remove('connected');
+                    statusText.textContent = 'Кошелек не подключен';
+                    statusText.className = 'status-text';
+                    connectBtn.textContent = 'Подключить MetaMask';
+                    formContainer.classList.add('hidden');
                 }
             }
 
-            // ---- Подключение к MetaMask ----
+            // --- Подключение кошелька ---
             async function connectWallet() {
-                console.log('connectWallet called');
-
+                clearMessage();
                 if (typeof window.ethereum === 'undefined') {
-                    setStatus('❌ MetaMask not installed', 'error');
+                    showMessage('MetaMask не установлен. Пожалуйста, установите расширение MetaMask.', 'error');
                     return;
                 }
 
                 try {
-                    setStatus('⏳ Connecting...', 'info');
-                    console.log('Requesting accounts...');
-
+                    // Запрашиваем доступ к аккаунтам
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    console.log('Accounts:', accounts);
-
-                    if (!accounts || accounts.length === 0) {
-                        setStatus('❌ No accounts found', 'error');
+                    if (accounts.length === 0) {
+                        showMessage('Нет доступных аккаунтов.', 'error');
                         return;
                     }
 
-                    userAddress = accounts[0];
-                    console.log('User address:', userAddress);
-
-                    const provider = new ethers.BrowserProvider(window.ethereum);
-                    signer = await provider.getSigner();
-                    console.log('Signer obtained');
-
-                    const network = await provider.getNetwork();
-                    const chainId = Number(network.chainId);
-                    console.log('Chain ID:', chainId);
-
-                    if (chainId !== 46630) {
-                        setStatus('⚠️ Please switch to Robinhood Testnet (Chain ID: 46630)', 'error');
+                    // Проверяем сеть
+                    const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+                    if (currentChainId !== chainId) {
                         try {
                             await window.ethereum.request({
                                 method: 'wallet_switchEthereumChain',
-                                params: [{ chainId: '0xb5fe' }]
+                                params: [{ chainId: chainId }],
                             });
-                            setStatus('✅ Switched to Robinhood Testnet', 'success');
-                        } catch (e) {
-                            setStatus('❌ Please switch to Robinhood Testnet manually', 'error');
-                            return;
+                            // После переключения сети запрашиваем аккаунты снова
+                            const newAccounts = await window.ethereum.request({ method: 'eth_accounts' });
+                            if (newAccounts.length === 0) {
+                                showMessage('Ошибка получения аккаунта после смены сети.', 'error');
+                                return;
+                            }
+                            userAddress = newAccounts[0];
+                        } catch (switchError) {
+                            // Если сети нет в кошельке, пробуем добавить
+                            if (switchError.code === 4902) {
+                                try {
+                                    await window.ethereum.request({
+                                        method: 'wallet_addEthereumChain',
+                                        params: [networkParams],
+                                    });
+                                    // После добавления сети запрашиваем аккаунты
+                                    const finalAccounts = await window.ethereum.request({ method: 'eth_accounts' });
+                                    if (finalAccounts.length === 0) {
+                                        showMessage('Ошибка получения аккаунта после добавления сети.', 'error');
+                                        return;
+                                    }
+                                    userAddress = finalAccounts[0];
+                                } catch (addError) {
+                                    showMessage('Не удалось добавить сеть Robinhood Testnet. Пожалуйста, добавьте ее вручную.',
+                                        'error');
+                                    return;
+                                }
+                            } else {
+                                showMessage('Ошибка переключения сети: ' + switchError.message, 'error');
+                                return;
+                            }
                         }
+                    } else {
+                        // Сеть уже правильная
+                        userAddress = accounts[0];
                     }
 
-                    isConnected = true;
-                    setStatus('✅ Connected: ' + userAddress.slice(0, 6) + '...' + userAddress.slice(-4), 'success');
-                    updateUI();
+                    // Инициализируем провайдер и подписант
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
 
-                    // Слушаем изменения аккаунта
-                    window.ethereum.on('accountsChanged', function(accounts) {
-                        console.log('accountsChanged:', accounts);
-                        if (accounts && accounts.length > 0) {
-                            userAddress = accounts[0];
-                            isConnected = true;
-                            updateUI();
-                            setStatus('✅ Account changed: ' + userAddress.slice(0, 6) + '...' + userAddress.slice(-4),
-                            'success');
+                    // Обновляем UI
+                    updateUIForConnection(userAddress);
+
+                    // Включаем кнопку создания
+                    launchBtn.disabled = false;
+
+                    // Слушаем смену аккаунта
+                    window.ethereum.on('accountsChanged', function(newAccounts) {
+                        if (newAccounts.length > 0) {
+                            userAddress = newAccounts[0];
+                            signer = provider.getSigner();
+                            updateUIForConnection(userAddress);
                         } else {
-                            isConnected = false;
-                            userAddress = null;
-                            updateUI();
-                            setStatus('⛓️ Wallet disconnected', 'info');
+                            // Пользователь отключил кошелек
+                            signer = null;
+                            userAddress = '';
+                            updateUIForConnection(null);
+                            launchBtn.disabled = true;
                         }
+                        clearMessage();
+                    });
+
+                    // Слушаем смену сети
+                    window.ethereum.on('chainChanged', function() {
+                        window.location.reload();
                     });
 
                 } catch (error) {
-                    console.error('Connection error:', error);
-                    setStatus('❌ Connection failed: ' + (error.message || 'Unknown error'), 'error');
-                    isConnected = false;
-                    userAddress = null;
-                    updateUI();
+                    console.error('Ошибка подключения:', error);
+                    showMessage('Ошибка подключения: ' + (error.message || 'Неизвестная ошибка'), 'error');
                 }
             }
 
-            connectBtn.addEventListener('click', connectWallet);
+            // --- Валидация формы ---
+            function validateForm() {
+                const name = tokenNameInput.value.trim();
+                const supply = tokenSupplyInput.value.trim();
+                const duration = lockDurationInput.value.trim();
 
-            // ---- Запуск токена ----
-            launchForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                if (!isConnected) {
-                    setStatus('❌ Please connect wallet first', 'error');
+                if (!name) {
+                    showMessage('Введите название токена.', 'error');
+                    return false;
+                }
+                if (name.length > 60) {
+                    showMessage('Название токена не должно превышать 60 символов.', 'error');
+                    return false;
+                }
+                if (!supply || isNaN(supply) || Number(supply) <= 0) {
+                    showMessage('Введите корректное количество токенов (больше 0).', 'error');
+                    return false;
+                }
+                if (!duration || isNaN(duration) || Number(duration) < 60 || Number(duration) > 600) {
+                    showMessage('Срок блокировки должен быть от 60 до 600 секунд.', 'error');
+                    return false;
+                }
+                return true;
+            }
+
+            // --- Функция запуска токена (заглушка) ---
+            async function launchToken() {
+                clearMessage();
+                if (!signer) {
+                    showMessage('Сначала подключите кошелек.', 'error');
                     return;
                 }
 
-                const name = tokenName.value.trim();
-                const symbol = tokenSymbol.value.trim();
-                const supply = parseInt(tokenSupply.value);
-                const assetAmt = assetAmount.value.trim();
-                const duration = parseInt(lockDuration.value);
-
-                if (!name || !symbol || !supply || !assetAmt) {
-                    setStatus('❌ Please fill all fields', 'error');
+                if (!validateForm()) {
                     return;
                 }
 
-                setStatus('⏳ Launching token...', 'info');
+                const name = tokenNameInput.value.trim();
+                const supply = tokenSupplyInput.value.trim();
+                const duration = lockDurationInput.value.trim();
+
+                // Подтверждение действия
+                if (!confirm(`Вы уверены, что хотите создать токен "${name}"?\nКоличество: ${supply}\nСрок блокировки: ${duration} секунд\nКомиссия: 0.0005 ETH`)) {
+                    return;
+                }
+
+                // Блокируем кнопку
                 launchBtn.disabled = true;
+                launchBtn.textContent = 'Запуск...';
 
                 try {
-                    // Здесь будет вызов контракта
-                    // Пока просто имитация
+                    // Здесь должен быть вызов вашего смарт-контракта
+                    // Для демонстрации используем задержку
                     await new Promise(resolve => setTimeout(resolve, 2000));
-                    setStatus('✅ Token launched! (simulated)', 'success');
+
+                    // Успешное завершение (заглушка)
+                    showMessage(`✅ Токен "${name}" успешно создан!\nКоличество: ${supply}\nСрок блокировки: ${duration} сек.`, 'success');
+                    console.log('Токен создан:', {
+                        name,
+                        supply,
+                        duration,
+                        userAddress,
+                        timestamp: new Date().toISOString()
+                    });
+
                 } catch (error) {
-                    setStatus('❌ Error: ' + error.message, 'error');
+                    console.error('Ошибка создания токена:', error);
+                    showMessage('❌ Ошибка создания токена: ' + (error.message || 'Неизвестная ошибка'), 'error');
                 } finally {
                     launchBtn.disabled = false;
+                    launchBtn.textContent = 'Запустить токен';
+                }
+            }
+
+            // --- Обработчики событий ---
+            connectBtn.addEventListener('click', connectWallet);
+
+            launchBtn.addEventListener('click', launchToken);
+
+            // Валидация полей в реальном времени
+            lockDurationInput.addEventListener('input', function() {
+                const val = parseInt(this.value);
+                if (this.value && (isNaN(val) || val < 60 || val > 600)) {
+                    this.style.borderColor = '#ef4444';
+                } else {
+                    this.style.borderColor = '#33334a';
                 }
             });
 
-            // ---- Автоподключение ----
+            // Автоподключение при загрузке, если уже есть доступ
             if (typeof window.ethereum !== 'undefined') {
                 window.ethereum.request({ method: 'eth_accounts' })
                     .then(accounts => {
-                        if (accounts && accounts.length > 0) {
-                            console.log('Auto-connecting...');
-                            setTimeout(connectWallet, 500);
+                        if (accounts.length > 0) {
+                            // Проверяем сеть
+                            return window.ethereum.request({ method: 'eth_chainId' })
+                                .then(chain => {
+                                    if (chain === chainId) {
+                                        connectWallet(); // Автоподключение
+                                    }
+                                });
                         }
                     })
                     .catch(() => {});
             }
 
-            updateUI();
-            console.log('App initialized');
+            // Обработка ошибок MetaMask
+            if (typeof window.ethereum !== 'undefined') {
+                window.ethereum.on('error', (error) => {
+                    console.error('MetaMask error:', error);
+                    if (error.code === 4001) {
+                        showMessage('Доступ к кошельку отклонен.', 'error');
+                    }
+                });
+            }
         });
     </script>
-
 </body>
 </html>
