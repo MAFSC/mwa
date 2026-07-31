@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MWA — Launch & Redeem</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Courier New', Courier, monospace;
@@ -24,7 +28,7 @@
             padding: 30px 25px;
             border: 2px solid #222222;
             background-color: #ffffff;
-            box-shadow: 8px 8px 0 rgba(0,0,0,0.1);
+            box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);
         }
 
         h1 {
@@ -119,7 +123,8 @@
             letter-spacing: 0.3px;
         }
 
-        input, select {
+        input,
+        select {
             font-family: 'Courier New', Courier, monospace;
             width: 100%;
             padding: 10px 12px;
@@ -130,7 +135,8 @@
             border-radius: 0;
         }
 
-        input:focus, select:focus {
+        input:focus,
+        select:focus {
             outline: none;
             border-color: #222222;
             background: #ffffff;
@@ -238,460 +244,491 @@
         }
 
         @media (max-width: 480px) {
-            .container { padding: 20px 15px; }
-            h1 { font-size: 22px; }
-            .info-grid { grid-template-columns: 1fr; gap: 3px; }
-            .info-grid .value { text-align: left; }
-            .wallet-section { flex-direction: column; align-items: stretch; }
-            #connectButton { width: 100%; }
+            .container {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 3px;
+            }
+            .info-grid .value {
+                text-align: left;
+            }
+            .wallet-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            #connectButton {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>⌨️ MWA · LAUNCH & REDEEM</h1>
+    <div class="container">
+        <h1>⌨️ MWA · LAUNCH & REDEEM</h1>
 
-    <div class="wallet-section">
-        <span class="wallet-status" id="walletStatus">⛓️ Not connected</span>
-        <button id="connectButton">Connect MetaMask</button>
-    </div>
-
-    <div class="section">
-        <div class="section-title">📥 1. Lock RWA & Mint Tokens</div>
-        <form id="depositForm" autocomplete="off">
-            <div class="form-group">
-                <label for="assetAddress">RWA Asset Address (ERC-20)</label>
-                <input type="text" id="assetAddress" placeholder="Address of the tokenized stock" value="0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E" required>
-                <span class="hint">This is the address of the token you want to lock. For testnet, use AMD/TSLA/AAPL token addresses.</span>
-            </div>
-
-            <div class="form-group">
-                <label for="assetAmount">Asset Amount (in wei)</label>
-                <input type="text" id="assetAmount" placeholder="e.g. 5000000000000000000" value="0x4563918244f3ffff" required>
-                <span class="hint">Amount of RWA tokens to lock. Use wei format.</span>
-            </div>
-
-            <div class="form-group">
-                <label for="tokenSupply">Token Supply to Mint</label>
-                <input type="number" id="tokenSupply" placeholder="e.g. 1000000" value="1000000" min="1" step="1" required>
-                <span class="hint">Number of MWA tokens to mint.</span>
-            </div>
-
-            <div class="form-group">
-                <label for="lockDuration">Lock / Redemption Period (seconds)</label>
-                <select id="lockDuration" required>
-                    <option value="60">60 sec</option>
-                    <option value="120">120 sec</option>
-                    <option value="180">180 sec</option>
-                    <option value="300" selected>300 sec</option>
-                    <option value="600">600 sec</option>
-                </select>
-                <span class="hint">Time until you must buy back the tokens (60–600 sec).</span>
-            </div>
-
-            <div class="launch-fee">
-                ⚡ This will call <strong>depositRWA()</strong> on the Vault contract.
-            </div>
-
-            <button type="submit" class="action-button" id="depositButton" disabled>🔒 Lock & Mint</button>
-        </form>
-    </div>
-
-    <div class="section">
-        <div class="section-title">🔄 2. Redeem RWA</div>
-        <div class="form-group">
-            <label for="depositId">Deposit ID</label>
-            <input type="number" id="depositId" placeholder="e.g. 1" value="1" min="1" step="1" required>
-            <span class="hint">ID of the deposit you want to redeem.</span>
+        <div class="wallet-section">
+            <span class="wallet-status" id="walletStatus">⛓️ Not connected</span>
+            <button id="connectButton">Connect MetaMask</button>
         </div>
 
-        <div class="launch-fee" style="border-left-color: #555555;">
-            ⚡ This will call <strong>redeemRWA()</strong> on the Vault contract.
-            <br>Requires you to have enough MWA tokens and have approved the Vault.
+        <div class="section">
+            <div class="section-title">📥 1. Lock RWA & Mint Tokens</div>
+            <form id="depositForm" autocomplete="off">
+                <div class="form-group">
+                    <label for="assetAddress">RWA Asset Address (ERC-20)</label>
+                    <input type="text" id="assetAddress" placeholder="Address of the tokenized stock" value="0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E" required>
+                    <span class="hint">This is the address of the token you want to lock. For testnet, use AMD/TSLA/AAPL token addresses.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="assetAmount">Asset Amount (in wei)</label>
+                    <input type="text" id="assetAmount" placeholder="e.g. 5000000000000000000" value="0x4563918244f3ffff" required>
+                    <span class="hint">Amount of RWA tokens to lock. Use wei format.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="tokenSupply">Token Supply to Mint</label>
+                    <input type="number" id="tokenSupply" placeholder="e.g. 1000000" value="1000000" min="1" step="1" required>
+                    <span class="hint">Number of MWA tokens to mint.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="lockDuration">Lock / Redemption Period (seconds)</label>
+                    <select id="lockDuration" required>
+                        <option value="60">60 sec</option>
+                        <option value="120">120 sec</option>
+                        <option value="180">180 sec</option>
+                        <option value="300" selected>300 sec</option>
+                        <option value="600">600 sec</option>
+                    </select>
+                    <span class="hint">Time until you must buy back the tokens (60–600 sec).</span>
+                </div>
+
+                <div class="launch-fee">
+                    ⚡ This will call <strong>depositRWA()</strong> on the Vault contract.
+                </div>
+
+                <button type="submit" class="action-button" id="depositButton" disabled>🔒 Lock & Mint</button>
+            </form>
         </div>
 
-        <button class="action-button secondary" id="redeemButton" disabled>↩️ Redeem RWA</button>
+        <div class="section">
+            <div class="section-title">🔄 2. Redeem RWA</div>
+            <div class="form-group">
+                <label for="depositId">Deposit ID</label>
+                <input type="number" id="depositId" placeholder="e.g. 1" value="1" min="1" step="1" required>
+                <span class="hint">ID of the deposit you want to redeem.</span>
+            </div>
+
+            <div class="launch-fee" style="border-left-color: #555555;">
+                ⚡ This will call <strong>redeemRWA()</strong> on the Vault contract.
+                <br>Requires you to have enough MWA tokens and have approved the Vault.
+            </div>
+
+            <button class="action-button secondary" id="redeemButton" disabled>↩️ Redeem RWA</button>
+        </div>
+
+        <div id="statusMessage" class="status-message">⏳ Connect wallet and fill in the form...</div>
+
+        <div id="contractInfo" class="info-grid" style="display: none;">
+            <span class="label">Vault Address:</span>
+            <span class="value" id="vaultAddressDisplay">0xdd6fc829709F47c6e9D764dc65B4324DF851fA40</span>
+            <span class="label">MWA Token:</span>
+            <span class="value" id="tokenAddressDisplay">0xdBB8401ee6c808c747578C680e6b65AEFBAc6484</span>
+            <span class="label">Your MWA Balance:</span>
+            <span class="value" id="balanceDisplay">0</span>
+        </div>
+
+        <div class="footer">
+            Testnet only · MWA protocol · ⚙️ v0.2
+        </div>
     </div>
 
-    <div id="statusMessage" class="status-message">⏳ Connect wallet and fill in the form...</div>
+    <!-- Load ethers.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.16.0/ethers.min.js">
+    </script>
 
-    <div id="contractInfo" class="info-grid" style="display: none;">
-        <span class="label">Vault Address:</span>
-        <span class="value" id="vaultAddressDisplay">0xdd6fc829709F47c6e9D764dc65B4324DF851fA40</span>
-        <span class="label">MWA Token:</span>
-        <span class="value" id="tokenAddressDisplay">0xdBB8401ee6c808c747578C680e6b65AEFBAc6484</span>
-        <span class="label">Your MWA Balance:</span>
-        <span class="value" id="balanceDisplay">0</span>
-    </div>
+    <script>
+        // Wait for DOM and ethers to be ready
+        (function() {
+            'use strict';
 
-    <div class="footer">
-        Testnet only · MWA protocol · ⚙️ v0.2
-    </div>
-</div>
-
-<!-- Ethers.js - Loaded directly with verification -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.16.0/ethers.min.js">
-</script>
-
-<script>
-    // Wait for the page to fully load
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Page loaded, checking ethers...');
-        console.log('typeof ethers:', typeof ethers);
-        
-        // If ethers is not available, show error
-        if (typeof ethers === 'undefined') {
-            document.getElementById('statusMessage').textContent = '❌ Error: ethers library not loaded. Please check your internet connection and refresh the page.';
-            document.getElementById('statusMessage').className = 'status-message error';
-            return;
-        }
-        
-        console.log('ethers version:', ethers.version);
-        initializeApp();
-    });
-
-    function initializeApp() {
-        'use strict';
-
-        // ---- CONTRACT CONFIGURATION ----
-        const VAULT_ADDRESS = '0xdd6fc829709F47c6e9D764dc65B4324DF851fA40';
-        const TOKEN_ADDRESS = '0xdBB8401ee6c808c747578C680e6b65AEFBAc6484';
-
-        // ---- ABIs ----
-        const VAULT_ABI = [
-            "function depositRWA(address assetAddress, uint256 assetAmount, uint256 tokenAmount, uint256 lockDurationMonths) external",
-            "function redeemRWA(uint256 depositId) external",
-            "function getDeposit(uint256 depositId) external view returns (tuple(address assetAddress, uint256 assetAmount, uint256 tokenAmount, uint256 redemptionDeadline, bool isRedeemed, bool isClaimed))",
-            "function depositCounter() external view returns (uint256)"
-        ];
-
-        const TOKEN_ABI = [
-            "function balanceOf(address owner) view returns (uint256)",
-            "function approve(address spender, uint256 amount) returns (bool)",
-            "function allowance(address owner, address spender) view returns (uint256)"
-        ];
-
-        // ---- DOM Elements ----
-        const connectBtn = document.getElementById('connectButton');
-        const walletStatus = document.getElementById('walletStatus');
-        const statusMsg = document.getElementById('statusMessage');
-        const depositForm = document.getElementById('depositForm');
-        const depositBtn = document.getElementById('depositButton');
-        const redeemBtn = document.getElementById('redeemButton');
-        const assetAddress = document.getElementById('assetAddress');
-        const assetAmount = document.getElementById('assetAmount');
-        const tokenSupply = document.getElementById('tokenSupply');
-        const lockDuration = document.getElementById('lockDuration');
-        const depositIdInput = document.getElementById('depositId');
-        const balanceDisplay = document.getElementById('balanceDisplay');
-        const vaultAddressDisplay = document.getElementById('vaultAddressDisplay');
-        const tokenAddressDisplay = document.getElementById('tokenAddressDisplay');
-        const contractInfo = document.getElementById('contractInfo');
-
-        // ---- State ----
-        let signer = null;
-        let vaultContract = null;
-        let tokenContract = null;
-        let userAddress = null;
-        let isConnected = false;
-        let provider = null;
-        let isConnecting = false;
-
-        // ---- Helper Functions ----
-        function setStatus(text, type = 'info') {
-            statusMsg.textContent = text;
-            statusMsg.className = 'status-message';
-            if (type === 'error') statusMsg.classList.add('error');
-            else if (type === 'success') statusMsg.classList.add('success');
-            else if (type === 'pending') statusMsg.classList.add('pending');
-        }
-
-        function updateUI() {
-            const connected = isConnected && signer;
-            depositBtn.disabled = !connected;
-            redeemBtn.disabled = !connected;
-            if (connected) {
-                contractInfo.style.display = 'grid';
-                vaultAddressDisplay.textContent = VAULT_ADDRESS;
-                tokenAddressDisplay.textContent = TOKEN_ADDRESS;
-                updateBalance();
-            } else {
-                contractInfo.style.display = 'none';
-            }
-        }
-
-        async function updateBalance() {
-            if (!isConnected || !tokenContract || !userAddress) return;
-            try {
-                const balance = await tokenContract.balanceOf(userAddress);
-                balanceDisplay.textContent = balance.toString();
-            } catch (e) {
-                balanceDisplay.textContent = 'Error';
-                console.error('Balance fetch error:', e);
-            }
-        }
-
-        // ---- Connect to MetaMask ----
-        async function connectWallet() {
-            if (isConnecting) return;
-            if (typeof window.ethereum === 'undefined') {
-                setStatus('❌ MetaMask not detected. Please install MetaMask extension.', 'error');
+            // Check if ethers is loaded
+            if (typeof ethers === 'undefined') {
+                document.getElementById('statusMessage').textContent = '❌ Error: ethers library not loaded. Please check internet connection and refresh.';
+                document.getElementById('statusMessage').className = 'status-message error';
+                console.error('ethers is not defined');
                 return;
             }
 
-            isConnecting = true;
-            connectBtn.disabled = true;
-            connectBtn.textContent = 'Connecting...';
-            setStatus('⏳ Connecting to MetaMask...', 'pending');
+            console.log('ethers version:', ethers.version);
 
-            try {
-                provider = new ethers.BrowserProvider(window.ethereum);
-                const accounts = await provider.send("eth_requestAccounts", []);
-                if (accounts.length === 0) {
-                    setStatus('❌ No accounts found.', 'error');
-                    isConnecting = false;
-                    connectBtn.disabled = false;
-                    connectBtn.textContent = 'Connect MetaMask';
+            // ---- CONTRACT CONFIGURATION ----
+            const VAULT_ADDRESS = '0xdd6fc829709F47c6e9D764dc65B4324DF851fA40';
+            const TOKEN_ADDRESS = '0xdBB8401ee6c808c747578C680e6b65AEFBAc6484';
+
+            // ---- ABIs ----
+            const VAULT_ABI = [
+                "function depositRWA(address assetAddress, uint256 assetAmount, uint256 tokenAmount, uint256 lockDurationMonths) external",
+                "function redeemRWA(uint256 depositId) external",
+                "function getDeposit(uint256 depositId) external view returns (tuple(address assetAddress, uint256 assetAmount, uint256 tokenAmount, uint256 redemptionDeadline, bool isRedeemed, bool isClaimed))",
+                "function depositCounter() external view returns (uint256)"
+            ];
+
+            const TOKEN_ABI = [
+                "function balanceOf(address owner) view returns (uint256)",
+                "function approve(address spender, uint256 amount) returns (bool)",
+                "function allowance(address owner, address spender) view returns (uint256)"
+            ];
+
+            // ---- DOM Elements ----
+            const connectBtn = document.getElementById('connectButton');
+            const walletStatus = document.getElementById('walletStatus');
+            const statusMsg = document.getElementById('statusMessage');
+            const depositForm = document.getElementById('depositForm');
+            const depositBtn = document.getElementById('depositButton');
+            const redeemBtn = document.getElementById('redeemButton');
+            const assetAddress = document.getElementById('assetAddress');
+            const assetAmount = document.getElementById('assetAmount');
+            const tokenSupply = document.getElementById('tokenSupply');
+            const lockDuration = document.getElementById('lockDuration');
+            const depositIdInput = document.getElementById('depositId');
+            const balanceDisplay = document.getElementById('balanceDisplay');
+            const vaultAddressDisplay = document.getElementById('vaultAddressDisplay');
+            const tokenAddressDisplay = document.getElementById('tokenAddressDisplay');
+            const contractInfo = document.getElementById('contractInfo');
+
+            // ---- State ----
+            let signer = null;
+            let vaultContract = null;
+            let tokenContract = null;
+            let userAddress = null;
+            let isConnected = false;
+            let provider = null;
+            let isConnecting = false;
+
+            // ---- Helper Functions ----
+            function setStatus(text, type = 'info') {
+                statusMsg.textContent = text;
+                statusMsg.className = 'status-message';
+                if (type === 'error') statusMsg.classList.add('error');
+                else if (type === 'success') statusMsg.classList.add('success');
+                else if (type === 'pending') statusMsg.classList.add('pending');
+            }
+
+            function updateUI() {
+                const connected = isConnected && signer;
+                depositBtn.disabled = !connected;
+                redeemBtn.disabled = !connected;
+                if (connected) {
+                    contractInfo.style.display = 'grid';
+                    vaultAddressDisplay.textContent = VAULT_ADDRESS;
+                    tokenAddressDisplay.textContent = TOKEN_ADDRESS;
+                    updateBalance();
+                } else {
+                    contractInfo.style.display = 'none';
+                }
+            }
+
+            async function updateBalance() {
+                if (!isConnected || !tokenContract || !userAddress) return;
+                try {
+                    const balance = await tokenContract.balanceOf(userAddress);
+                    balanceDisplay.textContent = balance.toString();
+                } catch (e) {
+                    balanceDisplay.textContent = 'Error';
+                    console.error('Balance fetch error:', e);
+                }
+            }
+
+            // ---- Connect to MetaMask ----
+            async function connectWallet() {
+                // Prevent multiple clicks
+                if (isConnecting) return;
+
+                // Check if MetaMask is installed
+                if (typeof window.ethereum === 'undefined') {
+                    setStatus('❌ MetaMask not detected. Please install MetaMask extension.', 'error');
                     return;
                 }
 
-                userAddress = accounts[0];
-                signer = await provider.getSigner();
+                isConnecting = true;
+                connectBtn.disabled = true;
+                connectBtn.textContent = 'Connecting...';
+                setStatus('⏳ Connecting to MetaMask...', 'pending');
 
-                // Check network
-                const network = await provider.getNetwork();
-                const chainId = Number(network.chainId);
-                if (chainId !== 46630) {
-                    setStatus(`⚠️ Please switch to Robinhood Testnet (Chain ID: 46630). Current: ${chainId}`, 'error');
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: '0xb5fe' }],
-                        });
-                        const newProvider = new ethers.BrowserProvider(window.ethereum);
-                        signer = await newProvider.getSigner();
-                        setStatus('✅ Switched to Robinhood Testnet.', 'success');
-                    } catch (switchError) {
-                        if (switchError.code === 4902) {
-                            try {
-                                await window.ethereum.request({
-                                    method: 'wallet_addEthereumChain',
-                                    params: [{
-                                        chainId: '0xb5fe',
-                                        chainName: 'Robinhood Testnet',
-                                        rpcUrls: ['https://rpc.testnet.chain.robinhood.com'],
-                                        nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                                        blockExplorerUrls: ['https://explorer.testnet.chain.robinhood.com']
-                                    }]
-                                });
-                                setStatus('✅ Robinhood Testnet added. Please reconnect.', 'success');
-                                isConnecting = false;
-                                connectBtn.disabled = false;
-                                connectBtn.textContent = 'Connect MetaMask';
-                                return;
-                            } catch (addError) {
-                                setStatus('❌ Failed to add Robinhood Testnet. Please add manually.', 'error');
+                try {
+                    // Request accounts - this triggers the MetaMask popup
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+                    if (!accounts || accounts.length === 0) {
+                        setStatus('❌ No accounts found. Please unlock MetaMask.', 'error');
+                        isConnecting = false;
+                        connectBtn.disabled = false;
+                        connectBtn.textContent = 'Connect MetaMask';
+                        return;
+                    }
+
+                    // Get the first account
+                    userAddress = accounts[0];
+
+                    // Create provider and signer
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    signer = await provider.getSigner();
+
+                    // Check network
+                    const network = await provider.getNetwork();
+                    const chainId = Number(network.chainId);
+
+                    if (chainId !== 46630) {
+                        setStatus(`⚠️ Please switch to Robinhood Testnet (Chain ID: 46630). Current: ${chainId}`, 'error');
+
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_switchEthereumChain',
+                                params: [{ chainId: '0xb5fe' }],
+                            });
+
+                            // Re-initialize after network switch
+                            provider = new ethers.BrowserProvider(window.ethereum);
+                            signer = await provider.getSigner();
+                            setStatus('✅ Switched to Robinhood Testnet.', 'success');
+                        } catch (switchError) {
+                            if (switchError.code === 4902) {
+                                try {
+                                    await window.ethereum.request({
+                                        method: 'wallet_addEthereumChain',
+                                        params: [{
+                                            chainId: '0xb5fe',
+                                            chainName: 'Robinhood Testnet',
+                                            rpcUrls: ['https://rpc.testnet.chain.robinhood.com'],
+                                            nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                                            blockExplorerUrls: ['https://explorer.testnet.chain.robinhood.com']
+                                        }]
+                                    });
+                                    setStatus('✅ Robinhood Testnet added. Please reconnect.', 'success');
+                                    isConnecting = false;
+                                    connectBtn.disabled = false;
+                                    connectBtn.textContent = 'Connect MetaMask';
+                                    return;
+                                } catch (addError) {
+                                    setStatus('❌ Failed to add Robinhood Testnet. Please add manually.', 'error');
+                                    isConnecting = false;
+                                    connectBtn.disabled = false;
+                                    connectBtn.textContent = 'Connect MetaMask';
+                                    return;
+                                }
+                            } else {
+                                setStatus(`❌ Please switch to Robinhood Testnet manually. Chain ID: 46630`, 'error');
                                 isConnecting = false;
                                 connectBtn.disabled = false;
                                 connectBtn.textContent = 'Connect MetaMask';
                                 return;
                             }
-                        } else {
-                            setStatus('❌ Failed to switch network. Please switch manually.', 'error');
-                            isConnecting = false;
-                            connectBtn.disabled = false;
-                            connectBtn.textContent = 'Connect MetaMask';
-                            return;
                         }
                     }
+
+                    // Initialize contracts
+                    vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
+                    tokenContract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
+
+                    isConnected = true;
+                    walletStatus.textContent = `🔗 ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+                    connectBtn.textContent = 'Connected ✓';
+                    connectBtn.classList.add('connected');
+                    setStatus(`✅ Connected: ${userAddress}`, 'success');
+
+                    updateUI();
+
+                    // Listen for account changes
+                    window.ethereum.on('accountsChanged', (newAccounts) => {
+                        if (newAccounts && newAccounts.length > 0) {
+                            connectWallet();
+                        } else {
+                            isConnected = false;
+                            signer = null;
+                            userAddress = null;
+                            walletStatus.textContent = '⛓️ Not connected';
+                            connectBtn.textContent = 'Connect MetaMask';
+                            connectBtn.classList.remove('connected');
+                            setStatus('⛓️ Wallet disconnected.', 'info');
+                            updateUI();
+                        }
+                    });
+
+                    // Listen for network changes
+                    window.ethereum.on('chainChanged', () => {
+                        if (isConnected) {
+                            setTimeout(connectWallet, 500);
+                        }
+                    });
+
+                } catch (error) {
+                    console.error('Connection error:', error);
+                    let errorMsg = error.message || 'Unknown error';
+                    if (error.code === 4001) {
+                        errorMsg = 'User rejected the connection request.';
+                    }
+                    setStatus(`❌ Connection failed: ${errorMsg}`, 'error');
+                    isConnected = false;
+                    signer = null;
+                    userAddress = null;
+                    walletStatus.textContent = '⛓️ Not connected';
+                    connectBtn.textContent = 'Connect MetaMask';
+                    connectBtn.classList.remove('connected');
+                    updateUI();
+                } finally {
+                    isConnecting = false;
+                    connectBtn.disabled = false;
+                }
+            }
+
+            // ---- Event Listeners ----
+            connectBtn.addEventListener('click', connectWallet);
+
+            // ---- Deposit Handler ----
+            depositForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                if (!isConnected || !vaultContract || !signer) {
+                    setStatus('❌ Please connect your wallet first.', 'error');
+                    return;
                 }
 
-                vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
-                tokenContract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
+                const assetAddr = assetAddress.value.trim();
+                const assetAmt = assetAmount.value.trim();
+                const supply = tokenSupply.value.trim();
+                const duration = parseInt(lockDuration.value);
 
-                isConnected = true;
-                walletStatus.textContent = `🔗 ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
-                connectBtn.textContent = 'Connected ✓';
-                connectBtn.classList.add('connected');
-                setStatus(`✅ Connected: ${userAddress}`, 'success');
+                if (!assetAddr || !assetAmt || !supply) {
+                    setStatus('❌ Please fill all fields correctly.', 'error');
+                    return;
+                }
 
-                updateUI();
+                const supplyNum = parseInt(supply);
+                if (supplyNum <= 0) {
+                    setStatus('❌ Total supply must be greater than 0.', 'error');
+                    return;
+                }
 
-                window.ethereum.on('accountsChanged', (accounts) => {
-                    if (accounts.length > 0) {
-                        connectWallet();
+                if (duration < 60 || duration > 600) {
+                    setStatus('❌ Lock period must be between 60 and 600 seconds.', 'error');
+                    return;
+                }
+
+                let assetAmountWei;
+                if (assetAmt.startsWith('0x')) {
+                    assetAmountWei = BigInt(assetAmt);
+                } else {
+                    assetAmountWei = BigInt(assetAmt);
+                }
+
+                setStatus(`⏳ Calling depositRWA() for ${supplyNum} tokens...`, 'pending');
+                depositBtn.disabled = true;
+
+                try {
+                    const tx = await vaultContract.depositRWA(
+                        assetAddr,
+                        assetAmountWei,
+                        supplyNum,
+                        duration, { gasLimit: 500000 }
+                    );
+
+                    setStatus(`⏳ Transaction sent: ${tx.hash}. Waiting for confirmation...`, 'pending');
+                    const receipt = await tx.wait();
+
+                    if (receipt.status === 1) {
+                        setStatus(`✅ Deposit successful! Tx: ${tx.hash}`, 'success');
+                        await updateBalance();
+                        const counter = await vaultContract.depositCounter();
+                        depositIdInput.value = counter.toString();
                     } else {
-                        isConnected = false;
-                        signer = null;
-                        userAddress = null;
-                        walletStatus.textContent = '⛓️ Not connected';
-                        connectBtn.textContent = 'Connect MetaMask';
-                        connectBtn.classList.remove('connected');
-                        setStatus('⛓️ Wallet disconnected.', 'info');
-                        updateUI();
+                        setStatus(`❌ Transaction failed. Status: ${receipt.status}`, 'error');
                     }
-                });
-
-                window.ethereum.on('chainChanged', () => {
-                    if (isConnected) setTimeout(connectWallet, 500);
-                });
-
-            } catch (error) {
-                console.error('Connection error:', error);
-                let errorMsg = error.message || 'Unknown error';
-                if (error.code === 4001) {
-                    errorMsg = 'User rejected the connection request.';
-                }
-                setStatus(`❌ Connection failed: ${errorMsg}`, 'error');
-                isConnected = false;
-                signer = null;
-                userAddress = null;
-                connectBtn.textContent = 'Connect MetaMask';
-                connectBtn.classList.remove('connected');
-                walletStatus.textContent = '⛓️ Not connected';
-                updateUI();
-            } finally {
-                isConnecting = false;
-                connectBtn.disabled = false;
-            }
-        }
-
-        connectBtn.addEventListener('click', connectWallet);
-
-        // ---- Deposit Handler ----
-        depositForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            if (!isConnected || !vaultContract || !signer) {
-                setStatus('❌ Please connect your wallet first.', 'error');
-                return;
-            }
-
-            const assetAddr = assetAddress.value.trim();
-            const assetAmt = assetAmount.value.trim();
-            const supply = tokenSupply.value.trim();
-            const duration = parseInt(lockDuration.value);
-
-            if (!assetAddr || !assetAmt || !supply) {
-                setStatus('❌ Please fill all fields correctly.', 'error');
-                return;
-            }
-
-            const supplyNum = parseInt(supply);
-            if (supplyNum <= 0) {
-                setStatus('❌ Total supply must be greater than 0.', 'error');
-                return;
-            }
-
-            if (duration < 60 || duration > 600) {
-                setStatus('❌ Lock period must be between 60 and 600 seconds.', 'error');
-                return;
-            }
-
-            let assetAmountWei;
-            if (assetAmt.startsWith('0x')) {
-                assetAmountWei = BigInt(assetAmt);
-            } else {
-                assetAmountWei = BigInt(assetAmt);
-            }
-
-            setStatus(`⏳ Calling depositRWA() for ${supplyNum} tokens...`, 'pending');
-            depositBtn.disabled = true;
-
-            try {
-                const tx = await vaultContract.depositRWA(
-                    assetAddr,
-                    assetAmountWei,
-                    supplyNum,
-                    duration, { gasLimit: 500000 }
-                );
-
-                setStatus(`⏳ Transaction sent: ${tx.hash}. Waiting for confirmation...`, 'pending');
-                const receipt = await tx.wait();
-
-                if (receipt.status === 1) {
-                    setStatus(`✅ Deposit successful! Tx: ${tx.hash}`, 'success');
-                    await updateBalance();
-                    const counter = await vaultContract.depositCounter();
-                    depositIdInput.value = counter.toString();
-                } else {
-                    setStatus(`❌ Transaction failed. Status: ${receipt.status}`, 'error');
-                }
-            } catch (error) {
-                console.error('Deposit error:', error);
-                let errorMsg = error.message || 'Unknown error';
-                if (error.reason) errorMsg = error.reason;
-                setStatus(`❌ Deposit failed: ${errorMsg}`, 'error');
-            } finally {
-                depositBtn.disabled = false;
-            }
-        });
-
-        // ---- Redeem Handler ----
-        document.getElementById('redeemButton').addEventListener('click', async function() {
-            if (!isConnected || !vaultContract || !signer) {
-                setStatus('❌ Please connect your wallet first.', 'error');
-                return;
-            }
-
-            const depositId = parseInt(depositIdInput.value.trim());
-            if (isNaN(depositId) || depositId < 1) {
-                setStatus('❌ Please enter a valid Deposit ID.', 'error');
-                return;
-            }
-
-            setStatus(`⏳ Calling redeemRWA(${depositId})...`, 'pending');
-            redeemBtn.disabled = true;
-
-            try {
-                const tx = await vaultContract.redeemRWA(
-                    depositId, { gasLimit: 300000 }
-                );
-
-                setStatus(`⏳ Transaction sent: ${tx.hash}. Waiting for confirmation...`, 'pending');
-                const receipt = await tx.wait();
-
-                if (receipt.status === 1) {
-                    setStatus(`✅ Redeem successful! Tx: ${tx.hash}`, 'success');
-                    await updateBalance();
-                } else {
-                    setStatus(`❌ Transaction failed. Status: ${receipt.status}`, 'error');
-                }
-            } catch (error) {
-                console.error('Redeem error:', error);
-                let errorMsg = error.message || 'Unknown error';
-                if (error.reason) errorMsg = error.reason;
-                setStatus(`❌ Redeem failed: ${errorMsg}`, 'error');
-            } finally {
-                redeemBtn.disabled = false;
-            }
-        });
-
-        // ---- Initialization ----
-        vaultAddressDisplay.textContent = VAULT_ADDRESS;
-        tokenAddressDisplay.textContent = TOKEN_ADDRESS;
-
-        if (typeof window.ethereum !== 'undefined') {
-            window.ethereum.request({ method: 'eth_accounts' })
-                .then(accounts => {
-                    if (accounts && accounts.length > 0) {
-                        setTimeout(connectWallet, 500);
-                    }
-                })
-                .catch(() => {});
-        }
-
-        document.querySelectorAll('#depositForm input, #depositForm select').forEach(el => {
-            el.addEventListener('input', () => {
-                if (isConnected) {
+                } catch (error) {
+                    console.error('Deposit error:', error);
+                    let errorMsg = error.message || 'Unknown error';
+                    if (error.reason) errorMsg = error.reason;
+                    setStatus(`❌ Deposit failed: ${errorMsg}`, 'error');
+                } finally {
                     depositBtn.disabled = false;
                 }
             });
-        });
 
-        updateUI();
-    }
-</script>
+            // ---- Redeem Handler ----
+            document.getElementById('redeemButton').addEventListener('click', async function() {
+                if (!isConnected || !vaultContract || !signer) {
+                    setStatus('❌ Please connect your wallet first.', 'error');
+                    return;
+                }
+
+                const depositId = parseInt(depositIdInput.value.trim());
+                if (isNaN(depositId) || depositId < 1) {
+                    setStatus('❌ Please enter a valid Deposit ID.', 'error');
+                    return;
+                }
+
+                setStatus(`⏳ Calling redeemRWA(${depositId})...`, 'pending');
+                redeemBtn.disabled = true;
+
+                try {
+                    const tx = await vaultContract.redeemRWA(
+                        depositId, { gasLimit: 300000 }
+                    );
+
+                    setStatus(`⏳ Transaction sent: ${tx.hash}. Waiting for confirmation...`, 'pending');
+                    const receipt = await tx.wait();
+
+                    if (receipt.status === 1) {
+                        setStatus(`✅ Redeem successful! Tx: ${tx.hash}`, 'success');
+                        await updateBalance();
+                    } else {
+                        setStatus(`❌ Transaction failed. Status: ${receipt.status}`, 'error');
+                    }
+                } catch (error) {
+                    console.error('Redeem error:', error);
+                    let errorMsg = error.message || 'Unknown error';
+                    if (error.reason) errorMsg = error.reason;
+                    setStatus(`❌ Redeem failed: ${errorMsg}`, 'error');
+                } finally {
+                    redeemBtn.disabled = false;
+                }
+            });
+
+            // ---- Form field handlers ----
+            document.querySelectorAll('#depositForm input, #depositForm select').forEach(el => {
+                el.addEventListener('input', () => {
+                    if (isConnected) {
+                        depositBtn.disabled = false;
+                    }
+                });
+            });
+
+            // ---- Auto-connect if accounts already exist ----
+            if (typeof window.ethereum !== 'undefined') {
+                window.ethereum.request({ method: 'eth_accounts' })
+                    .then(accounts => {
+                        if (accounts && accounts.length > 0) {
+                            setTimeout(connectWallet, 500);
+                        }
+                    })
+                    .catch(() => {});
+            }
+
+            // ---- Initialization ----
+            vaultAddressDisplay.textContent = VAULT_ADDRESS;
+            tokenAddressDisplay.textContent = TOKEN_ADDRESS;
+            updateUI();
+
+            console.log('MWA app initialized');
+
+        })();
+    </script>
 
 </body>
 </html>
