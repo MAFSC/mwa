@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MWA — Launch & Redeem</title>
     <style>
+        /* ----- RESET & BASE ----- */
         * {
             margin: 0;
             padding: 0;
@@ -124,20 +125,6 @@
             font-size: 18px;
             font-weight: 700;
             color: #ffffff;
-        }
-
-        .ticker-price .change {
-            font-size: 13px;
-            font-weight: 400;
-            margin-left: 8px;
-        }
-
-        .ticker-price .change.positive {
-            color: #00D395;
-        }
-
-        .ticker-price .change.negative {
-            color: #FF494A;
         }
 
         .section {
@@ -350,7 +337,7 @@
         <!-- WALLET -->
         <div class="wallet-section">
             <span class="wallet-status" id="walletStatus">⛓️ Not connected</span>
-            <button id="connectButton">Connect MetaMask</button>
+            <button id="connectButton">Connect Wallet</button>
         </div>
 
         <!-- PRICE TICKER -->
@@ -450,12 +437,78 @@
         </div>
     </div>
 
-    <!-- Ethers.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.16.0/ethers.min.js">
-    </script>
-
+    <!-- Ethers.js with fallback -->
     <script>
-        (function() {
+        // Функция загрузки ethers.js
+        function loadEthers() {
+            return new Promise((resolve, reject) => {
+                if (typeof ethers !== 'undefined') {
+                    resolve();
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/ethers/6.16.0/ethers.min.js';
+                script.onload = function() {
+                    setTimeout(() => {
+                        if (typeof ethers !== 'undefined') {
+                            resolve();
+                        } else {
+                            reject(new Error('ethers not loaded'));
+                        }
+                    }, 200);
+                };
+                script.onerror = function() {
+                    // Fallback
+                    const script2 = document.createElement('script');
+                    script2.src = 'https://cdn.jsdelivr.net/npm/ethers@6.16.0/dist/ethers.min.js';
+                    script2.onload = function() {
+                        setTimeout(() => {
+                            if (typeof ethers !== 'undefined') {
+                                resolve();
+                            } else {
+                                reject(new Error('ethers not loaded from fallback'));
+                            }
+                        }, 200);
+                    };
+                    script2.onerror = function() {
+                        reject(new Error('Failed to load ethers.js'));
+                    };
+                    document.head.appendChild(script2);
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        // Ждем загрузки и запускаем
+        let appStarted = false;
+
+        function startApp() {
+            if (appStarted) return;
+            if (typeof ethers === 'undefined') {
+                document.getElementById('statusMessage').textContent = '❌ Loading library... Please wait.';
+                return;
+            }
+            appStarted = true;
+            main();
+        }
+
+        loadEthers()
+            .then(() => {
+                console.log('ethers.js loaded');
+                startApp();
+            })
+            .catch((err) => {
+                console.error('Failed to load ethers:', err);
+                document.getElementById('statusMessage').textContent = '❌ Failed to load required library. Please refresh.';
+                document.getElementById('statusMessage').className = 'status-message error';
+            });
+
+        if (typeof ethers !== 'undefined') {
+            startApp();
+        }
+
+        function main() {
             // ---- CONFIG ----
             const VAULT_ADDRESS = '0xdd6fc829709F47c6e9D764dc65B4324DF851fA40';
             const TOKEN_ADDRESS = '0xdBB8401ee6c808c747578C680e6b65AEFBAc6484';
@@ -472,7 +525,6 @@
                 "function latestRoundData() external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)"
             ];
 
-            // ---- ABIs ----
             const VAULT_ABI = [
                 "function depositRWA(address assetAddress, uint256 assetAmount, uint256 tokenAmount, uint256 lockDurationMonths) external",
                 "function redeemRWA(uint256 depositId) external",
@@ -481,9 +533,7 @@
             ];
 
             const TOKEN_ABI = [
-                "function balanceOf(address owner) view returns (uint256)",
-                "function approve(address spender, uint256 amount) returns (bool)",
-                "function allowance(address owner, address spender) view returns (uint256)"
+                "function balanceOf(address owner) view returns (uint256)"
             ];
 
             // ---- DOM ----
@@ -518,7 +568,6 @@
             let isConnected = false;
             let provider = null;
             let isConnecting = false;
-            let priceInterval = null;
 
             // ---- HELPERS ----
             function setStatus(text, type = 'info') {
@@ -550,18 +599,15 @@
                     balanceDisplay.textContent = balance.toString();
                 } catch (e) {
                     balanceDisplay.textContent = 'Error';
-                    console.error(e);
                 }
             }
 
             // ---- FETCH PRICES ----
             async function fetchPrices() {
                 if (!provider) {
-                    // Если провайдер еще не создан, создаем через window.ethereum
                     if (typeof window.ethereum !== 'undefined') {
                         provider = new ethers.BrowserProvider(window.ethereum);
                     } else {
-                        console.warn('No provider available for price fetch');
                         return;
                     }
                 }
@@ -576,16 +622,13 @@
                             el.textContent = '$' + price.toFixed(2);
                         }
                     } catch (e) {
-                        console.warn('Failed to fetch price for ' + symbol, e);
                         const el = priceElements[symbol];
-                        if (el) {
-                            el.textContent = '—';
-                        }
+                        if (el) el.textContent = '—';
                     }
                 }
             }
 
-            // ---- CONNECT (WalletConnect style) ----
+            // ---- CONNECT ----
             async function connectWallet() {
                 if (isConnecting) return;
 
@@ -600,9 +643,9 @@
                 setStatus('⏳ Connecting to wallet...', 'pending');
 
                 try {
-                    // Прямой запрос к MetaMask (как WalletConnect)
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    if (!accounts || accounts.length === 0) {
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    const accounts = await provider.send('eth_requestAccounts', []);
+                    if (accounts.length === 0) {
                         setStatus('❌ No accounts found.', 'error');
                         isConnecting = false;
                         connectBtn.disabled = false;
@@ -611,14 +654,11 @@
                     }
 
                     userAddress = accounts[0];
-                    provider = new ethers.BrowserProvider(window.ethereum);
                     signer = await provider.getSigner();
 
-                    // Проверяем сеть
                     const network = await provider.getNetwork();
                     const chainId = Number(network.chainId);
 
-                    // Если не Robinhood Testnet, пробуем переключить
                     if (chainId !== 46630) {
                         setStatus('⚠️ Switching to Robinhood Testnet...', 'pending');
                         try {
@@ -626,7 +666,6 @@
                                 method: 'wallet_switchEthereumChain',
                                 params: [{ chainId: '0xb5fe' }],
                             });
-                            // После переключения обновляем провайдер
                             provider = new ethers.BrowserProvider(window.ethereum);
                             signer = await provider.getSigner();
                         } catch (switchError) {
@@ -652,7 +691,7 @@
                                     return;
                                 }
                             } else {
-                                setStatus('❌ Please switch to Robinhood Testnet manually (Chain ID: 46630).', 'error');
+                                setStatus('❌ Please switch to Robinhood Testnet manually.', 'error');
                                 isConnecting = false;
                                 connectBtn.disabled = false;
                                 connectBtn.textContent = 'Connect Wallet';
@@ -661,7 +700,6 @@
                         }
                     }
 
-                    // Инициализация контрактов
                     vaultContract = new ethers.Contract(VAULT_ADDRESS, VAULT_ABI, signer);
                     tokenContract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
 
@@ -671,16 +709,9 @@
                     connectBtn.classList.add('connected');
                     setStatus('✅ Connected: ' + userAddress, 'success');
 
-                    // Загружаем цены сразу после подключения
                     await fetchPrices();
-
                     updateUI();
 
-                    // Запускаем обновление цен каждые 30 секунд
-                    if (priceInterval) clearInterval(priceInterval);
-                    priceInterval = setInterval(fetchPrices, 30000);
-
-                    // Слушаем изменения аккаунта
                     window.ethereum.on('accountsChanged', (accounts) => {
                         if (accounts && accounts.length > 0) {
                             connectWallet();
@@ -693,7 +724,6 @@
                             connectBtn.classList.remove('connected');
                             setStatus('⛓️ Wallet disconnected.', 'info');
                             updateUI();
-                            if (priceInterval) clearInterval(priceInterval);
                         }
                     });
 
@@ -705,7 +735,7 @@
                     console.error('Connection error:', error);
                     let errorMsg = error.message || 'Unknown error';
                     if (error.code === 4001) {
-                        errorMsg = 'User rejected the connection request.';
+                        errorMsg = 'User rejected the connection.';
                     }
                     setStatus('❌ Connection failed: ' + errorMsg, 'error');
                     isConnected = false;
@@ -737,18 +767,13 @@
                 const duration = parseInt(lockDuration.value);
 
                 if (!assetAddr || !assetAmt || !supply) {
-                    setStatus('❌ Please fill all fields correctly.', 'error');
+                    setStatus('❌ Please fill all fields.', 'error');
                     return;
                 }
 
                 const supplyNum = parseInt(supply);
-                if (supplyNum <= 0) {
-                    setStatus('❌ Total supply must be greater than 0.', 'error');
-                    return;
-                }
-
-                if (duration < 60 || duration > 600) {
-                    setStatus('❌ Lock period must be between 60 and 600 seconds.', 'error');
+                if (supplyNum <= 0 || duration < 60 || duration > 600) {
+                    setStatus('❌ Invalid input.', 'error');
                     return;
                 }
 
@@ -782,10 +807,8 @@
                         setStatus('❌ Transaction failed.', 'error');
                     }
                 } catch (error) {
-                    console.error('Deposit error:', error);
-                    let errorMsg = error.message || 'Unknown error';
-                    if (error.reason) errorMsg = error.reason;
-                    setStatus('❌ Deposit failed: ' + errorMsg, 'error');
+                    console.error(error);
+                    setStatus('❌ Deposit failed: ' + (error.reason || error.message), 'error');
                 } finally {
                     depositBtn.disabled = false;
                 }
@@ -800,18 +823,15 @@
 
                 const depositId = parseInt(depositIdInput.value.trim());
                 if (isNaN(depositId) || depositId < 1) {
-                    setStatus('❌ Please enter a valid Deposit ID.', 'error');
+                    setStatus('❌ Invalid Deposit ID.', 'error');
                     return;
                 }
 
-                setStatus('⏳ Calling redeemRWA(' + depositId + ')...', 'pending');
+                setStatus('⏳ Calling redeemRWA()...', 'pending');
                 redeemBtn.disabled = true;
 
                 try {
-                    const tx = await vaultContract.redeemRWA(
-                        depositId, { gasLimit: 300000 }
-                    );
-
+                    const tx = await vaultContract.redeemRWA(depositId, { gasLimit: 300000 });
                     setStatus('⏳ Transaction sent: ' + tx.hash, 'pending');
                     const receipt = await tx.wait();
 
@@ -822,24 +842,18 @@
                         setStatus('❌ Transaction failed.', 'error');
                     }
                 } catch (error) {
-                    console.error('Redeem error:', error);
-                    let errorMsg = error.message || 'Unknown error';
-                    if (error.reason) errorMsg = error.reason;
-                    setStatus('❌ Redeem failed: ' + errorMsg, 'error');
+                    console.error(error);
+                    setStatus('❌ Redeem failed: ' + (error.reason || error.message), 'error');
                 } finally {
                     redeemBtn.disabled = false;
                 }
             });
 
-            // ---- AUTO-CONNECT & PRICE LOAD ----
+            // ---- AUTO ----
             if (typeof window.ethereum !== 'undefined') {
-                // Создаем провайдер для цен еще до подключения
                 provider = new ethers.BrowserProvider(window.ethereum);
-
-                // Загружаем цены сразу при загрузке страницы
                 fetchPrices().catch(() => {});
 
-                // Проверяем, есть ли уже подключенный аккаунт
                 window.ethereum.request({ method: 'eth_accounts' })
                     .then(accounts => {
                         if (accounts && accounts.length > 0) {
@@ -849,28 +863,22 @@
                     .catch(() => {});
             }
 
-            // Обновляем цены каждые 30 секунд даже без подключения
             setInterval(() => {
-                if (!isConnected) {
-                    fetchPrices().catch(() => {});
-                }
+                if (!isConnected) fetchPrices().catch(() => {});
             }, 30000);
 
-            // ---- INIT ----
             vaultAddressDisplay.textContent = VAULT_ADDRESS;
             tokenAddressDisplay.textContent = TOKEN_ADDRESS;
 
             document.querySelectorAll('#depositForm input, #depositForm select').forEach(el => {
                 el.addEventListener('input', () => {
-                    if (isConnected) {
-                        depositBtn.disabled = false;
-                    }
+                    if (isConnected) depositBtn.disabled = false;
                 });
             });
 
             updateUI();
-            console.log('MWA app initialized with WalletConnect style and price ticker');
-        })();
+            console.log('MWA app initialized');
+        }
     </script>
 
 </body>
