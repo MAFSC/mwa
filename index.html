@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MWA — Launch & Redeem</title>
     <style>
-        /* ----- RESET & BASE (как у Edel) ----- */
         * {
             margin: 0;
             padding: 0;
@@ -43,7 +42,6 @@
             color: #ffffff;
         }
 
-        /* ----- WALLET (как у Edel) ----- */
         .wallet-section {
             display: flex;
             justify-content: space-between;
@@ -53,11 +51,14 @@
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 12px;
             margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .wallet-status {
             font-size: 14px;
             color: rgba(255, 255, 255, 0.5);
+            word-break: break-all;
         }
 
         #connectButton {
@@ -94,7 +95,6 @@
             background: rgba(255, 255, 255, 0.14);
         }
 
-        /* ----- PRICE TICKER (как у Edel) ----- */
         .price-ticker {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -140,7 +140,6 @@
             color: #FF494A;
         }
 
-        /* ----- FORM (как у Edel) ----- */
         .section {
             margin-bottom: 28px;
             padding-bottom: 24px;
@@ -221,7 +220,6 @@
             color: #ffffff;
         }
 
-        /* ----- BUTTONS (как у Edel) ----- */
         .action-button {
             font-family: 'Courier New', Courier, monospace;
             width: 100%;
@@ -257,7 +255,6 @@
             background: rgba(255, 255, 255, 0.10);
         }
 
-        /* ----- STATUS ----- */
         .status-message {
             margin-top: 16px;
             padding: 12px 16px;
@@ -285,7 +282,6 @@
             background: rgba(255, 214, 65, 0.06);
         }
 
-        /* ----- INFO ----- */
         .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -309,7 +305,6 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
-        /* ----- FOOTER ----- */
         .footer {
             margin-top: 24px;
             font-size: 12px;
@@ -358,7 +353,7 @@
             <button id="connectButton">Connect MetaMask</button>
         </div>
 
-        <!-- PRICE TICKER (Edel style) -->
+        <!-- PRICE TICKER -->
         <div class="price-ticker" id="priceTicker">
             <div class="ticker-item">
                 <span class="ticker-symbol">AAPL</span>
@@ -523,6 +518,7 @@
             let isConnected = false;
             let provider = null;
             let isConnecting = false;
+            let priceInterval = null;
 
             // ---- HELPERS ----
             function setStatus(text, type = 'info') {
@@ -558,9 +554,17 @@
                 }
             }
 
-            // ---- FETCH PRICES (Edel style) ----
+            // ---- FETCH PRICES ----
             async function fetchPrices() {
-                if (!provider) return;
+                if (!provider) {
+                    // Если провайдер еще не создан, создаем через window.ethereum
+                    if (typeof window.ethereum !== 'undefined') {
+                        provider = new ethers.BrowserProvider(window.ethereum);
+                    } else {
+                        console.warn('No provider available for price fetch');
+                        return;
+                    }
+                }
 
                 for (const [symbol, address] of Object.entries(ORACLES)) {
                     try {
@@ -581,7 +585,7 @@
                 }
             }
 
-            // ---- CONNECT (Edel style) ----
+            // ---- CONNECT (WalletConnect style) ----
             async function connectWallet() {
                 if (isConnecting) return;
 
@@ -593,35 +597,38 @@
                 isConnecting = true;
                 connectBtn.disabled = true;
                 connectBtn.textContent = 'Connecting...';
-                setStatus('⏳ Connecting to MetaMask...', 'pending');
+                setStatus('⏳ Connecting to wallet...', 'pending');
 
                 try {
-                    provider = new ethers.BrowserProvider(window.ethereum);
-                    const accounts = await provider.send('eth_requestAccounts', []);
-                    if (accounts.length === 0) {
+                    // Прямой запрос к MetaMask (как WalletConnect)
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    if (!accounts || accounts.length === 0) {
                         setStatus('❌ No accounts found.', 'error');
                         isConnecting = false;
                         connectBtn.disabled = false;
-                        connectBtn.textContent = 'Connect MetaMask';
+                        connectBtn.textContent = 'Connect Wallet';
                         return;
                     }
 
                     userAddress = accounts[0];
+                    provider = new ethers.BrowserProvider(window.ethereum);
                     signer = await provider.getSigner();
 
-                    // Проверяем сеть (Robinhood Testnet = 46630)
+                    // Проверяем сеть
                     const network = await provider.getNetwork();
                     const chainId = Number(network.chainId);
+
+                    // Если не Robinhood Testnet, пробуем переключить
                     if (chainId !== 46630) {
-                        setStatus('⚠️ Please switch to Robinhood Testnet (Chain ID: 46630).', 'error');
+                        setStatus('⚠️ Switching to Robinhood Testnet...', 'pending');
                         try {
                             await window.ethereum.request({
                                 method: 'wallet_switchEthereumChain',
                                 params: [{ chainId: '0xb5fe' }],
                             });
-                            const newProvider = new ethers.BrowserProvider(window.ethereum);
-                            signer = await newProvider.getSigner();
-                            setStatus('✅ Switched to Robinhood Testnet.', 'success');
+                            // После переключения обновляем провайдер
+                            provider = new ethers.BrowserProvider(window.ethereum);
+                            signer = await provider.getSigner();
                         } catch (switchError) {
                             if (switchError.code === 4902) {
                                 try {
@@ -635,23 +642,20 @@
                                             blockExplorerUrls: ['https://explorer.testnet.chain.robinhood.com']
                                         }]
                                     });
-                                    setStatus('✅ Robinhood Testnet added. Please reconnect.', 'success');
-                                    isConnecting = false;
-                                    connectBtn.disabled = false;
-                                    connectBtn.textContent = 'Connect MetaMask';
-                                    return;
+                                    provider = new ethers.BrowserProvider(window.ethereum);
+                                    signer = await provider.getSigner();
                                 } catch (addError) {
                                     setStatus('❌ Failed to add Robinhood Testnet. Please add manually.', 'error');
                                     isConnecting = false;
                                     connectBtn.disabled = false;
-                                    connectBtn.textContent = 'Connect MetaMask';
+                                    connectBtn.textContent = 'Connect Wallet';
                                     return;
                                 }
                             } else {
-                                setStatus('❌ Failed to switch network. Please switch manually.', 'error');
+                                setStatus('❌ Please switch to Robinhood Testnet manually (Chain ID: 46630).', 'error');
                                 isConnecting = false;
                                 connectBtn.disabled = false;
-                                connectBtn.textContent = 'Connect MetaMask';
+                                connectBtn.textContent = 'Connect Wallet';
                                 return;
                             }
                         }
@@ -667,24 +671,29 @@
                     connectBtn.classList.add('connected');
                     setStatus('✅ Connected: ' + userAddress, 'success');
 
-                    // Загружаем цены
+                    // Загружаем цены сразу после подключения
                     await fetchPrices();
 
                     updateUI();
 
+                    // Запускаем обновление цен каждые 30 секунд
+                    if (priceInterval) clearInterval(priceInterval);
+                    priceInterval = setInterval(fetchPrices, 30000);
+
                     // Слушаем изменения аккаунта
                     window.ethereum.on('accountsChanged', (accounts) => {
-                        if (accounts.length > 0) {
+                        if (accounts && accounts.length > 0) {
                             connectWallet();
                         } else {
                             isConnected = false;
                             signer = null;
                             userAddress = null;
                             walletStatus.textContent = '⛓️ Not connected';
-                            connectBtn.textContent = 'Connect MetaMask';
+                            connectBtn.textContent = 'Connect Wallet';
                             connectBtn.classList.remove('connected');
                             setStatus('⛓️ Wallet disconnected.', 'info');
                             updateUI();
+                            if (priceInterval) clearInterval(priceInterval);
                         }
                     });
 
@@ -702,7 +711,7 @@
                     isConnected = false;
                     signer = null;
                     userAddress = null;
-                    connectBtn.textContent = 'Connect MetaMask';
+                    connectBtn.textContent = 'Connect Wallet';
                     connectBtn.classList.remove('connected');
                     walletStatus.textContent = '⛓️ Not connected';
                     updateUI();
@@ -750,7 +759,7 @@
                     assetAmountWei = BigInt(assetAmt);
                 }
 
-                setStatus('⏳ Calling depositRWA() for ' + supplyNum + ' tokens...', 'pending');
+                setStatus('⏳ Calling depositRWA()...', 'pending');
                 depositBtn.disabled = true;
 
                 try {
@@ -761,7 +770,7 @@
                         duration, { gasLimit: 500000 }
                     );
 
-                    setStatus('⏳ Transaction sent: ' + tx.hash + '. Waiting for confirmation...', 'pending');
+                    setStatus('⏳ Transaction sent: ' + tx.hash, 'pending');
                     const receipt = await tx.wait();
 
                     if (receipt.status === 1) {
@@ -770,7 +779,7 @@
                         const counter = await vaultContract.depositCounter();
                         depositIdInput.value = counter.toString();
                     } else {
-                        setStatus('❌ Transaction failed. Status: ' + receipt.status, 'error');
+                        setStatus('❌ Transaction failed.', 'error');
                     }
                 } catch (error) {
                     console.error('Deposit error:', error);
@@ -803,14 +812,14 @@
                         depositId, { gasLimit: 300000 }
                     );
 
-                    setStatus('⏳ Transaction sent: ' + tx.hash + '. Waiting for confirmation...', 'pending');
+                    setStatus('⏳ Transaction sent: ' + tx.hash, 'pending');
                     const receipt = await tx.wait();
 
                     if (receipt.status === 1) {
                         setStatus('✅ Redeem successful! Tx: ' + tx.hash, 'success');
                         await updateBalance();
                     } else {
-                        setStatus('❌ Transaction failed. Status: ' + receipt.status, 'error');
+                        setStatus('❌ Transaction failed.', 'error');
                     }
                 } catch (error) {
                     console.error('Redeem error:', error);
@@ -822,8 +831,15 @@
                 }
             });
 
-            // ---- AUTO-CONNECT ----
+            // ---- AUTO-CONNECT & PRICE LOAD ----
             if (typeof window.ethereum !== 'undefined') {
+                // Создаем провайдер для цен еще до подключения
+                provider = new ethers.BrowserProvider(window.ethereum);
+
+                // Загружаем цены сразу при загрузке страницы
+                fetchPrices().catch(() => {});
+
+                // Проверяем, есть ли уже подключенный аккаунт
                 window.ethereum.request({ method: 'eth_accounts' })
                     .then(accounts => {
                         if (accounts && accounts.length > 0) {
@@ -832,6 +848,13 @@
                     })
                     .catch(() => {});
             }
+
+            // Обновляем цены каждые 30 секунд даже без подключения
+            setInterval(() => {
+                if (!isConnected) {
+                    fetchPrices().catch(() => {});
+                }
+            }, 30000);
 
             // ---- INIT ----
             vaultAddressDisplay.textContent = VAULT_ADDRESS;
@@ -845,14 +868,8 @@
                 });
             });
 
-            // Загружаем цены при старте (без кошелька)
-            if (typeof window.ethereum !== 'undefined') {
-                provider = new ethers.BrowserProvider(window.ethereum);
-                fetchPrices().catch(() => {});
-            }
-
             updateUI();
-            console.log('MWA app initialized (Edel style with price ticker)');
+            console.log('MWA app initialized with WalletConnect style and price ticker');
         })();
     </script>
 
