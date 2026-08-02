@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MWA — Launch & Redeem</title>
     <style>
-        /* ----- RESET & BASE ----- */
+        /* ----- RESET & BASE (как у Edel) ----- */
         * {
             margin: 0;
             padding: 0;
@@ -14,7 +14,7 @@
 
         body {
             font-family: 'Courier New', Courier, monospace;
-            background-color: #000000;
+            background-color: #0D1916;
             color: #ffffff;
             min-height: 100vh;
             display: flex;
@@ -24,81 +24,127 @@
         }
 
         .container {
-            max-width: 700px;
+            max-width: 720px;
             width: 100%;
-            padding: 30px 25px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: #1A1B1F;
-            border-radius: 16px;
+            padding: 32px 28px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
         }
 
         h1 {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 700;
             letter-spacing: -0.5px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            padding-bottom: 15px;
-            margin-bottom: 25px;
-            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
             color: #ffffff;
         }
 
-        /* ----- WALLET CONNECTION (как на Noxa) ----- */
+        /* ----- WALLET (как у Edel) ----- */
         .wallet-section {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 16px;
+            padding: 12px 18px;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 10px;
+            border-radius: 12px;
             margin-bottom: 24px;
         }
 
         .wallet-status {
             font-size: 14px;
-            color: rgba(224, 232, 255, 0.6);
+            color: rgba(255, 255, 255, 0.5);
         }
 
         #connectButton {
             font-family: 'Courier New', Courier, monospace;
-            background: #ceff00;
-            color: #000000;
+            background: #00D395;
+            color: #0D1916;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 22px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            border-radius: 8px;
-            transition: background 0.2s;
+            border-radius: 10px;
+            transition: background 0.2s, opacity 0.2s;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
             min-width: 160px;
         }
 
         #connectButton:hover:not(:disabled) {
-            background: #b8e600;
+            background: #00b57a;
         }
 
         #connectButton:disabled {
-            opacity: 0.5;
+            opacity: 0.4;
             cursor: not-allowed;
         }
 
         #connectButton.connected {
-            background: #2a7d4f;
+            background: rgba(255, 255, 255, 0.08);
             color: #ffffff;
         }
 
         #connectButton.connected:hover:not(:disabled) {
-            background: #1f5f3b;
+            background: rgba(255, 255, 255, 0.14);
         }
 
-        /* ----- FORM ELEMENTS (как на Noxa) ----- */
+        /* ----- PRICE TICKER (как у Edel) ----- */
+        .price-ticker {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 16px 18px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+        }
+
+        .ticker-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .ticker-symbol {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .ticker-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .ticker-price .change {
+            font-size: 13px;
+            font-weight: 400;
+            margin-left: 8px;
+        }
+
+        .ticker-price .change.positive {
+            color: #00D395;
+        }
+
+        .ticker-price .change.negative {
+            color: #FF494A;
+        }
+
+        /* ----- FORM (как у Edel) ----- */
         .section {
-            margin-bottom: 30px;
-            padding-bottom: 25px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            margin-bottom: 28px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         }
 
         .section:last-child {
@@ -112,8 +158,8 @@
             font-weight: 600;
             margin-bottom: 16px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: rgba(255, 255, 255, 0.8);
+            letter-spacing: 0.4px;
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .form-group {
@@ -122,12 +168,12 @@
 
         label {
             display: block;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             text-transform: uppercase;
             letter-spacing: 0.3px;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.3);
         }
 
         input,
@@ -136,52 +182,46 @@
             width: 100%;
             padding: 10px 14px;
             font-size: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             background: rgba(255, 255, 255, 0.04);
             color: #ffffff;
-            border-radius: 8px;
+            border-radius: 10px;
             transition: border 0.2s, background 0.2s;
         }
 
         input:focus,
         select:focus {
             outline: none;
-            border-color: #ceff00;
+            border-color: #00D395;
             background: rgba(255, 255, 255, 0.06);
         }
 
         input::placeholder {
-            color: rgba(255, 255, 255, 0.3);
-        }
-
-        input:disabled,
-        select:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
+            color: rgba(255, 255, 255, 0.2);
         }
 
         .hint {
             display: block;
-            margin-top: 5px;
+            margin-top: 4px;
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.35);
+            color: rgba(255, 255, 255, 0.25);
         }
 
         .launch-fee {
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.02);
             padding: 12px 16px;
             font-size: 14px;
-            border-left: 3px solid #ceff00;
-            border-radius: 6px;
+            border-left: 3px solid #00D395;
+            border-radius: 8px;
             margin: 16px 0 20px 0;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .launch-fee strong {
             color: #ffffff;
         }
 
-        /* ----- BUTTONS (как на Noxa) ----- */
+        /* ----- BUTTONS (как у Edel) ----- */
         .action-button {
             font-family: 'Courier New', Courier, monospace;
             width: 100%;
@@ -189,107 +229,96 @@
             font-size: 16px;
             font-weight: 600;
             text-transform: uppercase;
-            background: #ceff00;
-            color: #000000;
+            background: #00D395;
+            color: #0D1916;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             transition: background 0.2s, opacity 0.2s;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
             margin-top: 4px;
         }
 
         .action-button:hover:not(:disabled) {
-            background: #b8e600;
+            background: #00b57a;
         }
 
         .action-button:disabled {
-            opacity: 0.4;
+            opacity: 0.3;
             cursor: not-allowed;
         }
 
         .action-button.secondary {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.06);
             color: #ffffff;
         }
 
         .action-button.secondary:hover:not(:disabled) {
-            background: rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.10);
         }
 
-        /* ----- STATUS MESSAGE ----- */
+        /* ----- STATUS ----- */
         .status-message {
             margin-top: 16px;
             padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.02);
             font-size: 14px;
             border-left: 3px solid rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
+            border-radius: 8px;
             min-height: 30px;
             word-break: break-word;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .status-message.error {
             border-left-color: #FF494A;
-            background: rgba(255, 73, 74, 0.08);
+            background: rgba(255, 73, 74, 0.06);
         }
 
         .status-message.success {
-            border-left-color: #30E000;
-            background: rgba(48, 224, 0, 0.08);
+            border-left-color: #00D395;
+            background: rgba(0, 211, 149, 0.06);
         }
 
         .status-message.pending {
             border-left-color: #FFD641;
-            background: rgba(255, 214, 65, 0.08);
+            background: rgba(255, 214, 65, 0.06);
         }
 
-        /* ----- INFO GRID (как на Noxa) ----- */
+        /* ----- INFO ----- */
         .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px 20px;
-            background: rgba(255, 255, 255, 0.03);
+            gap: 6px 20px;
+            background: rgba(255, 255, 255, 0.02);
             padding: 12px 16px;
             font-size: 13px;
-            border-radius: 8px;
+            border-radius: 10px;
             margin: 10px 0 16px 0;
-            border: 1px solid rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.03);
         }
 
         .info-grid .label {
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(255, 255, 255, 0.3);
         }
 
         .info-grid .value {
             text-align: right;
             word-break: break-all;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.7);
         }
 
         /* ----- FOOTER ----- */
         .footer {
-            margin-top: 25px;
+            margin-top: 24px;
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.25);
+            color: rgba(255, 255, 255, 0.15);
             text-align: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+            padding-top: 18px;
         }
 
-        .footer a {
-            color: rgba(255, 255, 255, 0.4);
-            text-decoration: underline;
-            text-underline-offset: 2px;
-        }
-
-        .footer a:hover {
-            color: #ffffff;
-        }
-
-        /* ----- RESPONSIVE ----- */
         @media (max-width: 480px) {
             .container {
                 padding: 20px 16px;
@@ -312,18 +341,41 @@
             #connectButton {
                 width: 100%;
             }
+            .price-ticker {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>⌨️ MWA · LAUNCH & REDEEM</h1>
+        <h1>⌨️ MWA · LAUNCH &amp; REDEEM</h1>
 
-        <!-- WALLET (как на Noxa) -->
+        <!-- WALLET -->
         <div class="wallet-section">
             <span class="wallet-status" id="walletStatus">⛓️ Not connected</span>
             <button id="connectButton">Connect MetaMask</button>
+        </div>
+
+        <!-- PRICE TICKER (Edel style) -->
+        <div class="price-ticker" id="priceTicker">
+            <div class="ticker-item">
+                <span class="ticker-symbol">AAPL</span>
+                <span class="ticker-price" id="priceAAPL">$0.00</span>
+            </div>
+            <div class="ticker-item">
+                <span class="ticker-symbol">TSLA</span>
+                <span class="ticker-price" id="priceTSLA">$0.00</span>
+            </div>
+            <div class="ticker-item">
+                <span class="ticker-symbol">NVDA</span>
+                <span class="ticker-price" id="priceNVDA">$0.00</span>
+            </div>
+            <div class="ticker-item">
+                <span class="ticker-symbol">AMD</span>
+                <span class="ticker-price" id="priceAMD">$0.00</span>
+            </div>
         </div>
 
         <!-- SECTION 1: DEPOSIT -->
@@ -377,7 +429,7 @@
                 <span class="hint">ID of the deposit you want to redeem.</span>
             </div>
 
-            <div class="launch-fee" style="border-left-color: rgba(255,255,255,0.2);">
+            <div class="launch-fee" style="border-left-color: rgba(255,255,255,0.15);">
                 ⚡ This will call <strong>redeemRWA()</strong> on the Vault contract.
                 <br>Requires you to have enough MWA tokens and have approved the Vault.
             </div>
@@ -409,10 +461,23 @@
 
     <script>
         (function() {
-            // ---- CONFIGURATION ----
+            // ---- CONFIG ----
             const VAULT_ADDRESS = '0xdd6fc829709F47c6e9D764dc65B4324DF851fA40';
             const TOKEN_ADDRESS = '0xdBB8401ee6c808c747578C680e6b65AEFBAc6484';
 
+            // ---- CHAINLINK ORACLES (Robinhood Mainnet) ----
+            const ORACLES = {
+                AAPL: '0x6B22A786bAa607d76728168703a39Ea9C99f2cD0',
+                TSLA: '0x4A1166a659A55625345e9515b32adECea5547C38',
+                NVDA: '0x379EC4f7C378F34a1B47E4F3cbeBCbAC3E8E9F15',
+                AMD: '0x943A29E7ae51A4798823ca9eEd2ed533B2A22C72'
+            };
+
+            const PRICE_FEED_ABI = [
+                "function latestRoundData() external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)"
+            ];
+
+            // ---- ABIs ----
             const VAULT_ABI = [
                 "function depositRWA(address assetAddress, uint256 assetAmount, uint256 tokenAmount, uint256 lockDurationMonths) external",
                 "function redeemRWA(uint256 depositId) external",
@@ -442,6 +507,13 @@
             const vaultAddressDisplay = document.getElementById('vaultAddressDisplay');
             const tokenAddressDisplay = document.getElementById('tokenAddressDisplay');
             const contractInfo = document.getElementById('contractInfo');
+
+            const priceElements = {
+                AAPL: document.getElementById('priceAAPL'),
+                TSLA: document.getElementById('priceTSLA'),
+                NVDA: document.getElementById('priceNVDA'),
+                AMD: document.getElementById('priceAMD')
+            };
 
             // ---- STATE ----
             let signer = null;
@@ -486,7 +558,30 @@
                 }
             }
 
-            // ---- CONNECT (как на Noxa) ----
+            // ---- FETCH PRICES (Edel style) ----
+            async function fetchPrices() {
+                if (!provider) return;
+
+                for (const [symbol, address] of Object.entries(ORACLES)) {
+                    try {
+                        const contract = new ethers.Contract(address, PRICE_FEED_ABI, provider);
+                        const data = await contract.latestRoundData();
+                        const price = Number(data.answer) / 1e8;
+                        const el = priceElements[symbol];
+                        if (el) {
+                            el.textContent = '$' + price.toFixed(2);
+                        }
+                    } catch (e) {
+                        console.warn('Failed to fetch price for ' + symbol, e);
+                        const el = priceElements[symbol];
+                        if (el) {
+                            el.textContent = '—';
+                        }
+                    }
+                }
+            }
+
+            // ---- CONNECT (Edel style) ----
             async function connectWallet() {
                 if (isConnecting) return;
 
@@ -571,6 +666,9 @@
                     connectBtn.textContent = 'Connected ✓';
                     connectBtn.classList.add('connected');
                     setStatus('✅ Connected: ' + userAddress, 'success');
+
+                    // Загружаем цены
+                    await fetchPrices();
 
                     updateUI();
 
@@ -747,8 +845,14 @@
                 });
             });
 
+            // Загружаем цены при старте (без кошелька)
+            if (typeof window.ethereum !== 'undefined') {
+                provider = new ethers.BrowserProvider(window.ethereum);
+                fetchPrices().catch(() => {});
+            }
+
             updateUI();
-            console.log('MWA app initialized (Noxa style)');
+            console.log('MWA app initialized (Edel style with price ticker)');
         })();
     </script>
 
