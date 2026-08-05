@@ -1240,59 +1240,47 @@ function showPriceError(symbol){
 /*=========================================================
     LOAD ALL
 =========================================================*/
+async function refreshPrices() {
 
-async function refreshPrices(){
+    try {
 
-    try{
+        const response = await fetch(PRICE_CONFIG.API_URL);
 
-        const response=await fetch(
-
-            PRICE_CONFIG.API_URL
-
-        );
-
-        if(!response.ok){
-
-            throw new Error(
-
-                "HTTP "+response.status
-
-            );
-
+        if (!response.ok) {
+            throw new Error("HTTP " + response.status);
         }
 
-        const prices=await response.json();
+        const prices = await response.json();
 
-        for(const item of prices){
+        console.log("Prices:", prices);
 
-            LAST_PRICES[item.symbol]=item.price;
+        prices.forEach(item => {
 
-            updatePriceHTML(
+            const el = document.getElementById(item.symbol);
 
-                item.symbol,
+            if (!el) {
+                console.warn("No element:", item.symbol);
+                return;
+            }
 
-                item.price,
-
-                item.change>=0
-
+            el.textContent = formatPrice(item.price);
+            el.style.color =
+                item.change >= 0
                     ? "#00d395"
+                    : "#ff5555";
 
-                    : "#ff5555"
+        });
 
-            );
+    } catch (e) {
 
-        }
+        console.error("Price error:", e);
 
-    }
-
-    catch(e){
-
-        console.error(e);
+        PRICE_CONFIG.SYMBOLS.forEach(showPriceError);
 
     }
 
-}
-
+} 
+    
     /*=========================================================
     START PRICE LOOP
 =========================================================*/
