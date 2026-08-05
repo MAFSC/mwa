@@ -109,6 +109,12 @@
             cursor: not-allowed;
         }
 
+        button.small {
+            padding: 6px 14px;
+            font-size: 13px;
+            margin-left: 8px;
+        }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -207,12 +213,15 @@
             background: #081411;
             border-radius: 8px;
             margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .token-item .info {
             display: flex;
             flex-direction: column;
             gap: 4px;
+            flex: 1;
         }
 
         .token-item .info .name {
@@ -226,11 +235,21 @@
 
         .token-item .balance {
             text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
         }
 
         .token-item .balance .available {
             font-size: 12px;
             color: #9cb4ad;
+        }
+
+        .token-item .actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
         }
 
         #launchStatus {
@@ -240,19 +259,32 @@
             display: none;
         }
 
-        /* Стили для выпадающего списка акций */
-        .asset-select-wrapper {
-            position: relative;
-        }
-
-        .asset-select-wrapper select {
-            appearance: none;
-            cursor: pointer;
-        }
-
-        .asset-select-wrapper select option {
+        .buy-sell-input {
+            width: 80px;
+            padding: 4px 8px;
+            font-size: 13px;
             background: #081411;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             color: white;
+            border-radius: 4px;
+        }
+
+        .btn-buy {
+            background: #00d395;
+            color: #000;
+        }
+
+        .btn-buy:hover {
+            background: #00b67d;
+        }
+
+        .btn-sell {
+            background: #ff5555;
+            color: #fff;
+        }
+
+        .btn-sell:hover {
+            background: #cc4444;
         }
 
         @media(max-width:768px) {
@@ -268,6 +300,16 @@
             }
             .info-grid {
                 grid-template-columns: 1fr;
+            }
+            .token-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .token-item .balance {
+                align-items: flex-start;
+            }
+            .token-item .actions {
+                justify-content: flex-start;
             }
         }
     </style>
@@ -348,9 +390,13 @@
         <!-- Redeem -->
         <div class="section">
             <h2>🔄 Redeem RWA</h2>
-            <label>Deposit ID</label>
-            <input id="depositId" value="1">
-            <button style="margin-top:20px;width:100%;" id="redeemBtn" disabled>Redeem</button>
+            <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;">
+                <div>
+                    <label>Deposit ID</label>
+                    <input id="depositId" value="1">
+                </div>
+                <button id="redeemBtn" disabled style="margin-bottom:2px;">Redeem</button>
+            </div>
         </div>
 
         <!-- Wallet Info -->
@@ -381,7 +427,7 @@
             EXPLORER: "https://explorer.testnet.chain.robinhood.com",
             VAULT_ADDRESS: "0xdd6fc829709F47c6e9D764dc65B4324DF851fA40",
             TOKEN_ADDRESS: "0xdBB8401ee6c808c747578C680e6b65AEFBAc6484",
-            FACTORY_ADDRESS: "0xYOUR_FACTORY_ADDRESS" // ЗАМЕНИТЕ
+            FACTORY_ADDRESS: "0x7D6beD6bF1BaFB1515Dd4CEdCBa6e619990a3118" // ЗАМЕНИТЕ
         };
 
         // =========================================================
@@ -528,10 +574,10 @@
             }
 
             let html = '';
-            APP.tokens.forEach(token => {
+            APP.tokens.forEach((token, index) => {
                 const totalSupply = parseInt(token.supply) || 0;
-                // Все токены доступны для продажи (никаких блокировок в пуле нет)
                 const availableForSale = totalSupply;
+                const balanceNum = Number(token.balance || 0);
 
                 html += `
                         <div class="token-item">
@@ -540,8 +586,13 @@
                                 <div class="address">${shortAddress(token.address)}</div>
                             </div>
                             <div class="balance">
-                                <div style="color: #00d395;">Balance: ${Number(token.balance || 0).toLocaleString()}</div>
+                                <div style="color: #00d395;">Balance: ${balanceNum.toLocaleString()}</div>
                                 <div class="available">For sale: ${availableForSale.toLocaleString()}</div>
+                            </div>
+                            <div class="actions">
+                                <input type="number" class="buy-sell-input" id="amount_${index}" value="1" min="1" max="${balanceNum}">
+                                <button class="small btn-buy" onclick="window.MWA.buyToken(${index})">Buy</button>
+                                <button class="small btn-sell" onclick="window.MWA.sellToken(${index})">Sell</button>
                             </div>
                         </div>
                     `;
@@ -570,6 +621,58 @@
                     launchStatus.style.display = 'none';
                 }, 8000);
             }
+        }
+
+        // =========================================================
+        // BUY / SELL (Simulated)
+        // =========================================================
+        function buyToken(index) {
+            const token = APP.tokens[index];
+            if (!token) return;
+
+            const amountInput = document.getElementById(`amount_${index}`);
+            const amount = parseInt(amountInput.value) || 1;
+            const currentBalance = Number(token.balance || 0);
+
+            if (amount <= 0) {
+                setStatus("❌ Amount must be greater than 0", "error");
+                return;
+            }
+
+            // Симуляция покупки — увеличиваем баланс
+            const newBalance = currentBalance + amount;
+            token.balance = newBalance.toString();
+            saveTokensToStorage();
+            renderTokenList();
+
+            setStatus(`✅ Bought ${amount} ${token.symbol} (simulated). New balance: ${newBalance}`, "success");
+        }
+
+        function sellToken(index) {
+            const token = APP.tokens[index];
+            if (!token) return;
+
+            const amountInput = document.getElementById(`amount_${index}`);
+            const amount = parseInt(amountInput.value) || 1;
+            const currentBalance = Number(token.balance || 0);
+
+            if (amount <= 0) {
+                setStatus("❌ Amount must be greater than 0", "error");
+                return;
+            }
+
+            if (amount > currentBalance) {
+                setStatus(`❌ Not enough ${token.symbol} to sell. Balance: ${currentBalance}`, "error");
+                return;
+            }
+
+            // Симуляция продажи — уменьшаем баланс
+            const newBalance = currentBalance - amount;
+            token.balance = newBalance.toString();
+            saveTokensToStorage();
+            renderTokenList();
+
+            setStatus(`✅ Sold ${amount} ${token.symbol} (simulated). New balance: ${newBalance}`, "success");
         }
 
         // =========================================================
@@ -813,7 +916,6 @@
                 if (rwaAmount === null) throw new Error("Invalid amount.");
                 if (duration <= 0) throw new Error("Invalid duration.");
 
-                // 1. Create token via factory
                 setStatus(`Creating token: ${name} (${symbol})...`);
 
                 const factory = new ethers.Contract(
@@ -873,11 +975,9 @@
                 console.log('New token address:', newTokenAddress);
                 setStatus(`Token created: ${newTokenAddress}`);
 
-                // 2. Approve RWA
                 setStatus("Checking RWA allowance...");
                 await approveIfNeeded(rwaAddress, APP.account, CONFIG.VAULT_ADDRESS, rwaAmount);
 
-                // 3. Deposit
                 setStatus("Sending deposit...");
                 const vault = new ethers.Contract(CONFIG.VAULT_ADDRESS, VAULT_ABI, APP.signer);
                 const tx = await vault.depositRWA(rwaAddress, rwaAmount, supply, duration);
@@ -954,6 +1054,20 @@
         }
 
         // =========================================================
+        // EXPOSE TO GLOBAL
+        // =========================================================
+        window.MWA = {
+            APP,
+            CONFIG,
+            connectWallet,
+            refreshPrices,
+            refreshWalletBalance,
+            addTokenToUI,
+            buyToken,
+            sellToken
+        };
+
+        // =========================================================
         // EVENTS
         // =========================================================
         connectBtn.onclick = connectWallet;
@@ -1014,15 +1128,6 @@
             if (APP.connected) await refreshWalletBalance();
             await refreshPrices();
         });
-
-        window.MWA = {
-            APP,
-            CONFIG,
-            connectWallet,
-            refreshPrices,
-            refreshWalletBalance,
-            addTokenToUI
-        };
 
         console.log("MWA initialized successfully");
         console.log("========================================");
