@@ -115,6 +115,15 @@
             margin-left: 8px;
         }
 
+        button.danger {
+            background: #ff5555;
+            color: white;
+        }
+
+        button.danger:hover:not(:disabled) {
+            background: #cc4444;
+        }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -156,6 +165,10 @@
             border-left-color: var(--green);
         }
 
+        .status.pending {
+            border-left-color: #f39c12;
+        }
+
         .ticker {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -179,19 +192,6 @@
         .price {
             font-size: 24px;
             font-weight: bold;
-        }
-
-        .info-grid {
-            margin-top: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .info-grid div {
-            background: #081411;
-            padding: 12px;
-            border-radius: 8px;
         }
 
         .footer {
@@ -250,13 +250,7 @@
             display: flex;
             gap: 6px;
             align-items: center;
-        }
-
-        #launchStatus {
-            margin-top: 12px;
-            font-size: 14px;
-            color: var(--green);
-            display: none;
+            flex-wrap: wrap;
         }
 
         .buy-sell-input {
@@ -287,6 +281,22 @@
             background: #cc4444;
         }
 
+        .btn-approve {
+            background: #f39c12;
+            color: #000;
+        }
+
+        .btn-approve:hover {
+            background: #d68910;
+        }
+
+        #launchStatus {
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--green);
+            display: none;
+        }
+
         @media(max-width:768px) {
             .grid {
                 grid-template-columns: 1fr;
@@ -297,9 +307,6 @@
             .wallet {
                 flex-direction: column;
                 align-items: stretch;
-            }
-            .info-grid {
-                grid-template-columns: 1fr;
             }
             .token-item {
                 flex-direction: column;
@@ -366,13 +373,8 @@
                     <input id="assetAmount" value="1000000000000000000">
                 </div>
                 <div>
-                    <label>Lock Duration</label>
-                    <select id="lockDuration">
-                        <option value="60">60 sec</option>
-                        <option value="120">120 sec</option>
-                        <option value="300" selected>300 sec</option>
-                        <option value="600">600 sec</option>
-                    </select>
+                    <label>Lock Duration (seconds)</label>
+                    <input id="lockDuration" type="number" value="600" min="60">
                 </div>
             </div>
             <button style="margin-top:20px;width:100%;" id="depositBtn" disabled>🚀 Launch Token</button>
@@ -397,16 +399,7 @@
                 </div>
                 <button id="redeemBtn" disabled style="margin-bottom:2px;">Redeem</button>
             </div>
-        </div>
-
-        <!-- Wallet Info -->
-        <div class="section">
-            <h2>Wallet Information</h2>
-            <div class="info-grid">
-                <div><b>Vault</b><br><span id="vaultAddress">—</span></div>
-                <div><b>Balance (MWA)</b><br><span id="balance">0</span></div>
-                <div><b>Network</b><br><span id="network">—</span></div>
-            </div>
+            <button id="approveBtn" style="margin-top:12px;width:100%;background:#f39c12;color:#000;" disabled>Approve Meme Token for Vault</button>
         </div>
 
         <div class="status" id="status">Ready.</div>
@@ -425,7 +418,7 @@
             CHAIN_NAME: "Robinhood Testnet",
             RPC_URL: "https://rpc.testnet.chain.robinhood.com",
             EXPLORER: "https://explorer.testnet.chain.robinhood.com",
-            VAULT_ADDRESS: "0xb91De23C83679567d6664854E2DE7856db56DF90", // ЗАМЕНИТЕ
+            VAULT_ADDRESS: "0xb91De23C83679567d6664854E2DE7856db56DF90",
             TOKEN_ADDRESS: "0xdBB8401ee6c808c747578C680e6b65AEFBAc6484",
             FACTORY_ADDRESS: "0x6F4B2b5629798D810147d7E61BD3f4e121d10f21" // ЗАМЕНИТЕ
         };
@@ -436,12 +429,10 @@
         const connectBtn = document.getElementById("connectBtn");
         const walletState = document.getElementById("walletState");
         const walletAddress = document.getElementById("walletAddress");
-        const balance = document.getElementById("balance");
-        const network = document.getElementById("network");
         const status = document.getElementById("status");
-        const vaultAddress = document.getElementById("vaultAddress");
         const depositBtn = document.getElementById("depositBtn");
         const redeemBtn = document.getElementById("redeemBtn");
+        const approveBtn = document.getElementById("approveBtn");
         const tokenName = document.getElementById("tokenName");
         const tokenSymbol = document.getElementById("tokenSymbol");
         const tokenSupply = document.getElementById("tokenSupply");
@@ -451,8 +442,6 @@
         const depositId = document.getElementById("depositId");
         const tokenList = document.getElementById("tokenList");
         const launchStatus = document.getElementById("launchStatus");
-
-        vaultAddress.textContent = CONFIG.VAULT_ADDRESS;
 
         // =========================================================
         // APP STATE
@@ -478,10 +467,10 @@
         ];
 
         const VAULT_ABI = [
-            "function depositRWA(address,uint256,uint256,uint256)",
+            "function depositRWA(address,uint256,address,uint256,uint256)",
             "function redeemRWA(uint256)",
             "function depositCounter() view returns(uint256)",
-            "function getDeposit(uint256) view returns(tuple(address assetAddress, uint256 assetAmount, uint256 tokenAmount, uint256 redemptionDeadline, bool isRedeemed, bool isClaimed))"
+            "function getDeposit(uint256) view returns(tuple(address assetAddress, uint256 assetAmount, address memeToken, uint256 memeTokenAmount, uint256 redemptionDeadline, bool isRedeemed, bool isClaimed))"
         ];
 
         const FACTORY_ABI = [
@@ -513,6 +502,7 @@
             status.className = "status";
             if (type === "error") status.classList.add("error");
             if (type === "success") status.classList.add("success");
+            if (type === "pending") status.classList.add("pending");
         }
 
         function shortAddress(addr) {
@@ -539,6 +529,7 @@
         function disableButtons(flag) {
             depositBtn.disabled = flag;
             redeemBtn.disabled = flag;
+            approveBtn.disabled = flag;
         }
 
         // =========================================================
@@ -566,7 +557,7 @@
             }
         }
 
-        function renderTokenList() {
+        async function renderTokenList() {
             if (APP.tokens.length === 0) {
                 tokenList.innerHTML =
                     '<div style="color: #9cb4ad; padding: 20px; text-align: center;">No tokens launched yet.</div>';
@@ -574,10 +565,26 @@
             }
 
             let html = '';
-            APP.tokens.forEach((token, index) => {
+            
+            for (let i = 0; i < APP.tokens.length; i++) {
+                const token = APP.tokens[i];
                 const totalSupply = parseInt(token.supply) || 0;
                 const availableForSale = totalSupply;
-                const balanceNum = Number(token.balance || 0);
+                
+                // Получаем реальный баланс из блокчейна
+                let realBalance = 0;
+                if (APP.connected && APP.signer) {
+                    try {
+                        const contract = new ethers.Contract(token.address, TOKEN_ABI, APP.signer);
+                        const bal = await contract.balanceOf(APP.account);
+                        realBalance = Number(bal);
+                        token.balance = bal.toString();
+                    } catch (e) {
+                        realBalance = Number(token.balance || 0);
+                    }
+                } else {
+                    realBalance = Number(token.balance || 0);
+                }
 
                 html += `
                         <div class="token-item">
@@ -586,19 +593,33 @@
                                 <div class="address">${shortAddress(token.address)}</div>
                             </div>
                             <div class="balance">
-                                <div style="color: #00d395;">Balance: ${balanceNum.toLocaleString()}</div>
+                                <div style="color: #00d395;">Balance: ${realBalance.toLocaleString()}</div>
                                 <div class="available">For sale: ${availableForSale.toLocaleString()}</div>
                             </div>
                             <div class="actions">
-                                <input type="number" class="buy-sell-input" id="amount_${index}" value="1" min="1" max="${balanceNum}">
-                                <button class="small btn-buy" onclick="window.MWA.buyToken(${index})">Buy</button>
-                                <button class="small btn-sell" onclick="window.MWA.sellToken(${index})">Sell</button>
+                                <input type="number" class="buy-sell-input" id="amount_${i}" value="1" min="1">
+                                <button class="small btn-buy" data-index="${i}">Buy</button>
+                                <button class="small btn-sell" data-index="${i}">Sell</button>
                             </div>
                         </div>
                     `;
-            });
+            }
 
             tokenList.innerHTML = html;
+
+            // Привязываем обработчики
+            document.querySelectorAll('.btn-buy').forEach(btn => {
+                btn.onclick = function() {
+                    const index = parseInt(this.dataset.index);
+                    buyToken(index);
+                };
+            });
+            document.querySelectorAll('.btn-sell').forEach(btn => {
+                btn.onclick = function() {
+                    const index = parseInt(this.dataset.index);
+                    sellToken(index);
+                };
+            });
         }
 
         function addTokenToUI(name, symbol, address, supply) {
@@ -624,7 +645,7 @@
         }
 
         // =========================================================
-        // BUY / SELL (Simulated)
+        // BUY / SELL (Simulated - только локальное изменение)
         // =========================================================
         function buyToken(index) {
             const token = APP.tokens[index];
@@ -639,7 +660,6 @@
                 return;
             }
 
-            // Симуляция покупки — увеличиваем баланс
             const newBalance = currentBalance + amount;
             token.balance = newBalance.toString();
             saveTokensToStorage();
@@ -666,7 +686,6 @@
                 return;
             }
 
-            // Симуляция продажи — уменьшаем баланс
             const newBalance = currentBalance - amount;
             token.balance = newBalance.toString();
             saveTokensToStorage();
@@ -688,10 +707,9 @@
                 walletState.innerHTML = "Wallet not connected";
                 walletAddress.innerHTML = "—";
                 connectBtn.innerHTML = "Connect MetaMask";
-                balance.innerHTML = "0";
-                network.innerHTML = "—";
                 depositBtn.disabled = true;
                 redeemBtn.disabled = true;
+                approveBtn.disabled = true;
             }
         }
 
@@ -699,6 +717,7 @@
             if (!APP.connected) {
                 depositBtn.disabled = true;
                 redeemBtn.disabled = true;
+                approveBtn.disabled = true;
                 return;
             }
 
@@ -711,6 +730,7 @@
             const isValid = name && symbol && supply && parseInt(supply) > 0 && assetAddr && assetAmt;
             depositBtn.disabled = !isValid;
             redeemBtn.disabled = false;
+            approveBtn.disabled = false;
         }
 
         // =========================================================
@@ -718,64 +738,28 @@
         // =========================================================
         async function ensureNetwork() {
             const chain = await APP.provider.getNetwork();
-            if (Number(chain.chainId) === CONFIG.CHAIN_ID) {
-                network.innerHTML = CONFIG.CHAIN_NAME;
-                return;
-            }
-            try {
-                await window.ethereum.request({
-                    method: "wallet_switchEthereumChain",
-                    params: [{ chainId: CONFIG.CHAIN_HEX }]
-                });
-            } catch (e) {
-                if (e.code === 4902) {
+            if (Number(chain.chainId) !== CONFIG.CHAIN_ID) {
+                try {
                     await window.ethereum.request({
-                        method: "wallet_addEthereumChain",
-                        params: [{
-                            chainId: CONFIG.CHAIN_HEX,
-                            chainName: CONFIG.CHAIN_NAME,
-                            rpcUrls: [CONFIG.RPC_URL],
-                            nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
-                            blockExplorerUrls: [CONFIG.EXPLORER]
-                        }]
+                        method: "wallet_switchEthereumChain",
+                        params: [{ chainId: CONFIG.CHAIN_HEX }]
                     });
-                } else {
-                    throw e;
-                }
-            }
-        }
-
-        // =========================================================
-        // BALANCE
-        // =========================================================
-        async function loadBalance() {
-            if (!APP.connected) return;
-            try {
-                const value = await APP.token.balanceOf(APP.account);
-                balance.innerHTML = value.toString();
-            } catch (e) {
-                balance.innerHTML = "Error";
-            }
-        }
-
-        async function refreshWalletBalance() {
-            try {
-                await loadBalance();
-                if (APP.tokens.length > 0 && APP.signer) {
-                    for (let token of APP.tokens) {
-                        try {
-                            const contract = new ethers.Contract(token.address, TOKEN_ABI, APP.signer);
-                            const bal = await contract.balanceOf(APP.account);
-                            token.balance = bal.toString();
-                        } catch (e) {
-                            console.warn('Could not fetch balance for', token.symbol);
-                        }
+                } catch (e) {
+                    if (e.code === 4902) {
+                        await window.ethereum.request({
+                            method: "wallet_addEthereumChain",
+                            params: [{
+                                chainId: CONFIG.CHAIN_HEX,
+                                chainName: CONFIG.CHAIN_NAME,
+                                rpcUrls: [CONFIG.RPC_URL],
+                                nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+                                blockExplorerUrls: [CONFIG.EXPLORER]
+                            }]
+                        });
+                    } else {
+                        throw e;
                     }
-                    saveTokensToStorage();
-                    renderTokenList();
                 }
-            } catch (e) {
-                console.log(e);
             }
         }
 
@@ -796,11 +780,10 @@
                 APP.signer = await APP.provider.getSigner();
                 APP.account = accounts[0];
                 APP.vault = new ethers.Contract(CONFIG.VAULT_ADDRESS, VAULT_ABI, APP.signer);
-                APP.token = new ethers.Contract(CONFIG.TOKEN_ADDRESS, TOKEN_ABI, APP.signer);
                 APP.connected = true;
-                await loadBalance();
                 updateWalletUI();
                 setStatus("Wallet connected successfully.");
+                renderTokenList();
             } catch (e) {
                 console.error(e);
                 APP.connected = false;
@@ -811,85 +794,45 @@
         }
 
         // =========================================================
-        // WALLET EVENTS
+        // APPROVE MEME TOKEN FOR VAULT
         // =========================================================
-        function initWalletEvents() {
-            if (APP.eventsAdded) return;
-            APP.eventsAdded = true;
-            window.ethereum.on("accountsChanged", async (accounts) => {
-                if (accounts.length === 0) {
-                    APP.connected = false;
-                    updateWalletUI();
+        async function approveMemeToken() {
+            if (!APP.connected) {
+                setStatus("Connect wallet first.", "error");
+                return;
+            }
+
+            // Берем первый токен из списка
+            if (APP.tokens.length === 0) {
+                setStatus("No meme tokens found. Launch a token first.", "error");
+                return;
+            }
+
+            const tokenAddress = APP.tokens[0].address;
+            approveBtn.disabled = true;
+            setStatus("⏳ Approving meme token for Vault...", "pending");
+
+            try {
+                const token = new ethers.Contract(tokenAddress, TOKEN_ABI, APP.signer);
+                const allowance = await token.allowance(APP.account, CONFIG.VAULT_ADDRESS);
+                const amount = ethers.MaxUint256;
+
+                if (allowance >= amount) {
+                    setStatus(`✅ Already approved for Vault`, "success");
+                    approveBtn.disabled = false;
                     return;
                 }
-                await connectWallet();
-            });
-            window.ethereum.on("chainChanged", () => {
-                window.location.reload();
-            });
-        }
 
-        // =========================================================
-        // AUTO CONNECT
-        // =========================================================
-        async function autoConnect() {
-            if (typeof window.ethereum === "undefined") return;
-            try {
-                APP.provider = new ethers.BrowserProvider(window.ethereum);
-                const accounts = await APP.provider.send("eth_accounts", []);
-                if (accounts.length) {
-                    await connectWallet();
-                }
+                const tx = await token.approve(CONFIG.VAULT_ADDRESS, amount);
+                setStatus("⏳ Waiting for approval confirmation...", "pending");
+                await tx.wait();
+
+                setStatus(`✅ Meme token approved for Vault!`, "success");
             } catch (e) {
-                console.log(e);
+                console.error(e);
+                setStatus(`❌ Approval failed: ${e.message}`, "error");
             }
-        }
-
-        // =========================================================
-        // PRICES
-        // =========================================================
-        function updatePriceHTML(symbol, price, color = "#00d395") {
-            const el = document.getElementById(symbol);
-            if (!el) return;
-            el.innerHTML = formatPrice(price);
-            el.style.color = color;
-        }
-
-        function showPriceError(symbol) {
-            const el = document.getElementById(symbol);
-            if (!el) return;
-            el.innerHTML = "N/A";
-            el.style.color = "#ff5555";
-        }
-
-        async function refreshPrices() {
-            try {
-                const response = await fetch(PRICE_CONFIG.API_URL);
-                if (!response.ok) throw new Error("HTTP " + response.status);
-                const prices = await response.json();
-                prices.forEach(item => {
-                    const el = document.getElementById(item.symbol);
-                    if (!el) return;
-                    el.textContent = formatPrice(item.price);
-                    el.style.color = item.change >= 0 ? "#00d395" : "#ff5555";
-                });
-            } catch (e) {
-                console.error("Price error:", e);
-                PRICE_CONFIG.SYMBOLS.forEach(showPriceError);
-            }
-        }
-
-        // =========================================================
-        // APPROVE
-        // =========================================================
-        async function approveIfNeeded(tokenAddress, owner, spender, amount) {
-            const token = new ethers.Contract(tokenAddress, ERC20_ABI, APP.signer);
-            const allowance = await token.allowance(owner, spender);
-            if (allowance >= amount) return true;
-            setStatus("Approving token...", "success");
-            const tx = await token.approve(spender, ethers.MaxUint256);
-            await tx.wait();
-            return true;
+            approveBtn.disabled = false;
         }
 
         // =========================================================
@@ -914,7 +857,7 @@
                 if (supply <= 0n) throw new Error("Supply must be positive.");
                 if (!ethers.isAddress(rwaAddress)) throw new Error("Invalid asset address.");
                 if (rwaAmount === null) throw new Error("Invalid amount.");
-                if (duration <= 0) throw new Error("Invalid duration.");
+                if (duration < 60) throw new Error("Lock duration must be at least 60 seconds.");
 
                 setStatus(`Creating token: ${name} (${symbol})...`);
 
@@ -928,7 +871,6 @@
                 const receiptCreate = await txCreate.wait();
 
                 let newTokenAddress = null;
-
                 for (const log of receiptCreate.logs) {
                     try {
                         const parsedLog = factory.interface.parseLog(log);
@@ -941,46 +883,27 @@
                     }
                 }
 
-                if (!newTokenAddress && receiptCreate.logs && receiptCreate.logs.length > 0) {
-                    try {
-                        if (receiptCreate.logs[0].args && receiptCreate.logs[0].args.token) {
-                            newTokenAddress = receiptCreate.logs[0].args.token;
-                        } else if (receiptCreate.logs[0].topics && receiptCreate.logs[0].topics.length > 1) {
-                            newTokenAddress = '0x' + receiptCreate.logs[0].topics[1].slice(26);
-                        }
-                    } catch (e) {
-                        console.warn('Could not extract token address from logs:', e);
-                    }
-                }
-
                 if (!newTokenAddress) {
-                    for (const log of receiptCreate.logs) {
-                        if (log.address.toLowerCase() === CONFIG.FACTORY_ADDRESS.toLowerCase()) {
-                            try {
-                                const iface = new ethers.Interface(FACTORY_ABI);
-                                const decoded = iface.parseLog(log);
-                                if (decoded && decoded.name === 'TokenCreated') {
-                                    newTokenAddress = decoded.args.token;
-                                    break;
-                                }
-                            } catch (e) {}
-                        }
-                    }
-                }
-
-                if (!newTokenAddress) {
-                    throw new Error(`Could not get token address. Check transaction: ${CONFIG.EXPLORER}/tx/${txCreate.hash}`);
+                    throw new Error(`Could not get token address.`);
                 }
 
                 console.log('New token address:', newTokenAddress);
                 setStatus(`Token created: ${newTokenAddress}`);
 
+                // Approve RWA
                 setStatus("Checking RWA allowance...");
-                await approveIfNeeded(rwaAddress, APP.account, CONFIG.VAULT_ADDRESS, rwaAmount);
+                await approveRWA(rwaAddress, rwaAmount);
 
+                // Deposit
                 setStatus("Sending deposit...");
                 const vault = new ethers.Contract(CONFIG.VAULT_ADDRESS, VAULT_ABI, APP.signer);
-                const tx = await vault.depositRWA(rwaAddress, rwaAmount, supply, duration);
+                const tx = await vault.depositRWA(
+                    rwaAddress,
+                    rwaAmount,
+                    newTokenAddress,
+                    supply,
+                    duration
+                );
 
                 setStatus("Waiting confirmation...");
                 const receipt = await tx.wait();
@@ -991,8 +914,6 @@
                 depositId.value = id.toString();
 
                 addTokenToUI(name, symbol, newTokenAddress, supply);
-
-                await refreshWalletBalance();
                 setStatus(`✅ ${name} (${symbol}) launched! Deposit ID: ${id}`, "success");
 
             } catch (e) {
@@ -1000,6 +921,19 @@
                 setStatus(e.reason || e.shortMessage || e.message, "error");
             }
             disableButtons(false);
+        }
+
+        // =========================================================
+        // APPROVE RWA
+        // =========================================================
+        async function approveRWA(tokenAddress, amount) {
+            const token = new ethers.Contract(tokenAddress, ERC20_ABI, APP.signer);
+            const allowance = await token.allowance(APP.account, CONFIG.VAULT_ADDRESS);
+            if (allowance >= amount) return true;
+            setStatus("Approving RWA token...", "pending");
+            const tx = await token.approve(CONFIG.VAULT_ADDRESS, ethers.MaxUint256);
+            await tx.wait();
+            return true;
         }
 
         // =========================================================
@@ -1016,8 +950,7 @@
                 if (id <= 0) throw new Error("Invalid deposit id.");
 
                 const vault = new ethers.Contract(CONFIG.VAULT_ADDRESS, VAULT_ABI, APP.signer);
-
-                // Проверяем, существует ли депозит
+                
                 let info;
                 try {
                     info = await vault.getDeposit(id);
@@ -1025,15 +958,28 @@
                     throw new Error(`Deposit ID ${id} does not exist. Create a new deposit first.`);
                 }
 
+                // Проверяем срок
+                const deadline = Number(info.redemptionDeadline);
+                const now = Math.floor(Date.now() / 1000);
+                if (deadline === 0) {
+                    throw new Error(`Deposit ID ${id} has no deadline set. Please check the deposit.`);
+                }
+                if (now > deadline) {
+                    throw new Error(`Deposit ID ${id} expired. Create a new deposit.`);
+                }
+
                 if (info.isRedeemed) {
                     throw new Error(`Deposit ID ${id} is already redeemed.`);
                 }
 
-                // Проверяем, не истек ли срок
-                const deadline = Number(info.redemptionDeadline);
-                const now = Math.floor(Date.now() / 1000);
-                if (now > deadline) {
-                    throw new Error(`Deposit ID ${id} has expired. Deadline was ${new Date(deadline * 1000).toLocaleString()}`);
+                // Проверяем баланс мем-токенов
+                const memeToken = info.memeToken;
+                const memeTokenAmount = Number(info.memeTokenAmount);
+                
+                const token = new ethers.Contract(memeToken, TOKEN_ABI, APP.signer);
+                const balance = await token.balanceOf(APP.account);
+                if (Number(balance) < memeTokenAmount) {
+                    throw new Error(`Not enough meme tokens. Need ${memeTokenAmount}, have ${Number(balance)}`);
                 }
 
                 setStatus(`⏳ Redeeming deposit ${id}...`, "pending");
@@ -1043,8 +989,8 @@
 
                 if (receipt.status !== 1) throw new Error("Redeem failed.");
 
-                await refreshWalletBalance();
                 setStatus(`✅ Deposit ${id} redeemed successfully!`, "success");
+                renderTokenList();
 
             } catch (e) {
                 console.error('Redeem error:', e);
@@ -1054,18 +1000,24 @@
         }
 
         // =========================================================
-        // EXPOSE TO GLOBAL
+        // PRICES
         // =========================================================
-        window.MWA = {
-            APP,
-            CONFIG,
-            connectWallet,
-            refreshPrices,
-            refreshWalletBalance,
-            addTokenToUI,
-            buyToken,
-            sellToken
-        };
+        async function refreshPrices() {
+            try {
+                const response = await fetch(PRICE_CONFIG.API_URL);
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                const prices = await response.json();
+                prices.forEach(item => {
+                    const el = document.getElementById(item.symbol);
+                    if (!el) return;
+                    el.textContent = formatPrice(item.price);
+                    el.style.color = item.change >= 0 ? "#00d395" : "#ff5555";
+                });
+            } catch (e) {
+                console.error("Price error:", e);
+                document.querySelectorAll('.price').forEach(el => el.textContent = "N/A");
+            }
+        }
 
         // =========================================================
         // EVENTS
@@ -1073,6 +1025,7 @@
         connectBtn.onclick = connectWallet;
         depositBtn.addEventListener("click", executeDeposit);
         redeemBtn.addEventListener("click", executeRedeem);
+        approveBtn.addEventListener("click", approveMemeToken);
 
         document.querySelectorAll('input, select').forEach(el => {
             el.addEventListener('input', checkFormValidity);
@@ -1093,8 +1046,6 @@
                     return;
                 }
                 APP.provider = new ethers.BrowserProvider(window.ethereum);
-                const net = await APP.provider.getNetwork();
-                network.innerHTML = net.name + " (" + net.chainId + ")";
                 const accounts = await APP.provider.send("eth_accounts", []);
                 if (accounts.length) {
                     console.log("Found authorized wallet.");
@@ -1115,8 +1066,43 @@
         autoConnect();
         initializeApplication();
 
+        // =========================================================
+        // HELPER FUNCTIONS
+        // =========================================================
+        function initWalletEvents() {
+            if (APP.eventsAdded) return;
+            APP.eventsAdded = true;
+            window.ethereum.on("accountsChanged", async (accounts) => {
+                if (accounts.length === 0) {
+                    APP.connected = false;
+                    updateWalletUI();
+                    return;
+                }
+                await connectWallet();
+            });
+            window.ethereum.on("chainChanged", () => {
+                window.location.reload();
+            });
+        }
+
+        async function autoConnect() {
+            if (typeof window.ethereum === "undefined") return;
+            try {
+                APP.provider = new ethers.BrowserProvider(window.ethereum);
+                const accounts = await APP.provider.send("eth_accounts", []);
+                if (accounts.length) {
+                    await connectWallet();
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+
+        // Обновляем балансы каждые 15 секунд
         setInterval(async () => {
-            if (APP.connected) await refreshWalletBalance();
+            if (APP.connected) {
+                await renderTokenList();
+            }
         }, 15000);
 
         setInterval(async () => {
@@ -1125,7 +1111,7 @@
 
         document.addEventListener("visibilitychange", async () => {
             if (document.hidden) return;
-            if (APP.connected) await refreshWalletBalance();
+            if (APP.connected) await renderTokenList();
             await refreshPrices();
         });
 
