@@ -1154,31 +1154,17 @@ const PRICE_CONFIG={
 
     UPDATE_INTERVAL:15000,
 
-    API_KEY:"YOUR_TWELVEDATA_API_KEY",
+    API_URL:"http://localhost:3000/api/quotes",
 
     SYMBOLS:[
         "AAPL",
         "TSLA",
         "NVDA",
         "AMD"
-    ],
-
-    ORACLES:{
-
-        AAPL:"0x6B22A786bAa607d76728168703a39Ea9C99f2cD0",
-
-        TSLA:"0x4A1166a659A55625345e9515b32adECea5547C38",
-
-        NVDA:"0x379EC4f7C378F34a1B47E4F3cbeBCbAC3E8E9F15",
-
-        AMD:"0x943A29E7ae51A4798823ca9eEd2ed533B2A22C72"
-
-    }
+    ]
 
 };
-
-
-
+    
 const PRICE_ABI=[
 
 "function latestRoundData() view returns(uint80,int256,uint256,uint256,uint80)",
@@ -1251,221 +1237,63 @@ function showPriceError(symbol){
 
 }
 
-
-
-/*=========================================================
-    CHAINLINK
-=========================================================*/
-
-async function loadChainlinkPrice(symbol){
-
-    if(!APP.provider)
-
-        throw "provider";
-
-    const oracle=PRICE_CONFIG.ORACLES[symbol];
-
-    if(!oracle)
-
-        throw "oracle";
-
-    const contract=new ethers.Contract(
-
-        oracle,
-
-        PRICE_ABI,
-
-        APP.provider
-
-    );
-
-    const decimals=await contract.decimals();
-
-    const round=await contract.latestRoundData();
-
-    const answer=Number(round.answer);
-
-    if(answer<=0)
-
-        throw "price";
-
-    const price=
-
-        answer/
-
-        Math.pow(
-
-            10,
-
-            Number(decimals)
-
-        );
-
-    return price;
-
-}
-
-
-
-/*=========================================================
-    TWELVEDATA
-=========================================================*/
-
-async function loadAPIPrice(symbol){
-
-    if(
-
-        PRICE_CONFIG.API_KEY==="YOUR_TWELVEDATA_API_KEY"
-
-    ){
-
-        throw "apikey";
-
-    }
-
-    const url=
-
-        "https://api.twelvedata.com/price?symbol="+
-
-        symbol+
-
-        "&apikey="+
-
-        PRICE_CONFIG.API_KEY;
-
-    const response=
-
-        await fetch(url);
-
-    if(!response.ok)
-
-        throw "network";
-
-    const json=
-
-        await response.json();
-
-    if(json.price===undefined)
-
-        throw "price";
-
-    return Number(json.price);
-
-}
-
-
-
-/*=========================================================
-    LOAD SINGLE PRICE
-=========================================================*/
-
-async function loadPrice(symbol){
-
-    try{
-
-        const price=
-
-            await loadChainlinkPrice(symbol);
-
-        LAST_PRICES[symbol]=price;
-
-        updatePriceHTML(
-
-            symbol,
-
-            price,
-
-            "#00d395"
-
-        );
-
-        return;
-
-    }
-
-    catch(e){
-
-    }
-
-    try{
-
-        const price=
-
-            await loadAPIPrice(symbol);
-
-        LAST_PRICES[symbol]=price;
-
-        updatePriceHTML(
-
-            symbol,
-
-            price,
-
-            "#00d395"
-
-        );
-
-        return;
-
-    }
-
-    catch(e){
-
-    }
-
-    if(LAST_PRICES[symbol]){
-
-        updatePriceHTML(
-
-            symbol,
-
-            LAST_PRICES[symbol],
-
-            "#ffd54f"
-
-        );
-
-    }
-
-    else{
-
-        showPriceError(symbol);
-
-    }
-
-}
-
-
-
 /*=========================================================
     LOAD ALL
 =========================================================*/
 
 async function refreshPrices(){
 
-    const jobs=[];
+    try{
 
-    for(const symbol of PRICE_CONFIG.SYMBOLS){
+        const response=await fetch(
 
-        jobs.push(
-
-            loadPrice(symbol)
+            PRICE_CONFIG.API_URL
 
         );
 
+        if(!response.ok){
+
+            throw new Error(
+
+                "HTTP "+response.status
+
+            );
+
+        }
+
+        const prices=await response.json();
+
+        for(const item of prices){
+
+            LAST_PRICES[item.symbol]=item.price;
+
+            updatePriceHTML(
+
+                item.symbol,
+
+                item.price,
+
+                item.change>=0
+
+                    ? "#00d395"
+
+                    : "#ff5555"
+
+            );
+
+        }
+
     }
 
-    await Promise.allSettled(
+    catch(e){
 
-        jobs
+        console.error(e);
 
-    );
+    }
 
 }
 
-
-
-/*=========================================================
+    /*=========================================================
     START PRICE LOOP
 =========================================================*/
 
