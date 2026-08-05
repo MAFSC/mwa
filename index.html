@@ -175,14 +175,14 @@
             font-weight: bold;
         }
 
-        .info {
+        .info-grid {
             margin-top: 20px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
         }
 
-        .info div {
+        .info-grid div {
             background: #081411;
             padding: 12px;
             border-radius: 8px;
@@ -233,6 +233,13 @@
             color: #9cb4ad;
         }
 
+        #launchStatus {
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--green);
+            display: none;
+        }
+
         @media(max-width:768px) {
             .grid {
                 grid-template-columns: 1fr;
@@ -244,7 +251,7 @@
                 flex-direction: column;
                 align-items: stretch;
             }
-            .info {
+            .info-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -307,7 +314,7 @@
                 </div>
             </div>
             <button style="margin-top:20px;width:100%;" id="depositBtn" disabled>🚀 Launch Token</button>
-            <div id="launchStatus" style="margin-top:12px;font-size:14px;color:var(--green);display:none;"></div>
+            <div id="launchStatus"></div>
         </div>
 
         <!-- Token List -->
@@ -329,7 +336,7 @@
         <!-- Wallet Info -->
         <div class="section">
             <h2>Wallet Information</h2>
-            <div class="info">
+            <div class="info-grid">
                 <div><b>Vault</b><br><span id="vaultAddress">—</span></div>
                 <div><b>Balance (MWA)</b><br><span id="balance">0</span></div>
                 <div><b>Network</b><br><span id="network">—</span></div>
@@ -354,7 +361,7 @@
             EXPLORER: "https://explorer.testnet.chain.robinhood.com",
             VAULT_ADDRESS: "0xdd6fc829709F47c6e9D764dc65B4324DF851fA40",
             TOKEN_ADDRESS: "0xdBB8401ee6c808c747578C680e6b65AEFBAc6484",
-            FACTORY_ADDRESS: "0x7D6beD6bF1BaFB1515Dd4CEdCBa6e619990a3118" // ЗАМЕНИТЕ
+            FACTORY_ADDRESS: "0x7D6beD6bF1BaFB1515Dd4CEdCBa6e619990a3118" // ЗАМЕНИТЕ НА РЕАЛЬНЫЙ АДРЕС
         };
 
         // =========================================================
@@ -540,6 +547,7 @@
                 // Показываем сообщение о создании
                 launchStatus.style.display = 'block';
                 launchStatus.textContent = `✅ ${name} (${symbol}) launched! Supply: ${Number(supply).toLocaleString()}`;
+                launchStatus.style.color = '#00d395';
                 setTimeout(() => {
                     launchStatus.style.display = 'none';
                 }, 8000);
@@ -633,7 +641,7 @@
             try {
                 await loadBalance();
                 // Обновляем балансы токенов в UI
-                if (APP.tokens.length > 0) {
+                if (APP.tokens.length > 0 && APP.signer) {
                     for (let token of APP.tokens) {
                         try {
                             const contract = new ethers.Contract(token.address, TOKEN_ABI, APP.signer);
@@ -799,12 +807,61 @@
 
                 const txCreate = await factory.createToken(name, symbol, CONFIG.VAULT_ADDRESS);
                 const receiptCreate = await txCreate.wait();
-                const newTokenAddress = receiptCreate.logs[0].args.token;
 
+                // Получаем адрес созданного токена
+                let newTokenAddress = null;
+
+                // Способ 1: Ищем событие TokenCreated через интерфейс
+                for (const log of receiptCreate.logs) {
+                    try {
+                        const parsedLog = factory.interface.parseLog(log);
+                        if (parsedLog && parsedLog.name === 'TokenCreated') {
+                            newTokenAddress = parsedLog.args.token;
+                            break;
+                        }
+                    } catch (e) {
+                        continue;
+                    }
+                }
+
+                // Способ 2: Если не нашли, пробуем через logs[0]
+                if (!newTokenAddress && receiptCreate.logs && receiptCreate.logs.length > 0) {
+                    try {
+                        if (receiptCreate.logs[0].args && receiptCreate.logs[0].args.token) {
+                            newTokenAddress = receiptCreate.logs[0].args.token;
+                        } else if (receiptCreate.logs[0].topics && receiptCreate.logs[0].topics.length > 1) {
+                            newTokenAddress = '0x' + receiptCreate.logs[0].topics[1].slice(26);
+                        }
+                    } catch (e) {
+                        console.warn('Could not extract token address from logs:', e);
+                    }
+                }
+
+                // Способ 3: Прямой поиск по событию в raw logs
+                if (!newTokenAddress) {
+                    for (const log of receiptCreate.logs) {
+                        if (log.address.toLowerCase() === CONFIG.FACTORY_ADDRESS.toLowerCase()) {
+                            try {
+                                const iface = new ethers.Interface(FACTORY_ABI);
+                                const decoded = iface.parseLog(log);
+                                if (decoded && decoded.name === 'TokenCreated') {
+                                    newTokenAddress = decoded.args.token;
+                                    break;
+                                }
+                            } catch (e) {}
+                        }
+                    }
+                }
+
+                if (!newTokenAddress) {
+                    throw new Error(`Could not get token address. Check transaction: ${CONFIG.EXPLORER}/tx/${txCreate.hash}`);
+                }
+
+                console.log('New token address:', newTokenAddress);
                 setStatus(`Token created: ${newTokenAddress}`);
 
                 // 2. Approve RWA
-                setStatus("Checking allowance...");
+                setStatus("Checking RWA allowance...");
                 await approveIfNeeded(rwaAddress, APP.account, CONFIG.VAULT_ADDRESS, rwaAmount);
 
                 // 3. Deposit
