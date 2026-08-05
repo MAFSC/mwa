@@ -115,6 +115,15 @@
             margin-left: 8px;
         }
 
+        button.danger {
+            background: #ff5555;
+            color: #fff;
+        }
+
+        button.danger:hover:not(:disabled) {
+            background: #cc4444;
+        }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -278,6 +287,11 @@
             color: #ffa500;
         }
 
+        .token-item .balance-info .status-badge.closed {
+            background: rgba(255, 0, 0, 0.15);
+            color: #ff0000;
+        }
+
         .token-item .actions {
             display: flex;
             gap: 4px;
@@ -333,6 +347,26 @@
             font-size: 13px;
             color: #9cb4ad;
             margin-top: 4px;
+        }
+
+        .redeem-helper {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(255, 165, 0, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #ffa500;
+            font-size: 13px;
+            color: #ffa500;
+        }
+
+        .close-helper {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(255, 0, 0, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #ff0000;
+            font-size: 13px;
+            color: #ff0000;
         }
 
         @media(max-width:768px) {
@@ -411,8 +445,8 @@
                 </div>
                 <div>
                     <label>Lock Duration (seconds)</label>
-                    <input id="lockDuration" type="number" value="86400" min="60">
-                    <span style="font-size:12px;color:#9cb4ad;">Default: 24 hours (86400 sec)</span>
+                    <input id="lockDuration" type="number" value="604800" min="60">
+                    <span style="font-size:12px;color:#9cb4ad;">Default: 7 days (604800 sec)</span>
                 </div>
             </div>
             <div class="eth-amount">⚡ ETH needed for liquidity: <span id="ethNeeded">0.01</span> ETH</div>
@@ -430,7 +464,7 @@
 
         <!-- Redeem -->
         <div class="section">
-            <h2>🔄 Redeem RWA</h2>
+            <h2>🔄 Close Pool & Redeem</h2>
             <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;">
                 <div>
                     <label>Deposit ID</label>
@@ -438,11 +472,13 @@
                 </div>
                 <button id="redeemBtn" disabled style="margin-bottom:2px;">Redeem</button>
             </div>
-            <div style="margin-top:8px;font-size:12px;color:#9cb4ad;">
-                ⚠️ Only the token creator (owner) can redeem RWA assets.
+            <button id="closeBtn" disabled style="margin-top:12px;width:100%;background:#ff5555;color:#fff;">🔥 Close Pool & Redeem All</button>
+            <div class="redeem-helper">
+                ⚠️ <strong>Redeem:</strong> Выкупает RWA, если у вас есть все 1,000,000 токенов.<br>
+                🔥 <strong>Close Pool:</strong> Закрывает пул, возвращает все токены и ETH создателю.
             </div>
-            <div style="margin-top:8px;font-size:12px;color:#f39c12;">
-                💡 To redeem, you need to have ALL tokens (total supply) in your wallet.
+            <div class="close-helper">
+                ⚡ <strong>Close Pool</strong> доступен только создателю токена и только до истечения срока блокировки.
             </div>
         </div>
 
@@ -474,6 +510,7 @@
         const status = document.getElementById("status");
         const depositBtn = document.getElementById("depositBtn");
         const redeemBtn = document.getElementById("redeemBtn");
+        const closeBtn = document.getElementById("closeBtn");
         const tokenName = document.getElementById("tokenName");
         const tokenSymbol = document.getElementById("tokenSymbol");
         const tokenSupply = document.getElementById("tokenSupply");
@@ -493,6 +530,7 @@
             "function buy(address,uint256) payable",
             "function sell(address,uint256,uint256)",
             "function redeem(uint256)",
+            "function closePoolAndRedeem(uint256)",
             "function getDeposit(uint256) view returns(tuple(address assetAddress, uint256 assetAmount, address memeToken, uint256 memeTokenAmount, uint256 redemptionDeadline, bool isRedeemed, bool isClaimed))",
             "function getActiveTokens() view returns(address[])",
             "function getReserves(address) view returns(uint256,uint256)",
@@ -542,7 +580,7 @@
             eventsAdded: false,
             deposits: [],
             tokenCache: new Map(),
-            rwaPrice: {}
+            stockPrices: {}
         };
 
         // =========================================================
@@ -591,6 +629,7 @@
         function disableButtons(flag) {
             depositBtn.disabled = flag;
             redeemBtn.disabled = flag;
+            closeBtn.disabled = flag;
         }
 
         // =========================================================
@@ -598,6 +637,10 @@
         // =========================================================
         async function getRWAPrice(rwaAddress) {
             try {
+                if (APP.stockPrices[rwaAddress]) {
+                    return APP.stockPrices[rwaAddress];
+                }
+
                 const response = await fetch(PRICE_CONFIG.API_URL);
                 if (!response.ok) throw new Error("HTTP " + response.status);
                 const prices = await response.json();
@@ -612,7 +655,10 @@
                 if (!symbol) return 0;
 
                 const item = prices.find(p => p.symbol === symbol);
-                return item ? item.price : 0;
+                const price = item ? item.price : 0;
+                APP.stockPrices[rwaAddress] = price;
+                return price;
+
             } catch (e) {
                 console.error("Error fetching RWA price:", e);
                 return 0;
@@ -761,12 +807,15 @@
                 const rwaPrice = await getRWAPrice(deposit.assetAddress);
                 const tokenPrice = rwaPrice > 0 ? rwaPrice / totalSupply : 0;
 
-                // Правильный расчет резервов
                 let reserves = { eth: 0, tokens: 0 };
+                let isPoolActive = true;
                 try {
                     const res = await APP.router.getReserves(deposit.memeToken);
                     reserves.eth = Number(ethers.formatEther(res[0]));
                     reserves.tokens = Number(res[1]);
+                    // Проверяем активность пула
+                    const info = await APP.router.tokenInfoMap(deposit.memeToken);
+                    isPoolActive = info.isActive;
                 } catch (e) {
                     console.warn("Could not get reserves for", deposit.memeToken);
                 }
@@ -779,13 +828,16 @@
                 if (isRedeemed) {
                     statusText = '✅ Redeemed';
                     statusClass = 'redeemed';
+                } else if (!isPoolActive) {
+                    statusText = '🔴 Pool Closed';
+                    statusClass = 'closed';
                 } else if (isExpired) {
                     statusText = '⏳ Expired';
                     statusClass = 'expired';
                 }
 
-                // Проверяем, может ли пользователь сделать redeem
-                const canRedeem = !isRedeemed && !isExpired && balance >= totalSupply;
+                const canRedeem = !isRedeemed && !isExpired && isPoolActive && balance >= totalSupply;
+                const canClose = !isRedeemed && !isExpired && isPoolActive;
 
                 html += `
                         <div class="token-item" id="token-${deposit.id}">
@@ -810,6 +862,11 @@
                                     Need ${(totalSupply - balance).toLocaleString()} more tokens to redeem
                                 </div>
                                 `}
+                                ${canClose ? `
+                                <div class="price-info" style="font-size:12px;color:#ff0000;">
+                                    🔥 Click "Close Pool" to close and get all assets back
+                                </div>
+                                ` : ''}
                             </div>
                             <div class="balance-info">
                                 <div class="balance">Balance: ${balance.toLocaleString()}</div>
@@ -817,7 +874,7 @@
                                 <div class="token-price">${formatTokenPrice(tokenPrice)} per token</div>
                                 <div class="status-badge ${statusClass}">${statusText}</div>
                             </div>
-                            ${!isRedeemed && !isExpired ? `
+                            ${!isRedeemed && !isExpired && isPoolActive ? `
                             <div class="actions">
                                 <input type="number" class="buy-sell-input" id="amount_${deposit.id}" value="1" min="1">
                                 <button class="small btn-buy" data-token="${deposit.memeToken}" data-id="${deposit.id}">Buy</button>
@@ -826,7 +883,9 @@
                             </div>
                             ` : `
                             <div style="color:#ff5555;font-size:12px;">
-                                ${isRedeemed ? '✅ Already redeemed' : '⏳ Lock period expired'}
+                                ${isRedeemed ? '✅ Already redeemed' : 
+                                  !isPoolActive ? '🔴 Pool closed' : 
+                                  '⏳ Lock period expired'}
                             </div>
                             `}
                         </div>
@@ -1005,6 +1064,62 @@
         }
 
         // =========================================================
+        // CLOSE POOL & REDEEM
+        // =========================================================
+        async function executeClosePool() {
+            if (!APP.connected) {
+                setStatus("Connect wallet first.", "error");
+                return;
+            }
+
+            const id = Number(depositId.value);
+            if (id <= 0) {
+                setStatus("❌ Invalid deposit ID.", "error");
+                return;
+            }
+
+            try {
+                // Проверяем, что пользователь является создателем
+                const deposit = await APP.router.getDeposit(id);
+                const owner = await APP.router.owner();
+                const isOwner = APP.account.toLowerCase() === owner.toLowerCase();
+
+                if (!isOwner) {
+                    setStatus("❌ Only the token creator can close the pool.", "error");
+                    return;
+                }
+
+                if (deposit.isRedeemed) {
+                    setStatus("❌ Already redeemed.", "error");
+                    return;
+                }
+
+                const deadline = Number(deposit.redemptionDeadline);
+                const now = Math.floor(Date.now() / 1000);
+                if (now > deadline) {
+                    setStatus("❌ Lock period expired. Cannot close pool.", "error");
+                    return;
+                }
+
+                setStatus("🔥 Closing pool and redeeming all assets...", "pending");
+                closeBtn.disabled = true;
+
+                const tx = await APP.router.closePoolAndRedeem(id);
+                await tx.wait();
+
+                APP.tokenCache.clear();
+                await renderTokenList();
+
+                setStatus(`✅ Pool closed! All assets returned to creator.`, "success");
+
+            } catch (e) {
+                console.error(e);
+                setStatus(`❌ Close pool failed: ${e.message}`, "error");
+            }
+            closeBtn.disabled = false;
+        }
+
+        // =========================================================
         // WALLET UI
         // =========================================================
         function updateWalletUI() {
@@ -1019,6 +1134,7 @@
                 connectBtn.innerHTML = "Connect MetaMask";
                 depositBtn.disabled = true;
                 redeemBtn.disabled = true;
+                closeBtn.disabled = true;
             }
         }
 
@@ -1026,6 +1142,7 @@
             if (!APP.connected) {
                 depositBtn.disabled = true;
                 redeemBtn.disabled = true;
+                closeBtn.disabled = true;
                 return;
             }
 
@@ -1038,6 +1155,7 @@
             const isValid = name && symbol && supply && parseInt(supply) > 0 && assetAddr && assetAmt;
             depositBtn.disabled = !isValid;
             redeemBtn.disabled = false;
+            closeBtn.disabled = false;
         }
 
         // =========================================================
@@ -1202,7 +1320,7 @@
                 const deadline = Number(deposit.redemptionDeadline);
                 const now = Math.floor(Date.now() / 1000);
                 if (deadline === 0 || now > deadline) {
-                    throw new Error(`Deposit ID ${id} expired.`);
+                    throw new Error(`Deposit ID ${id} expired. Cannot redeem.`);
                 }
 
                 const balance = await getTokenBalance(deposit.memeToken);
@@ -1247,12 +1365,25 @@
                 const response = await fetch(PRICE_CONFIG.API_URL);
                 if (!response.ok) throw new Error("HTTP " + response.status);
                 const prices = await response.json();
+
                 prices.forEach(item => {
                     const el = document.getElementById(item.symbol);
                     if (!el) return;
                     el.textContent = formatPrice(item.price);
                     el.style.color = item.change >= 0 ? "#00d395" : "#ff5555";
                 });
+
+                const symbolMap = {
+                    "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E": "AMD",
+                    "0x71178BAc73cBeb415514eB542a8995b82669778d": "TSLA",
+                    "0x7dF7F09271136b49bD1E44937FA758264024858C": "AAPL"
+                };
+                for (const [address, symbol] of Object.entries(symbolMap)) {
+                    const item = prices.find(p => p.symbol === symbol);
+                    if (item) {
+                        APP.stockPrices[address] = item.price;
+                    }
+                }
 
                 if (APP.connected) {
                     await renderTokenList();
@@ -1269,6 +1400,7 @@
         connectBtn.onclick = connectWallet;
         depositBtn.addEventListener("click", executeLaunch);
         redeemBtn.addEventListener("click", executeRedeem);
+        closeBtn.addEventListener("click", executeClosePool);
 
         document.querySelectorAll('input, select').forEach(el => {
             el.addEventListener('input', checkFormValidity);
