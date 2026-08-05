@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MWA — Launch & Trade</title>
+    <title>MWA • Launch & Trade</title>
     <script src="./ethers.umd.min.js"></script>
     <style>
         :root {
@@ -15,9 +15,15 @@
             --text: #ffffff;
             --text2: #cfd8d6;
             --red: #ff5555;
-            --border: rgba(255,255,255,.08);
+            --border: rgba(255, 255, 255, 0.08);
         }
-        * { margin:0; padding:0; box-sizing:border-box; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             background: var(--bg);
             font-family: Inter, Arial, sans-serif;
@@ -28,17 +34,37 @@
             justify-content: center;
             align-items: flex-start;
         }
+
         .container {
             width: 100%;
-            max-width: 920px;
+            max-width: 960px;
             background: var(--panel);
             border: 1px solid var(--border);
             border-radius: 18px;
             padding: 30px;
-            box-shadow: 0 20px 80px rgba(0,0,0,.35);
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.35);
         }
-        h1 { font-size: 32px; margin-bottom: 20px; font-weight: 700; }
-        h2 { font-size: 18px; margin-bottom: 15px; }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 30px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .section {
+            margin-top: 28px;
+            padding: 24px;
+            background: var(--panel2);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
         .wallet {
             display: flex;
             justify-content: space-between;
@@ -48,36 +74,65 @@
             background: #0d1b18;
             border-radius: 12px;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
         }
-        .wallet-info { display: flex; flex-direction: column; gap: 6px; }
-        .wallet-address { font-size: 14px; color: var(--text2); }
+
+        .wallet-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .wallet-address {
+            font-size: 14px;
+            color: var(--text2);
+        }
+
         button {
             background: var(--green);
             color: black;
             border: none;
-            padding: 10px 20px;
-            font-size: 14px;
+            padding: 13px 24px;
+            font-size: 15px;
             font-weight: 700;
             cursor: pointer;
             border-radius: 10px;
-            transition: .2s;
+            transition: 0.2s;
         }
-        button:hover:not(:disabled) { background: var(--green2); }
-        button:disabled { opacity: .35; cursor: not-allowed; }
-        .btn-red { background: var(--red); color: white; }
-        .btn-red:hover:not(:disabled) { background: #cc4444; }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-        input, select {
+
+        button:hover:not(:disabled) {
+            background: var(--green2);
+        }
+
+        button:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        input,
+        select {
             width: 100%;
             padding: 12px;
-            font-size: 14px;
+            font-size: 15px;
             background: #081411;
-            border: 1px solid rgba(255,255,255,.08);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             color: white;
             border-radius: 8px;
         }
-        label { display: block; margin-bottom: 6px; font-size: 13px; color: #9cb4ad; }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #9cb4ad;
+        }
+
         .status {
             margin-top: 20px;
             padding: 14px;
@@ -86,531 +141,809 @@
             border-radius: 8px;
             word-break: break-word;
         }
-        .status.error { border-left-color: var(--red); }
-        .status.success { border-left-color: var(--green); }
+
+        .status.error {
+            border-left-color: var(--red);
+        }
+
+        .status.success {
+            border-left-color: var(--green);
+        }
+
         .ticker {
             display: grid;
-            grid-template-columns: repeat(4,1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
-            margin-bottom: 25px;
+            margin-top: 25px;
         }
-        .card { background: #081411; padding: 16px; border-radius: 12px; text-align: center; }
-        .symbol { font-size: 12px; opacity: .6; margin-bottom: 8px; }
-        .price { font-size: 20px; font-weight: bold; }
-        .token-list {
-            margin-top: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .token-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
+
+        .card {
             background: #081411;
-            border-radius: 8px;
-            flex-wrap: wrap;
-            gap: 10px;
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
         }
-        .token-item .name { font-weight: 700; }
-        .token-item .balance { color: var(--text2); font-size: 14px; }
-        .token-item .actions { display: flex; gap: 8px; }
-        .token-item .actions button { padding: 6px 14px; font-size: 12px; }
+
+        .symbol {
+            font-size: 13px;
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
         .info {
-            margin-top: 15px;
+            margin-top: 20px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
         }
-        .info div { background: #081411; padding: 12px; border-radius: 8px; }
-        .footer { margin-top: 30px; text-align: center; opacity: .4; font-size: 12px; }
-        .flex { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+        .info div {
+            background: #081411;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            opacity: 0.4;
+            font-size: 12px;
+        }
+
+        #tokenList {
+            margin-top: 10px;
+        }
+
+        .token-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #081411;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .token-item .info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .token-item .info .name {
+            font-weight: 600;
+        }
+
+        .token-item .info .address {
+            font-size: 12px;
+            color: #9cb4ad;
+        }
+
+        .token-item .balance {
+            text-align: right;
+        }
+
+        .token-item .balance .available {
+            font-size: 12px;
+            color: #9cb4ad;
+        }
+
         @media(max-width:768px) {
-            .grid { grid-template-columns: 1fr; }
-            .ticker { grid-template-columns: repeat(2,1fr); }
-            .wallet { flex-direction: column; align-items: stretch; }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .ticker {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .wallet {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .info {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>MWA • Launch & Trade</h1>
+    <div class="container">
+        <h1>MWA • Launch & Trade</h1>
 
-    <!-- Wallet -->
-    <div class="wallet">
-        <div class="wallet-info">
-            <div id="walletState">Wallet not connected</div>
-            <div class="wallet-address" id="walletAddress">—</div>
-        </div>
-        <button id="connectBtn">Connect MetaMask</button>
-    </div>
-
-    <!-- Stock Ticker -->
-    <div class="ticker">
-        <div class="card"><div class="symbol">AAPL</div><div class="price" id="AAPL">--</div></div>
-        <div class="card"><div class="symbol">TSLA</div><div class="price" id="TSLA">--</div></div>
-        <div class="card"><div class="symbol">NVDA</div><div class="price" id="NVDA">--</div></div>
-        <div class="card"><div class="symbol">AMD</div><div class="price" id="AMD">--</div></div>
-    </div>
-
-    <!-- Launch New Token -->
-    <div class="section" style="background:var(--panel2);padding:20px;border-radius:14px;margin-bottom:25px;">
-        <h2>📦 Launch New Token</h2>
-        <div class="grid">
-            <div><label>Token Name</label><input id="tokenName" value="My Meme" maxlength="60"></div>
-            <div><label>Token Symbol</label><input id="tokenSymbol" value="MEME" maxlength="20"></div>
-            <div><label>Token Supply</label><input id="tokenSupply" type="number" value="1000000"></div>
-            <div><label>RWA Asset</label>
-                <select id="rwaSelect">
-                    <option value="0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E">AMD</option>
-                    <option value="0x71178BAc73cBeb415514eB542a8995b82669778d">TSLA</option>
-                    <option value="0x7dF7F09271136b49bD1E44937FA758264024858C">AAPL</option>
-                </select>
+        <!-- Wallet -->
+        <div class="wallet">
+            <div class="wallet-info">
+                <div id="walletState">Wallet not connected</div>
+                <div class="wallet-address" id="walletAddress">—</div>
             </div>
-            <div><label>Asset Amount (wei)</label><input id="assetAmount" value="1000000000000000000"></div>
-            <div><label>Lock Duration</label>
-                <select id="lockDuration">
-                    <option value="60">60 sec</option>
-                    <option value="120">120 sec</option>
-                    <option value="300" selected>300 sec</option>
-                    <option value="600">600 sec</option>
-                </select>
-            </div>
+            <button id="connectBtn">Connect MetaMask</button>
         </div>
-        <button style="margin-top:15px;width:100%;" id="launchBtn" disabled>🚀 Launch Token</button>
-        <div id="launchStatus" style="margin-top:12px;font-size:13px;color:var(--text2);"></div>
-    </div>
 
-    <!-- Your Tokens -->
-    <div class="section" style="background:var(--panel2);padding:20px;border-radius:14px;">
-        <h2>📊 Your Tokens</h2>
-        <div id="tokenList" class="token-list">
-            <div style="color:var(--text2);text-align:center;padding:20px;">Connect wallet to see your tokens</div>
+        <!-- Ticker -->
+        <div class="ticker">
+            <div class="card"><div class="symbol">AAPL</div><div class="price" id="AAPL">--</div></div>
+            <div class="card"><div class="symbol">TSLA</div><div class="price" id="TSLA">--</div></div>
+            <div class="card"><div class="symbol">NVDA</div><div class="price" id="NVDA">--</div></div>
+            <div class="card"><div class="symbol">AMD</div><div class="price" id="AMD">--</div></div>
         </div>
-    </div>
 
-    <!-- Redeem -->
-    <div class="section" style="background:var(--panel2);padding:20px;border-radius:14px;margin-top:20px;">
-        <h2>🔄 Redeem RWA</h2>
-        <div class="flex">
-            <label style="margin:0;">Deposit ID</label>
-            <input id="depositId" value="1" style="width:120px;">
-            <button id="redeemBtn" disabled>Redeem</button>
-        </div>
-    </div>
-
-    <!-- Info -->
-    <div class="info">
-        <div><b>Vault</b><br><span id="vaultAddress">—</span></div>
-        <div><b>Balance (MWA)</b><br><span id="balance">0</span></div>
-        <div><b>Network</b><br><span id="network">—</span></div>
-    </div>
-
-    <div class="status" id="status">Ready.</div>
-    <div class="footer">MWA Protocol v2</div>
-</div>
-
-<script>
-"use strict";
-
-// =========================================================
-// CONFIG
-// =========================================================
-const CONFIG = {
-    CHAIN_ID: 46630,
-    CHAIN_HEX: "0xb626",
-    CHAIN_NAME: "Robinhood Testnet",
-    RPC_URL: "https://rpc.testnet.chain.robinhood.com",
-    EXPLORER: "https://explorer.testnet.chain.robinhood.com",
-    VAULT_ADDRESS: "0xdd6fc829709F47c6e9D764dc65B4324DF851fA40",
-    FACTORY_ADDRESS: "0x7D6beD6bF1BaFB1515Dd4CEdCBa6e619990a3118"
-};
-
-// =========================================================
-// DOM
-// =========================================================
-const $ = id => document.getElementById(id);
-const connectBtn = $('connectBtn');
-const walletState = $('walletState');
-const walletAddress = $('walletAddress');
-const balance = $('balance');
-const network = $('network');
-const status = $('status');
-const vaultAddress = $('vaultAddress');
-const launchBtn = $('launchBtn');
-const redeemBtn = $('redeemBtn');
-const depositId = $('depositId');
-const tokenList = $('tokenList');
-const launchStatus = $('launchStatus');
-const tokenName = $('tokenName');
-const tokenSymbol = $('tokenSymbol');
-const tokenSupply = $('tokenSupply');
-const rwaSelect = $('rwaSelect');
-const assetAmount = $('assetAmount');
-const lockDuration = $('lockDuration');
-
-vaultAddress.textContent = CONFIG.VAULT_ADDRESS;
-
-// =========================================================
-// APP STATE
-// =========================================================
-const APP = {
-    provider: null,
-    signer: null,
-    account: null,
-    vault: null,
-    factory: null,
-    connected: false,
-    tokens: [],
-    tokenContracts: {}
-};
-
-// =========================================================
-// ABIs
-// =========================================================
-const VAULT_ABI = [
-    "function depositRWA(address,uint256,uint256,uint256)",
-    "function redeemRWA(uint256)",
-    "function depositCounter() view returns(uint256)",
-    "function getDeposit(uint256) view returns(tuple(address assetAddress, uint256 assetAmount, uint256 tokenAmount, uint256 redemptionDeadline, bool isRedeemed, bool isClaimed))"
-];
-
-const FACTORY_ABI = [
-    "function createToken(string name, string symbol, address vault) external returns (address)",
-    "event TokenCreated(address indexed token, string name, string symbol, address indexed owner)"
-];
-
-const ERC20_ABI = [
-    "function balanceOf(address) view returns(uint256)",
-    "function approve(address,uint256) returns(bool)",
-    "function allowance(address,address) view returns(uint256)",
-    "function name() view returns(string)",
-    "function symbol() view returns(string)",
-    "function decimals() view returns(uint8)"
-];
-
-// =========================================================
-// HELPERS
-// =========================================================
-function setStatus(msg, type = 'success') {
-    status.textContent = msg;
-    status.className = 'status';
-    if (type === 'error') status.classList.add('error');
-    if (type === 'success') status.classList.add('success');
-}
-
-function shortAddress(addr) {
-    if (!addr) return '—';
-    return addr.slice(0,6) + '...' + addr.slice(-4);
-}
-
-function formatPrice(price) {
-    return '$' + Number(price).toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-}
-
-// =========================================================
-// PRICES
-// =========================================================
-const PRICE_CONFIG = {
-    UPDATE_INTERVAL: 15000,
-    API_URL: "https://requests-awareness-chair-lodge.trycloudflare.com/api/quotes",
-    SYMBOLS: ["AAPL", "TSLA", "NVDA", "AMD"]
-};
-
-async function refreshPrices() {
-    try {
-        const res = await fetch(PRICE_CONFIG.API_URL);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        data.forEach(item => {
-            const el = document.getElementById(item.symbol);
-            if (el) {
-                el.textContent = formatPrice(item.price);
-                el.style.color = item.change >= 0 ? '#00d395' : '#ff5555';
-            }
-        });
-    } catch (e) {
-        console.error('Price error:', e);
-    }
-}
-
-// =========================================================
-// LOAD BALANCE
-// =========================================================
-async function loadBalance() {
-    if (!APP.connected || !APP.token) return;
-    try {
-        const val = await APP.token.balanceOf(APP.account);
-        balance.textContent = val.toString();
-    } catch (e) {
-        balance.textContent = 'Error';
-    }
-}
-
-// =========================================================
-// LOAD TOKENS
-// =========================================================
-async function loadUserTokens() {
-    if (!APP.connected) {
-        tokenList.innerHTML = '<div style="color:var(--text2);text-align:center;padding:20px;">Connect wallet to see your tokens</div>';
-        return;
-    }
-
-    // Загружаем токены из локального хранилища (или из событий фабрики)
-    // Для демонстрации используем список созданных токенов
-    const tokens = APP.tokens || [];
-    if (tokens.length === 0) {
-        tokenList.innerHTML = '<div style="color:var(--text2);text-align:center;padding:20px;">No tokens created yet. Launch your first token!</div>';
-        return;
-    }
-
-    let html = '';
-    for (const token of tokens) {
-        try {
-            const contract = new ethers.Contract(token.address, ERC20_ABI, APP.signer);
-            const balance = await contract.balanceOf(APP.account);
-            const symbol = await contract.symbol();
-            const name = await contract.name();
-            const bal = balance.toString();
-            html += `
-                <div class="token-item">
-                    <div>
-                        <span class="name">${name} (${symbol})</span>
-                        <span class="balance">Balance: ${bal}</span>
-                    </div>
-                    <div class="actions">
-                        <button class="buy-btn" data-addr="${token.address}" data-symbol="${symbol}">Buy</button>
-                        <button class="sell-btn" data-addr="${token.address}" data-symbol="${symbol}">Sell</button>
-                    </div>
+        <!-- Launch Token -->
+        <div class="section">
+            <h2>📦 Launch New Token</h2>
+            <div class="grid">
+                <div>
+                    <label>Token Name</label>
+                    <input id="tokenName" placeholder="e.g. My Meme Token" value="My Meme" maxlength="60">
                 </div>
-            `;
-        } catch (e) {
-            console.error('Error loading token:', token.address, e);
+                <div>
+                    <label>Token Symbol</label>
+                    <input id="tokenSymbol" placeholder="e.g. MEME" value="MEME" maxlength="20">
+                </div>
+                <div>
+                    <label>Token Supply</label>
+                    <input id="tokenSupply" type="number" value="1000000">
+                </div>
+                <div>
+                    <label>RWA Asset</label>
+                    <input id="assetAddress" value="0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E">
+                </div>
+                <div>
+                    <label>Asset Amount (wei)</label>
+                    <input id="assetAmount" value="1000000000000000000">
+                </div>
+                <div>
+                    <label>Lock Duration</label>
+                    <select id="lockDuration">
+                        <option value="60">60 sec</option>
+                        <option value="120">120 sec</option>
+                        <option value="300" selected>300 sec</option>
+                        <option value="600">600 sec</option>
+                    </select>
+                </div>
+            </div>
+            <button style="margin-top:20px;width:100%;" id="depositBtn" disabled>🚀 Launch Token</button>
+            <div id="launchStatus" style="margin-top:12px;font-size:14px;color:var(--green);display:none;"></div>
+        </div>
+
+        <!-- Token List -->
+        <div class="section">
+            <h2>📊 Your Tokens</h2>
+            <div id="tokenList">
+                <div style="color: #9cb4ad; padding: 20px; text-align: center;">No tokens launched yet.</div>
+            </div>
+        </div>
+
+        <!-- Redeem -->
+        <div class="section">
+            <h2>🔄 Redeem RWA</h2>
+            <label>Deposit ID</label>
+            <input id="depositId" value="1">
+            <button style="margin-top:20px;width:100%;" id="redeemBtn" disabled>Redeem</button>
+        </div>
+
+        <!-- Wallet Info -->
+        <div class="section">
+            <h2>Wallet Information</h2>
+            <div class="info">
+                <div><b>Vault</b><br><span id="vaultAddress">—</span></div>
+                <div><b>Balance (MWA)</b><br><span id="balance">0</span></div>
+                <div><b>Network</b><br><span id="network">—</span></div>
+            </div>
+        </div>
+
+        <div class="status" id="status">Ready.</div>
+        <div class="footer">MWA Protocol v2</div>
+    </div>
+
+    <script>
+        "use strict";
+
+        // =========================================================
+        // CONFIG
+        // =========================================================
+        const CONFIG = {
+            CHAIN_ID: 46630,
+            CHAIN_HEX: "0xb626",
+            CHAIN_NAME: "Robinhood Testnet",
+            RPC_URL: "https://rpc.testnet.chain.robinhood.com",
+            EXPLORER: "https://explorer.testnet.chain.robinhood.com",
+            VAULT_ADDRESS: "0xdd6fc829709F47c6e9D764dc65B4324DF851fA40",
+            TOKEN_ADDRESS: "0xdBB8401ee6c808c747578C680e6b65AEFBAc6484",
+            FACTORY_ADDRESS: "0x7D6beD6bF1BaFB1515Dd4CEdCBa6e619990a3118" // ЗАМЕНИТЕ
+        };
+
+        // =========================================================
+        // DOM
+        // =========================================================
+        const connectBtn = document.getElementById("connectBtn");
+        const walletState = document.getElementById("walletState");
+        const walletAddress = document.getElementById("walletAddress");
+        const balance = document.getElementById("balance");
+        const network = document.getElementById("network");
+        const status = document.getElementById("status");
+        const vaultAddress = document.getElementById("vaultAddress");
+        const depositBtn = document.getElementById("depositBtn");
+        const redeemBtn = document.getElementById("redeemBtn");
+        const tokenName = document.getElementById("tokenName");
+        const tokenSymbol = document.getElementById("tokenSymbol");
+        const tokenSupply = document.getElementById("tokenSupply");
+        const assetAddress = document.getElementById("assetAddress");
+        const assetAmount = document.getElementById("assetAmount");
+        const lockDuration = document.getElementById("lockDuration");
+        const depositId = document.getElementById("depositId");
+        const tokenList = document.getElementById("tokenList");
+        const launchStatus = document.getElementById("launchStatus");
+
+        vaultAddress.textContent = CONFIG.VAULT_ADDRESS;
+
+        // =========================================================
+        // APP STATE
+        // =========================================================
+        const APP = {
+            provider: null,
+            signer: null,
+            account: null,
+            vault: null,
+            token: null,
+            connected: false,
+            eventsAdded: false,
+            tokens: []
+        };
+
+        // =========================================================
+        // ABI
+        // =========================================================
+        const TOKEN_ABI = [
+            "function balanceOf(address owner) view returns(uint256)",
+            "function allowance(address owner, address spender) view returns(uint256)",
+            "function approve(address spender, uint256 amount) returns(bool)"
+        ];
+
+        const VAULT_ABI = [
+            "function depositRWA(address,uint256,uint256,uint256)",
+            "function redeemRWA(uint256)",
+            "function depositCounter() view returns(uint256)",
+            "function getDeposit(uint256) view returns(tuple(address assetAddress, uint256 assetAmount, uint256 tokenAmount, uint256 redemptionDeadline, bool isRedeemed, bool isClaimed))"
+        ];
+
+        const FACTORY_ABI = [
+            "function createToken(string name, string symbol, address vault) external returns (address)"
+        ];
+
+        const ERC20_ABI = [
+            "function decimals() view returns(uint8)",
+            "function symbol() view returns(string)",
+            "function balanceOf(address) view returns(uint256)",
+            "function allowance(address,address) view returns(uint256)",
+            "function approve(address,uint256) returns(bool)"
+        ];
+
+        // =========================================================
+        // PRICES
+        // =========================================================
+        const PRICE_CONFIG = {
+            UPDATE_INTERVAL: 15000,
+            API_URL: "https://requests-awareness-chair-lodge.trycloudflare.com/api/quotes",
+            SYMBOLS: ["AAPL", "TSLA", "NVDA", "AMD"]
+        };
+
+        // =========================================================
+        // HELPERS
+        // =========================================================
+        function setStatus(text, type = "success") {
+            status.innerText = text;
+            status.className = "status";
+            if (type === "error") status.classList.add("error");
+            if (type === "success") status.classList.add("success");
         }
-    }
-    tokenList.innerHTML = html || '<div style="color:var(--text2);text-align:center;padding:20px;">No tokens with balance</div>';
 
-    // Привязываем события к кнопкам
-    document.querySelectorAll('.buy-btn').forEach(btn => {
-        btn.onclick = () => buyToken(btn.dataset.addr, btn.dataset.symbol);
-    });
-    document.querySelectorAll('.sell-btn').forEach(btn => {
-        btn.onclick = () => sellToken(btn.dataset.addr, btn.dataset.symbol);
-    });
-}
+        function shortAddress(addr) {
+            if (!addr) return "—";
+            return addr.substring(0, 6) + "..." + addr.substring(addr.length - 4);
+        }
 
-// =========================================================
-// BUY / SELL TOKENS
-// =========================================================
-async function buyToken(address, symbol) {
-    if (!APP.connected) { setStatus('Connect wallet first.', 'error'); return; }
-    setStatus(`Buying ${symbol}... (simulated)`, 'pending');
-    // Здесь будет реальная логика покупки через DEX
-    // Для теста просто показываем сообщение
-    setTimeout(() => setStatus(`✅ ${symbol} buy simulated.`, 'success'), 1500);
-}
-
-async function sellToken(address, symbol) {
-    if (!APP.connected) { setStatus('Connect wallet first.', 'error'); return; }
-    setStatus(`Selling ${symbol}... (simulated)`, 'pending');
-    setTimeout(() => setStatus(`✅ ${symbol} sell simulated.`, 'success'), 1500);
-}
-
-// =========================================================
-// CONNECT WALLET
-// =========================================================
-async function connectWallet() {
-    if (typeof window.ethereum === 'undefined') {
-        setStatus('MetaMask not installed', 'error');
-        return;
-    }
-    connectBtn.disabled = true;
-    connectBtn.textContent = 'Connecting...';
-    try {
-        APP.provider = new ethers.BrowserProvider(window.ethereum);
-        await ensureNetwork();
-        const accounts = await APP.provider.send('eth_requestAccounts', []);
-        APP.signer = await APP.provider.getSigner();
-        APP.account = accounts[0];
-        APP.vault = new ethers.Contract(CONFIG.VAULT_ADDRESS, VAULT_ABI, APP.signer);
-        APP.factory = new ethers.Contract(CONFIG.FACTORY_ADDRESS, FACTORY_ABI, APP.signer);
-        APP.connected = true;
-        
-        walletState.textContent = 'Wallet Connected';
-        walletAddress.textContent = shortAddress(APP.account);
-        connectBtn.textContent = 'Connected ✓';
-        launchBtn.disabled = false;
-        redeemBtn.disabled = false;
-        
-        await loadBalance();
-        await loadUserTokens();
-        setStatus('Wallet connected successfully.');
-    } catch (e) {
-        console.error(e);
-        APP.connected = false;
-        setStatus(e.message, 'error');
-    }
-    connectBtn.disabled = false;
-}
-
-async function ensureNetwork() {
-    const chain = await APP.provider.getNetwork();
-    if (Number(chain.chainId) === CONFIG.CHAIN_ID) {
-        network.textContent = CONFIG.CHAIN_NAME;
-        return;
-    }
-    try {
-        await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: CONFIG.CHAIN_HEX }]
-        });
-    } catch (e) {
-        if (e.code === 4902) {
-            await window.ethereum.request({
-                method: 'wallet_addEthereumChain',
-                params: [{
-                    chainId: CONFIG.CHAIN_HEX,
-                    chainName: CONFIG.CHAIN_NAME,
-                    rpcUrls: [CONFIG.RPC_URL],
-                    nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                    blockExplorerUrls: [CONFIG.EXPLORER]
-                }]
+        function formatPrice(price) {
+            return "$" + Number(price).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
             });
-        } else throw e;
-    }
-}
-
-// =========================================================
-// LAUNCH TOKEN
-// =========================================================
-async function launchToken() {
-    if (!APP.connected) { setStatus('Connect wallet first.', 'error'); return; }
-
-    const name = tokenName.value.trim();
-    const symbol = tokenSymbol.value.trim();
-    const supply = tokenSupply.value.trim();
-    const rwaAddr = rwaSelect.value;
-    const amount = assetAmount.value.trim();
-    const duration = Number(lockDuration.value);
-
-    if (!name || !symbol || !supply || !amount) {
-        setStatus('Fill all fields.', 'error');
-        return;
-    }
-
-    const supplyNum = parseInt(supply);
-    if (supplyNum <= 0) { setStatus('Supply must be positive.', 'error'); return; }
-
-    launchBtn.disabled = true;
-    launchStatus.textContent = '⏳ Creating token...';
-
-    try {
-        // 1. Создаем токен через фабрику
-        const tx = await APP.factory.createToken(name, symbol, CONFIG.VAULT_ADDRESS);
-        const receipt = await tx.wait();
-        
-        // 2. Получаем адрес созданного токена из события
-        const event = receipt.logs.find(log => {
-            try {
-                const parsed = APP.factory.interface.parseLog(log);
-                return parsed && parsed.name === 'TokenCreated';
-            } catch { return false; }
-        });
-        
-        if (!event) throw new Error('TokenCreated event not found');
-        const parsed = APP.factory.interface.parseLog(event);
-        const tokenAddress = parsed.args.token;
-        
-        launchStatus.textContent = `✅ Token created: ${name} (${symbol}) at ${shortAddress(tokenAddress)}`;
-        
-        // 3. Сохраняем токен в список
-        APP.tokens.push({ address: tokenAddress, name, symbol });
-        
-        // 4. Выполняем депозит RWA в Vault (привязываем токен к RWA)
-        // Для этого нужно сначала одобрить RWA токен
-        const rwaToken = new ethers.Contract(rwaAddr, ERC20_ABI, APP.signer);
-        const allowance = await rwaToken.allowance(APP.account, CONFIG.VAULT_ADDRESS);
-        if (allowance < BigInt(amount)) {
-            launchStatus.textContent = '⏳ Approving RWA...';
-            const approveTx = await rwaToken.approve(CONFIG.VAULT_ADDRESS, ethers.MaxUint256);
-            await approveTx.wait();
         }
-        
-        launchStatus.textContent = '⏳ Depositing RWA...';
-        const depositTx = await APP.vault.depositRWA(rwaAddr, BigInt(amount), BigInt(supplyNum), duration);
-        await depositTx.wait();
-        
-        // 5. Обновляем список токенов и баланс
-        await loadUserTokens();
-        await loadBalance();
-        
-        launchStatus.textContent = `✅ ${name} (${symbol}) launched! Supply: ${supplyNum}`;
-        setStatus(`Token ${name} (${symbol}) launched successfully!`, 'success');
-        
-        // 6. Добавляем токен для торговли (в реальном приложении добавляем в пул ликвидности)
-        // Здесь можно вызвать функцию добавления ликвидности на Uniswap
-        
-    } catch (e) {
-        console.error(e);
-        launchStatus.textContent = `❌ Error: ${e.message}`;
-        setStatus(e.message, 'error');
-    }
-    launchBtn.disabled = false;
-}
 
-// =========================================================
-// REDEEM
-// =========================================================
-async function redeemRWA() {
-    if (!APP.connected) { setStatus('Connect wallet first.', 'error'); return; }
-    const id = Number(depositId.value);
-    if (id <= 0) { setStatus('Invalid deposit ID.', 'error'); return; }
-    redeemBtn.disabled = true;
-    try {
-        const tx = await APP.vault.redeemRWA(id);
-        await tx.wait();
-        setStatus(`Redeem successful!`, 'success');
-        await loadBalance();
-    } catch (e) {
-        setStatus(e.message, 'error');
-    }
-    redeemBtn.disabled = false;
-}
+        function parseBigInt(value) {
+            try {
+                if (value.startsWith("0x")) return BigInt(value);
+                return BigInt(value);
+            } catch {
+                return null;
+            }
+        }
 
-// =========================================================
-// EVENTS
-// =========================================================
-connectBtn.onclick = connectWallet;
-launchBtn.onclick = launchToken;
-redeemBtn.onclick = redeemRWA;
+        function disableButtons(flag) {
+            depositBtn.disabled = flag;
+            redeemBtn.disabled = flag;
+        }
 
-// =========================================================
-// INIT
-// =========================================================
-async function init() {
-    console.log('========================================');
-    console.log('MWA Launch & Trade v2');
-    console.log('========================================');
-    if (typeof window.ethereum !== 'undefined') {
-        APP.provider = new ethers.BrowserProvider(window.ethereum);
-        const net = await APP.provider.getNetwork();
-        network.textContent = net.name + ' (' + net.chainId + ')';
-        const accounts = await APP.provider.send('eth_accounts', []);
-        if (accounts.length) await connectWallet();
-    }
-    refreshPrices();
-    setInterval(refreshPrices, PRICE_CONFIG.UPDATE_INTERVAL);
-    console.log('MWA initialized');
-}
+        // =========================================================
+        // TOKEN LIST
+        // =========================================================
+        function loadTokensFromStorage() {
+            try {
+                const data = localStorage.getItem('mwa_tokens');
+                if (data) {
+                    APP.tokens = JSON.parse(data);
+                } else {
+                    APP.tokens = [];
+                }
+            } catch (e) {
+                APP.tokens = [];
+            }
+            renderTokenList();
+        }
 
-document.addEventListener('DOMContentLoaded', init);
-window.MWA = { APP, CONFIG, connectWallet, launchToken, redeemRWA };
-</script>
+        function saveTokensToStorage() {
+            try {
+                localStorage.setItem('mwa_tokens', JSON.stringify(APP.tokens));
+            } catch (e) {
+                console.warn('Could not save tokens to localStorage');
+            }
+        }
+
+        function renderTokenList() {
+            if (APP.tokens.length === 0) {
+                tokenList.innerHTML =
+                    '<div style="color: #9cb4ad; padding: 20px; text-align: center;">No tokens launched yet.</div>';
+                return;
+            }
+
+            let html = '';
+            APP.tokens.forEach(token => {
+                const totalSupply = parseInt(token.supply) || 0;
+                const lockedInPool = Math.floor(totalSupply * 0.5);
+                const availableForSale = totalSupply - lockedInPool;
+
+                html += `
+                        <div class="token-item">
+                            <div class="info">
+                                <div class="name">${token.name} (${token.symbol})</div>
+                                <div class="address">${shortAddress(token.address)}</div>
+                            </div>
+                            <div class="balance">
+                                <div style="color: #00d395;">Balance: ${Number(token.balance || 0).toLocaleString()}</div>
+                                <div class="available">For sale: ${availableForSale.toLocaleString()}</div>
+                            </div>
+                        </div>
+                    `;
+            });
+
+            tokenList.innerHTML = html;
+        }
+
+        function addTokenToUI(name, symbol, address, supply) {
+            // Проверяем, не существует ли уже токен с таким адресом
+            const exists = APP.tokens.some(t => t.address === address);
+            if (!exists) {
+                APP.tokens.push({
+                    name: name,
+                    symbol: symbol,
+                    address: address,
+                    supply: supply.toString(),
+                    balance: supply.toString()
+                });
+                saveTokensToStorage();
+                renderTokenList();
+
+                // Показываем сообщение о создании
+                launchStatus.style.display = 'block';
+                launchStatus.textContent = `✅ ${name} (${symbol}) launched! Supply: ${Number(supply).toLocaleString()}`;
+                setTimeout(() => {
+                    launchStatus.style.display = 'none';
+                }, 8000);
+            }
+        }
+
+        // =========================================================
+        // WALLET UI
+        // =========================================================
+        function updateWalletUI() {
+            if (APP.connected) {
+                walletState.innerHTML = "Wallet Connected";
+                walletAddress.innerHTML = shortAddress(APP.account);
+                connectBtn.innerHTML = "Connected";
+                checkFormValidity();
+            } else {
+                walletState.innerHTML = "Wallet not connected";
+                walletAddress.innerHTML = "—";
+                connectBtn.innerHTML = "Connect MetaMask";
+                balance.innerHTML = "0";
+                network.innerHTML = "—";
+                depositBtn.disabled = true;
+                redeemBtn.disabled = true;
+            }
+        }
+
+        function checkFormValidity() {
+            if (!APP.connected) {
+                depositBtn.disabled = true;
+                redeemBtn.disabled = true;
+                return;
+            }
+
+            const name = tokenName.value.trim();
+            const symbol = tokenSymbol.value.trim();
+            const supply = tokenSupply.value.trim();
+            const assetAddr = assetAddress.value.trim();
+            const assetAmt = assetAmount.value.trim();
+
+            const isValid = name && symbol && supply && parseInt(supply) > 0 && assetAddr && assetAmt;
+            depositBtn.disabled = !isValid;
+            redeemBtn.disabled = false;
+        }
+
+        // =========================================================
+        // NETWORK
+        // =========================================================
+        async function ensureNetwork() {
+            const chain = await APP.provider.getNetwork();
+            if (Number(chain.chainId) === CONFIG.CHAIN_ID) {
+                network.innerHTML = CONFIG.CHAIN_NAME;
+                return;
+            }
+            try {
+                await window.ethereum.request({
+                    method: "wallet_switchEthereumChain",
+                    params: [{ chainId: CONFIG.CHAIN_HEX }]
+                });
+            } catch (e) {
+                if (e.code === 4902) {
+                    await window.ethereum.request({
+                        method: "wallet_addEthereumChain",
+                        params: [{
+                            chainId: CONFIG.CHAIN_HEX,
+                            chainName: CONFIG.CHAIN_NAME,
+                            rpcUrls: [CONFIG.RPC_URL],
+                            nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+                            blockExplorerUrls: [CONFIG.EXPLORER]
+                        }]
+                    });
+                } else {
+                    throw e;
+                }
+            }
+        }
+
+        // =========================================================
+        // BALANCE
+        // =========================================================
+        async function loadBalance() {
+            if (!APP.connected) return;
+            try {
+                const value = await APP.token.balanceOf(APP.account);
+                balance.innerHTML = value.toString();
+            } catch (e) {
+                balance.innerHTML = "Error";
+            }
+        }
+
+        async function refreshWalletBalance() {
+            try {
+                await loadBalance();
+                // Обновляем балансы токенов в UI
+                if (APP.tokens.length > 0) {
+                    for (let token of APP.tokens) {
+                        try {
+                            const contract = new ethers.Contract(token.address, TOKEN_ABI, APP.signer);
+                            const bal = await contract.balanceOf(APP.account);
+                            token.balance = bal.toString();
+                        } catch (e) {
+                            console.warn('Could not fetch balance for', token.symbol);
+                        }
+                    }
+                    saveTokensToStorage();
+                    renderTokenList();
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+
+        // =========================================================
+        // CONNECT WALLET
+        // =========================================================
+        async function connectWallet() {
+            if (typeof window.ethereum === "undefined") {
+                setStatus("MetaMask is not installed", "error");
+                return;
+            }
+            connectBtn.disabled = true;
+            connectBtn.innerHTML = "Connecting...";
+            try {
+                APP.provider = new ethers.BrowserProvider(window.ethereum);
+                await ensureNetwork();
+                const accounts = await APP.provider.send("eth_requestAccounts", []);
+                APP.signer = await APP.provider.getSigner();
+                APP.account = accounts[0];
+                APP.vault = new ethers.Contract(CONFIG.VAULT_ADDRESS, VAULT_ABI, APP.signer);
+                APP.token = new ethers.Contract(CONFIG.TOKEN_ADDRESS, TOKEN_ABI, APP.signer);
+                APP.connected = true;
+                await loadBalance();
+                updateWalletUI();
+                setStatus("Wallet connected successfully.");
+            } catch (e) {
+                console.error(e);
+                APP.connected = false;
+                updateWalletUI();
+                setStatus(e.message, "error");
+            }
+            connectBtn.disabled = false;
+        }
+
+        // =========================================================
+        // WALLET EVENTS
+        // =========================================================
+        function initWalletEvents() {
+            if (APP.eventsAdded) return;
+            APP.eventsAdded = true;
+            window.ethereum.on("accountsChanged", async (accounts) => {
+                if (accounts.length === 0) {
+                    APP.connected = false;
+                    updateWalletUI();
+                    return;
+                }
+                await connectWallet();
+            });
+            window.ethereum.on("chainChanged", () => {
+                window.location.reload();
+            });
+        }
+
+        // =========================================================
+        // AUTO CONNECT
+        // =========================================================
+        async function autoConnect() {
+            if (typeof window.ethereum === "undefined") return;
+            try {
+                APP.provider = new ethers.BrowserProvider(window.ethereum);
+                const accounts = await APP.provider.send("eth_accounts", []);
+                if (accounts.length) {
+                    await connectWallet();
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+
+        // =========================================================
+        // PRICES
+        // =========================================================
+        function updatePriceHTML(symbol, price, color = "#00d395") {
+            const el = document.getElementById(symbol);
+            if (!el) return;
+            el.innerHTML = formatPrice(price);
+            el.style.color = color;
+        }
+
+        function showPriceError(symbol) {
+            const el = document.getElementById(symbol);
+            if (!el) return;
+            el.innerHTML = "N/A";
+            el.style.color = "#ff5555";
+        }
+
+        async function refreshPrices() {
+            try {
+                const response = await fetch(PRICE_CONFIG.API_URL);
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                const prices = await response.json();
+                prices.forEach(item => {
+                    const el = document.getElementById(item.symbol);
+                    if (!el) return;
+                    el.textContent = formatPrice(item.price);
+                    el.style.color = item.change >= 0 ? "#00d395" : "#ff5555";
+                });
+            } catch (e) {
+                console.error("Price error:", e);
+                PRICE_CONFIG.SYMBOLS.forEach(showPriceError);
+            }
+        }
+
+        // =========================================================
+        // APPROVE
+        // =========================================================
+        async function approveIfNeeded(tokenAddress, owner, spender, amount) {
+            const token = new ethers.Contract(tokenAddress, ERC20_ABI, APP.signer);
+            const allowance = await token.allowance(owner, spender);
+            if (allowance >= amount) return true;
+            setStatus("Approving token...", "success");
+            const tx = await token.approve(spender, ethers.MaxUint256);
+            await tx.wait();
+            return true;
+        }
+
+        // =========================================================
+        // DEPOSIT
+        // =========================================================
+        async function executeDeposit() {
+            if (!APP.connected) {
+                setStatus("Connect wallet first.", "error");
+                return;
+            }
+            disableButtons(true);
+            try {
+                const name = tokenName.value.trim();
+                const symbol = tokenSymbol.value.trim();
+                const supply = BigInt(tokenSupply.value.trim());
+                const rwaAddress = assetAddress.value.trim();
+                const rwaAmount = parseBigInt(assetAmount.value.trim());
+                const duration = Number(lockDuration.value);
+
+                if (!name) throw new Error("Token name required.");
+                if (!symbol) throw new Error("Token symbol required.");
+                if (supply <= 0n) throw new Error("Supply must be positive.");
+                if (!ethers.isAddress(rwaAddress)) throw new Error("Invalid asset address.");
+                if (rwaAmount === null) throw new Error("Invalid amount.");
+                if (duration <= 0) throw new Error("Invalid duration.");
+
+                // 1. Create token via factory
+                setStatus(`Creating token: ${name} (${symbol})...`);
+
+                const factory = new ethers.Contract(
+                    CONFIG.FACTORY_ADDRESS,
+                    FACTORY_ABI,
+                    APP.signer
+                );
+
+                const txCreate = await factory.createToken(name, symbol, CONFIG.VAULT_ADDRESS);
+                const receiptCreate = await txCreate.wait();
+                const newTokenAddress = receiptCreate.logs[0].args.token;
+
+                setStatus(`Token created: ${newTokenAddress}`);
+
+                // 2. Approve RWA
+                setStatus("Checking allowance...");
+                await approveIfNeeded(rwaAddress, APP.account, CONFIG.VAULT_ADDRESS, rwaAmount);
+
+                // 3. Deposit
+                setStatus("Sending deposit...");
+                const vault = new ethers.Contract(CONFIG.VAULT_ADDRESS, VAULT_ABI, APP.signer);
+                const tx = await vault.depositRWA(rwaAddress, rwaAmount, supply, duration);
+
+                setStatus("Waiting confirmation...");
+                const receipt = await tx.wait();
+
+                if (receipt.status !== 1) throw new Error("Transaction failed.");
+
+                const id = await vault.depositCounter();
+                depositId.value = id.toString();
+
+                // 4. Add token to UI
+                addTokenToUI(name, symbol, newTokenAddress, supply);
+
+                await refreshWalletBalance();
+                setStatus(`✅ ${name} (${symbol}) launched! Deposit ID: ${id}`, "success");
+
+            } catch (e) {
+                console.error(e);
+                setStatus(e.reason || e.shortMessage || e.message, "error");
+            }
+            disableButtons(false);
+        }
+
+        // =========================================================
+        // REDEEM
+        // =========================================================
+        async function executeRedeem() {
+            if (!APP.connected) {
+                setStatus("Connect wallet first.", "error");
+                return;
+            }
+            disableButtons(true);
+            try {
+                const id = Number(depositId.value);
+                if (id <= 0) throw new Error("Invalid deposit id.");
+                const vault = new ethers.Contract(CONFIG.VAULT_ADDRESS, VAULT_ABI, APP.signer);
+                const info = await vault.getDeposit(id);
+                if (info.isRedeemed) throw new Error("Already redeemed.");
+                setStatus("Sending redeem...");
+                const tx = await vault.redeemRWA(id);
+                setStatus("Waiting confirmation...");
+                const receipt = await tx.wait();
+                if (receipt.status !== 1) throw new Error("Redeem failed.");
+                await refreshWalletBalance();
+                setStatus("✅ Redeem completed.", "success");
+            } catch (e) {
+                console.error(e);
+                setStatus(e.reason || e.shortMessage || e.message, "error");
+            }
+            disableButtons(false);
+        }
+
+        // =========================================================
+        // EVENTS
+        // =========================================================
+        connectBtn.onclick = connectWallet;
+        depositBtn.addEventListener("click", executeDeposit);
+        redeemBtn.addEventListener("click", executeRedeem);
+
+        // Form validation on input
+        document.querySelectorAll('input, select').forEach(el => {
+            el.addEventListener('input', checkFormValidity);
+            el.addEventListener('change', checkFormValidity);
+        });
+
+        // =========================================================
+        // INIT
+        // =========================================================
+        async function initializeApplication() {
+            console.log("========================================");
+            console.log("MWA Launch & Trade v2");
+            console.log("========================================");
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    setStatus("MetaMask not detected.", "error");
+                    console.warn("MetaMask not installed.");
+                    return;
+                }
+                APP.provider = new ethers.BrowserProvider(window.ethereum);
+                const net = await APP.provider.getNetwork();
+                network.innerHTML = net.name + " (" + net.chainId + ")";
+                const accounts = await APP.provider.send("eth_accounts", []);
+                if (accounts.length) {
+                    console.log("Found authorized wallet.");
+                    await connectWallet();
+                } else {
+                    updateWalletUI();
+                    setStatus("Click Connect MetaMask.", "success");
+                }
+                // Load tokens from storage
+                loadTokensFromStorage();
+                console.log("Application ready.");
+            } catch (e) {
+                console.error(e);
+                setStatus(e.message, "error");
+            }
+        }
+
+        initWalletEvents();
+        autoConnect();
+        initializeApplication();
+
+        // =========================================================
+        // INTERVALS
+        // =========================================================
+        setInterval(async () => {
+            if (APP.connected) await refreshWalletBalance();
+        }, 15000);
+
+        setInterval(async () => {
+            try { await refreshPrices(); } catch (e) { console.log(e); }
+        }, 15000);
+
+        document.addEventListener("visibilitychange", async () => {
+            if (document.hidden) return;
+            if (APP.connected) await refreshWalletBalance();
+            await refreshPrices();
+        });
+
+        // =========================================================
+        // DEBUG
+        // =========================================================
+        window.MWA = {
+            APP,
+            CONFIG,
+            connectWallet,
+            refreshPrices,
+            refreshWalletBalance,
+            addTokenToUI
+        };
+
+        console.log("MWA initialized successfully");
+        console.log("========================================");
+    </script>
 
 </body>
 </html>
