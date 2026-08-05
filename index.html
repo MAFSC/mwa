@@ -240,6 +240,21 @@
             display: none;
         }
 
+        /* Стили для выпадающего списка акций */
+        .asset-select-wrapper {
+            position: relative;
+        }
+
+        .asset-select-wrapper select {
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .asset-select-wrapper select option {
+            background: #081411;
+            color: white;
+        }
+
         @media(max-width:768px) {
             .grid {
                 grid-template-columns: 1fr;
@@ -297,7 +312,12 @@
                 </div>
                 <div>
                     <label>RWA Asset</label>
-                    <input id="assetAddress" value="0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E">
+                    <select id="assetSelect">
+                        <option value="0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E">AMD</option>
+                        <option value="0x71178BAc73cBeb415514eB542a8995b82669778d">TSLA</option>
+                        <option value="0x7dF7F09271136b49bD1E44937FA758264024858C">AAPL</option>
+                    </select>
+                    <span style="font-size:12px;color:#9cb4ad;margin-top:4px;display:block;">Select token from your wallet</span>
                 </div>
                 <div>
                     <label>Asset Amount (wei)</label>
@@ -361,7 +381,7 @@
             EXPLORER: "https://explorer.testnet.chain.robinhood.com",
             VAULT_ADDRESS: "0xdd6fc829709F47c6e9D764dc65B4324DF851fA40",
             TOKEN_ADDRESS: "0xdBB8401ee6c808c747578C680e6b65AEFBAc6484",
-            FACTORY_ADDRESS: "0x7D6beD6bF1BaFB1515Dd4CEdCBa6e619990a3118" // ЗАМЕНИТЕ НА РЕАЛЬНЫЙ АДРЕС
+            FACTORY_ADDRESS: "0xYOUR_FACTORY_ADDRESS" // ЗАМЕНИТЕ
         };
 
         // =========================================================
@@ -379,7 +399,7 @@
         const tokenName = document.getElementById("tokenName");
         const tokenSymbol = document.getElementById("tokenSymbol");
         const tokenSupply = document.getElementById("tokenSupply");
-        const assetAddress = document.getElementById("assetAddress");
+        const assetSelect = document.getElementById("assetSelect");
         const assetAmount = document.getElementById("assetAmount");
         const lockDuration = document.getElementById("lockDuration");
         const depositId = document.getElementById("depositId");
@@ -510,8 +530,8 @@
             let html = '';
             APP.tokens.forEach(token => {
                 const totalSupply = parseInt(token.supply) || 0;
-                const lockedInPool = Math.floor(totalSupply * 0.5);
-                const availableForSale = totalSupply - lockedInPool;
+                // Все токены доступны для продажи (никаких блокировок в пуле нет)
+                const availableForSale = totalSupply;
 
                 html += `
                         <div class="token-item">
@@ -531,7 +551,6 @@
         }
 
         function addTokenToUI(name, symbol, address, supply) {
-            // Проверяем, не существует ли уже токен с таким адресом
             const exists = APP.tokens.some(t => t.address === address);
             if (!exists) {
                 APP.tokens.push({
@@ -544,7 +563,6 @@
                 saveTokensToStorage();
                 renderTokenList();
 
-                // Показываем сообщение о создании
                 launchStatus.style.display = 'block';
                 launchStatus.textContent = `✅ ${name} (${symbol}) launched! Supply: ${Number(supply).toLocaleString()}`;
                 launchStatus.style.color = '#00d395';
@@ -584,7 +602,7 @@
             const name = tokenName.value.trim();
             const symbol = tokenSymbol.value.trim();
             const supply = tokenSupply.value.trim();
-            const assetAddr = assetAddress.value.trim();
+            const assetAddr = assetSelect.value.trim();
             const assetAmt = assetAmount.value.trim();
 
             const isValid = name && symbol && supply && parseInt(supply) > 0 && assetAddr && assetAmt;
@@ -640,7 +658,6 @@
         async function refreshWalletBalance() {
             try {
                 await loadBalance();
-                // Обновляем балансы токенов в UI
                 if (APP.tokens.length > 0 && APP.signer) {
                     for (let token of APP.tokens) {
                         try {
@@ -785,7 +802,7 @@
                 const name = tokenName.value.trim();
                 const symbol = tokenSymbol.value.trim();
                 const supply = BigInt(tokenSupply.value.trim());
-                const rwaAddress = assetAddress.value.trim();
+                const rwaAddress = assetSelect.value.trim();
                 const rwaAmount = parseBigInt(assetAmount.value.trim());
                 const duration = Number(lockDuration.value);
 
@@ -808,10 +825,8 @@
                 const txCreate = await factory.createToken(name, symbol, CONFIG.VAULT_ADDRESS);
                 const receiptCreate = await txCreate.wait();
 
-                // Получаем адрес созданного токена
                 let newTokenAddress = null;
 
-                // Способ 1: Ищем событие TokenCreated через интерфейс
                 for (const log of receiptCreate.logs) {
                     try {
                         const parsedLog = factory.interface.parseLog(log);
@@ -824,7 +839,6 @@
                     }
                 }
 
-                // Способ 2: Если не нашли, пробуем через logs[0]
                 if (!newTokenAddress && receiptCreate.logs && receiptCreate.logs.length > 0) {
                     try {
                         if (receiptCreate.logs[0].args && receiptCreate.logs[0].args.token) {
@@ -837,7 +851,6 @@
                     }
                 }
 
-                // Способ 3: Прямой поиск по событию в raw logs
                 if (!newTokenAddress) {
                     for (const log of receiptCreate.logs) {
                         if (log.address.toLowerCase() === CONFIG.FACTORY_ADDRESS.toLowerCase()) {
@@ -877,7 +890,6 @@
                 const id = await vault.depositCounter();
                 depositId.value = id.toString();
 
-                // 4. Add token to UI
                 addTokenToUI(name, symbol, newTokenAddress, supply);
 
                 await refreshWalletBalance();
@@ -902,19 +914,41 @@
             try {
                 const id = Number(depositId.value);
                 if (id <= 0) throw new Error("Invalid deposit id.");
+
                 const vault = new ethers.Contract(CONFIG.VAULT_ADDRESS, VAULT_ABI, APP.signer);
-                const info = await vault.getDeposit(id);
-                if (info.isRedeemed) throw new Error("Already redeemed.");
-                setStatus("Sending redeem...");
+
+                // Проверяем, существует ли депозит
+                let info;
+                try {
+                    info = await vault.getDeposit(id);
+                } catch (e) {
+                    throw new Error(`Deposit ID ${id} does not exist. Create a new deposit first.`);
+                }
+
+                if (info.isRedeemed) {
+                    throw new Error(`Deposit ID ${id} is already redeemed.`);
+                }
+
+                // Проверяем, не истек ли срок
+                const deadline = Number(info.redemptionDeadline);
+                const now = Math.floor(Date.now() / 1000);
+                if (now > deadline) {
+                    throw new Error(`Deposit ID ${id} has expired. Deadline was ${new Date(deadline * 1000).toLocaleString()}`);
+                }
+
+                setStatus(`⏳ Redeeming deposit ${id}...`, "pending");
                 const tx = await vault.redeemRWA(id);
-                setStatus("Waiting confirmation...");
+                setStatus("⏳ Waiting for confirmation...", "pending");
                 const receipt = await tx.wait();
+
                 if (receipt.status !== 1) throw new Error("Redeem failed.");
+
                 await refreshWalletBalance();
-                setStatus("✅ Redeem completed.", "success");
+                setStatus(`✅ Deposit ${id} redeemed successfully!`, "success");
+
             } catch (e) {
-                console.error(e);
-                setStatus(e.reason || e.shortMessage || e.message, "error");
+                console.error('Redeem error:', e);
+                setStatus(`❌ ${e.message || 'Redeem failed'}`, "error");
             }
             disableButtons(false);
         }
@@ -926,7 +960,6 @@
         depositBtn.addEventListener("click", executeDeposit);
         redeemBtn.addEventListener("click", executeRedeem);
 
-        // Form validation on input
         document.querySelectorAll('input, select').forEach(el => {
             el.addEventListener('input', checkFormValidity);
             el.addEventListener('change', checkFormValidity);
@@ -956,7 +989,6 @@
                     updateWalletUI();
                     setStatus("Click Connect MetaMask.", "success");
                 }
-                // Load tokens from storage
                 loadTokensFromStorage();
                 console.log("Application ready.");
             } catch (e) {
@@ -969,9 +1001,6 @@
         autoConnect();
         initializeApplication();
 
-        // =========================================================
-        // INTERVALS
-        // =========================================================
         setInterval(async () => {
             if (APP.connected) await refreshWalletBalance();
         }, 15000);
@@ -986,9 +1015,6 @@
             await refreshPrices();
         });
 
-        // =========================================================
-        // DEBUG
-        // =========================================================
         window.MWA = {
             APP,
             CONFIG,
