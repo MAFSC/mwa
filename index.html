@@ -213,6 +213,7 @@
             flex-direction: column;
             gap: 4px;
             flex: 1;
+            min-width: 150px;
         }
 
         .token-item .info .name {
@@ -229,12 +230,19 @@
             color: #9cb4ad;
         }
 
+        .token-item .info .price-info {
+            font-size: 12px;
+            color: #00d395;
+            margin-top: 4px;
+        }
+
         .token-item .balance-info {
             text-align: right;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
             gap: 4px;
+            min-width: 100px;
         }
 
         .token-item .balance-info .balance {
@@ -244,6 +252,12 @@
         .token-item .balance-info .supply {
             font-size: 12px;
             color: #9cb4ad;
+        }
+
+        .token-item .balance-info .price {
+            font-size: 14px;
+            font-weight: bold;
+            color: #f39c12;
         }
 
         .token-item .balance-info .status-badge {
@@ -257,6 +271,11 @@
         .token-item .balance-info .status-badge.redeemed {
             background: rgba(255, 85, 85, 0.15);
             color: #ff5555;
+        }
+
+        .token-item .balance-info .status-badge.expired {
+            background: rgba(255, 165, 0, 0.15);
+            color: #ffa500;
         }
 
         .token-item .actions {
@@ -308,12 +327,6 @@
             font-size: 14px;
             color: var(--green);
             display: none;
-        }
-
-        .deposit-info {
-            font-size: 12px;
-            color: #9cb4ad;
-            margin-top: 4px;
         }
 
         .eth-amount {
@@ -398,7 +411,8 @@
                 </div>
                 <div>
                     <label>Lock Duration (seconds)</label>
-                    <input id="lockDuration" type="number" value="600" min="60">
+                    <input id="lockDuration" type="number" value="86400" min="60">
+                    <span style="font-size:12px;color:#9cb4ad;">Default: 24 hours (86400 sec)</span>
                 </div>
             </div>
             <div class="eth-amount">⚡ ETH needed for liquidity: <span id="ethNeeded">0.01</span> ETH</div>
@@ -525,7 +539,7 @@
             eventsAdded: false,
             deposits: [],
             tokenCache: new Map(),
-            rwaBalance: {}
+            rwaPrice: {}
         };
 
         // =========================================================
@@ -551,6 +565,13 @@
             });
         }
 
+        function formatTokenPrice(price) {
+            if (price === 0) return "$0.000000";
+            if (price < 0.0001) return "$" + price.toFixed(8);
+            if (price < 0.01) return "$" + price.toFixed(6);
+            return "$" + price.toFixed(4);
+        }
+
         function parseBigInt(value) {
             try {
                 if (value.startsWith("0x")) return BigInt(value);
@@ -567,6 +588,33 @@
         function disableButtons(flag) {
             depositBtn.disabled = flag;
             redeemBtn.disabled = flag;
+        }
+
+        // =========================================================
+        // GET RWA PRICE
+        // =========================================================
+        async function getRWAPrice(rwaAddress) {
+            try {
+                const response = await fetch(PRICE_CONFIG.API_URL);
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                const prices = await response.json();
+
+                // Определяем символ по адресу
+                const symbolMap = {
+                    "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E": "AMD",
+                    "0x71178BAc73cBeb415514eB542a8995b82669778d": "TSLA",
+                    "0x7dF7F09271136b49bD1E44937FA758264024858C": "AAPL"
+                };
+
+                const symbol = symbolMap[rwaAddress.toLowerCase()];
+                if (!symbol) return 0;
+
+                const item = prices.find(p => p.symbol === symbol);
+                return item ? item.price : 0;
+            } catch (e) {
+                console.error("Error fetching RWA price:", e);
+                return 0;
+            }
         }
 
         // =========================================================
@@ -708,15 +756,34 @@
                 const balance = await getTokenBalance(deposit.memeToken);
                 const totalSupply = deposit.memeTokenAmount;
 
+                // Получаем цену RWA
+                const rwaPrice = await getRWAPrice(deposit.assetAddress);
+
+                // Расчет цены токена: цена RWA / общее количество токенов
+                const tokenPrice = rwaPrice > 0 ? rwaPrice / totalSupply : 0;
+
+                // Получаем резервы для отображения ликвидности
+                let reserves = { eth: 0, tokens: 0 };
+                try {
+                    const res = await APP.router.getReserves(deposit.memeToken);
+                    reserves.eth = Number(res[0]);
+                    reserves.tokens = Number(res[1]);
+                } catch (e) {
+                    console.warn("Could not get reserves for", deposit.memeToken);
+                }
+
                 const isRedeemed = deposit.isRedeemed;
                 const isExpired = Date.now() / 1000 > deposit.redemptionDeadline;
 
-                const statusText = isRedeemed ? '✅ Redeemed' :
-                    isExpired ? '⏳ Expired' :
-                    '🟢 Active';
-
-                const statusClass = isRedeemed ? 'redeemed' :
-                    isExpired ? 'redeemed' : '';
+                let statusText = '🟢 Active';
+                let statusClass = '';
+                if (isRedeemed) {
+                    statusText = '✅ Redeemed';
+                    statusClass = 'redeemed';
+                } else if (isExpired) {
+                    statusText = '⏳ Expired';
+                    statusClass = 'expired';
+                }
 
                 html += `
                         <div class="token-item" id="token-${deposit.id}">
@@ -725,18 +792,32 @@
                                 <div class="address">${shortAddress(deposit.memeToken)}</div>
                                 <div class="deposit-id">Deposit ID: ${deposit.id}</div>
                                 <div class="deposit-id">Locked until: ${new Date(deposit.redemptionDeadline * 1000).toLocaleString()}</div>
+                                <div class="price-info">
+                                    RWA Price: ${formatPrice(rwaPrice)} 
+                                    | Token Price: ${formatTokenPrice(tokenPrice)}
+                                </div>
+                                <div class="price-info" style="font-size:11px;color:#9cb4ad;">
+                                    Liquidity: ${reserves.eth.toFixed(4)} ETH / ${reserves.tokens.toLocaleString()} tokens
+                                </div>
                             </div>
                             <div class="balance-info">
                                 <div class="balance">Balance: ${balance.toLocaleString()}</div>
                                 <div class="supply">Total supply: ${totalSupply.toLocaleString()}</div>
+                                <div class="price">${formatTokenPrice(tokenPrice)} per token</div>
                                 <div class="status-badge ${statusClass}">${statusText}</div>
                             </div>
+                            ${!isRedeemed && !isExpired ? `
                             <div class="actions">
                                 <input type="number" class="buy-sell-input" id="amount_${deposit.id}" value="1" min="1">
                                 <button class="small btn-buy" data-token="${deposit.memeToken}" data-id="${deposit.id}">Buy</button>
                                 <button class="small btn-sell" data-token="${deposit.memeToken}" data-id="${deposit.id}">Sell</button>
                                 <button class="small btn-approve" data-token="${deposit.memeToken}" data-id="${deposit.id}">Approve</button>
                             </div>
+                            ` : `
+                            <div style="color:#ff5555;font-size:12px;">
+                                ${isRedeemed ? '✅ Already redeemed' : '⏳ Lock period expired'}
+                            </div>
+                            `}
                         </div>
                     `;
             }
@@ -749,7 +830,7 @@
 
             tokenList.innerHTML = html;
 
-            // Bind event handlers
+            // Bind event handlers только для активных токенов
             document.querySelectorAll('.btn-buy').forEach(btn => {
                 btn.onclick = function() {
                     const token = this.dataset.token;
@@ -817,21 +898,29 @@
             try {
                 setStatus(`Buying ${amount} tokens...`, "pending");
 
-                // Get reserves to calculate price
+                // Get reserves
                 const reserves = await APP.router.getReserves(tokenAddress);
 
-                if (reserves[1] === 0n || reserves[0] === 0n) {
-                    throw new Error("No liquidity in pool");
+                if (Number(reserves[1]) === 0 || Number(reserves[0]) === 0) {
+                    throw new Error("No liquidity in pool. Cannot buy.");
                 }
 
-                // Simple price calculation
-                const price = Number(reserves[0]) / Number(reserves[1]);
-                const ethNeeded = amount * price;
+                // Calculate price and ETH needed
+                const ethReserve = Number(reserves[0]);
+                const tokenReserve = Number(reserves[1]);
+                const price = ethReserve / tokenReserve;
+                const ethNeeded = amount * price * 1.01; // +1% for slippage
+
+                console.log(`Buy: ${amount} tokens, price: ${price}, ETH needed: ${ethNeeded}`);
 
                 const minAmountOut = Math.floor(amount * 0.95);
-                const ethValue = ethers.parseEther((ethNeeded * 1.05).toFixed(18));
+                const ethValue = ethers.parseEther(ethNeeded.toFixed(18));
 
-                console.log(`Buying ${amount} tokens, ETH: ${ethNeeded}, minAmountOut: ${minAmountOut}`);
+                // Проверяем баланс ETH пользователя
+                const balance = await APP.provider.getBalance(APP.account);
+                if (Number(balance) < Number(ethValue)) {
+                    throw new Error(`Not enough ETH. Need ${ethers.formatEther(ethValue)} ETH`);
+                }
 
                 const tx = await APP.router.buy(tokenAddress, minAmountOut, {
                     value: ethValue
@@ -884,11 +973,19 @@
                     return;
                 }
 
-                // Sell with slippage protection
+                // Get reserves for price calculation
                 const reserves = await APP.router.getReserves(tokenAddress);
-                const minEthOut = Math.floor((amount / Number(reserves[1])) * Number(reserves[0]) * 0.95);
+                if (Number(reserves[1]) === 0 || Number(reserves[0]) === 0) {
+                    throw new Error("No liquidity in pool. Cannot sell.");
+                }
 
-                console.log(`Selling ${amount} tokens, minEthOut: ${minEthOut}`);
+                const ethReserve = Number(reserves[0]);
+                const tokenReserve = Number(reserves[1]);
+                const ethOut = (amount / tokenReserve) * ethReserve * 0.97; // -3% for fees and slippage
+
+                const minEthOut = Math.floor(ethOut * 0.95);
+
+                console.log(`Sell: ${amount} tokens, ETH out: ${ethOut}, minEthOut: ${minEthOut}`);
 
                 const tx = await APP.router.sell(tokenAddress, amount, minEthOut);
                 await tx.wait();
@@ -1155,6 +1252,12 @@
                     el.textContent = formatPrice(item.price);
                     el.style.color = item.change >= 0 ? "#00d395" : "#ff5555";
                 });
+
+                // Обновляем цены токенов в списке
+                if (APP.connected) {
+                    await renderTokenList();
+                }
+
             } catch (e) {
                 console.error("Price error:", e);
             }
