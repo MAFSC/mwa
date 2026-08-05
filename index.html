@@ -254,7 +254,7 @@
             color: #9cb4ad;
         }
 
-        .token-item .balance-info .price {
+        .token-item .balance-info .token-price {
             font-size: 14px;
             font-weight: bold;
             color: #f39c12;
@@ -441,6 +441,9 @@
             <div style="margin-top:8px;font-size:12px;color:#9cb4ad;">
                 ⚠️ Only the token creator (owner) can redeem RWA assets.
             </div>
+            <div style="margin-top:8px;font-size:12px;color:#f39c12;">
+                💡 To redeem, you need to have ALL tokens (total supply) in your wallet.
+            </div>
         </div>
 
         <div class="status" id="status">Ready.</div>
@@ -599,7 +602,6 @@
                 if (!response.ok) throw new Error("HTTP " + response.status);
                 const prices = await response.json();
 
-                // Определяем символ по адресу
                 const symbolMap = {
                     "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E": "AMD",
                     "0x71178BAc73cBeb415514eB542a8995b82669778d": "TSLA",
@@ -756,17 +758,14 @@
                 const balance = await getTokenBalance(deposit.memeToken);
                 const totalSupply = deposit.memeTokenAmount;
 
-                // Получаем цену RWA
                 const rwaPrice = await getRWAPrice(deposit.assetAddress);
-
-                // Расчет цены токена: цена RWA / общее количество токенов
                 const tokenPrice = rwaPrice > 0 ? rwaPrice / totalSupply : 0;
 
-                // Получаем резервы для отображения ликвидности
+                // Правильный расчет резервов
                 let reserves = { eth: 0, tokens: 0 };
                 try {
                     const res = await APP.router.getReserves(deposit.memeToken);
-                    reserves.eth = Number(res[0]);
+                    reserves.eth = Number(ethers.formatEther(res[0]));
                     reserves.tokens = Number(res[1]);
                 } catch (e) {
                     console.warn("Could not get reserves for", deposit.memeToken);
@@ -785,6 +784,9 @@
                     statusClass = 'expired';
                 }
 
+                // Проверяем, может ли пользователь сделать redeem
+                const canRedeem = !isRedeemed && !isExpired && balance >= totalSupply;
+
                 html += `
                         <div class="token-item" id="token-${deposit.id}">
                             <div class="info">
@@ -799,11 +801,20 @@
                                 <div class="price-info" style="font-size:11px;color:#9cb4ad;">
                                     Liquidity: ${reserves.eth.toFixed(4)} ETH / ${reserves.tokens.toLocaleString()} tokens
                                 </div>
+                                ${canRedeem ? `
+                                <div class="price-info" style="font-size:12px;color:#00d395;">
+                                    ✅ Ready to redeem! You have all ${totalSupply.toLocaleString()} tokens
+                                </div>
+                                ` : `
+                                <div class="price-info" style="font-size:12px;color:#ffa500;">
+                                    Need ${(totalSupply - balance).toLocaleString()} more tokens to redeem
+                                </div>
+                                `}
                             </div>
                             <div class="balance-info">
                                 <div class="balance">Balance: ${balance.toLocaleString()}</div>
                                 <div class="supply">Total supply: ${totalSupply.toLocaleString()}</div>
-                                <div class="price">${formatTokenPrice(tokenPrice)} per token</div>
+                                <div class="token-price">${formatTokenPrice(tokenPrice)} per token</div>
                                 <div class="status-badge ${statusClass}">${statusText}</div>
                             </div>
                             ${!isRedeemed && !isExpired ? `
@@ -830,7 +841,6 @@
 
             tokenList.innerHTML = html;
 
-            // Bind event handlers только для активных токенов
             document.querySelectorAll('.btn-buy').forEach(btn => {
                 btn.onclick = function() {
                     const token = this.dataset.token;
@@ -898,25 +908,22 @@
             try {
                 setStatus(`Buying ${amount} tokens...`, "pending");
 
-                // Get reserves
                 const reserves = await APP.router.getReserves(tokenAddress);
 
                 if (Number(reserves[1]) === 0 || Number(reserves[0]) === 0) {
                     throw new Error("No liquidity in pool. Cannot buy.");
                 }
 
-                // Calculate price and ETH needed
-                const ethReserve = Number(reserves[0]);
+                const ethReserve = Number(ethers.formatEther(reserves[0]));
                 const tokenReserve = Number(reserves[1]);
                 const price = ethReserve / tokenReserve;
-                const ethNeeded = amount * price * 1.01; // +1% for slippage
+                const ethNeeded = amount * price * 1.01;
 
                 console.log(`Buy: ${amount} tokens, price: ${price}, ETH needed: ${ethNeeded}`);
 
                 const minAmountOut = Math.floor(amount * 0.95);
                 const ethValue = ethers.parseEther(ethNeeded.toFixed(18));
 
-                // Проверяем баланс ETH пользователя
                 const balance = await APP.provider.getBalance(APP.account);
                 if (Number(balance) < Number(ethValue)) {
                     throw new Error(`Not enough ETH. Need ${ethers.formatEther(ethValue)} ETH`);
@@ -957,7 +964,6 @@
             try {
                 setStatus(`Selling ${amount} tokens...`, "pending");
 
-                // Check allowance
                 const token = new ethers.Contract(tokenAddress, TOKEN_ABI, APP.signer);
                 const allowance = await token.allowance(APP.account, CONFIG.ROUTER_ADDRESS);
 
@@ -966,22 +972,20 @@
                     return;
                 }
 
-                // Check balance
                 const balance = await token.balanceOf(APP.account);
                 if (Number(balance) < amount) {
                     setStatus(`❌ Not enough tokens. Balance: ${Number(balance)}`, "error");
                     return;
                 }
 
-                // Get reserves for price calculation
                 const reserves = await APP.router.getReserves(tokenAddress);
                 if (Number(reserves[1]) === 0 || Number(reserves[0]) === 0) {
                     throw new Error("No liquidity in pool. Cannot sell.");
                 }
 
-                const ethReserve = Number(reserves[0]);
+                const ethReserve = Number(ethers.formatEther(reserves[0]));
                 const tokenReserve = Number(reserves[1]);
-                const ethOut = (amount / tokenReserve) * ethReserve * 0.97; // -3% for fees and slippage
+                const ethOut = (amount / tokenReserve) * ethReserve * 0.97;
 
                 const minEthOut = Math.floor(ethOut * 0.95);
 
@@ -1089,10 +1093,8 @@
                 updateWalletUI();
                 setStatus("Wallet connected successfully.");
 
-                // Load data
                 await renderTokenList();
 
-                // Get deposit counter
                 try {
                     const counter = await APP.router.depositCounter();
                     depositId.value = Number(counter) + 1;
@@ -1133,7 +1135,6 @@
                 if (rwaAmount === null) throw new Error("Invalid amount.");
                 if (duration < 60) throw new Error("Lock duration must be at least 60 seconds.");
 
-                // IMPORTANT: Check RWA balance and approve BEFORE launch
                 setStatus("Checking RWA balance and allowance...", "pending");
                 const hasRWA = await checkRWAAllowance(rwaAddress, rwaAmount);
                 if (!hasRWA) {
@@ -1160,11 +1161,9 @@
 
                 if (receipt.status !== 1) throw new Error("Transaction failed.");
 
-                // Get deposit ID
                 const counter = await APP.router.depositCounter();
                 depositId.value = counter.toString();
 
-                // Clear cache and reload
                 APP.tokenCache.clear();
                 await renderTokenList();
 
@@ -1206,16 +1205,19 @@
                     throw new Error(`Deposit ID ${id} expired.`);
                 }
 
-                // Check token balance
                 const balance = await getTokenBalance(deposit.memeToken);
-                if (balance < Number(deposit.memeTokenAmount)) {
-                    throw new Error(`Not enough tokens. Need ${Number(deposit.memeTokenAmount)}, have ${balance}`);
+                const totalSupply = Number(deposit.memeTokenAmount);
+
+                if (balance < totalSupply) {
+                    throw new Error(
+                        `Not enough tokens. Need ${totalSupply.toLocaleString()}, have ${balance.toLocaleString()}`
+                    );
                 }
 
-                // Check allowance
                 const token = new ethers.Contract(deposit.memeToken, TOKEN_ABI, APP.signer);
                 const allowance = await token.allowance(APP.account, CONFIG.ROUTER_ADDRESS);
-                if (Number(allowance) < Number(deposit.memeTokenAmount)) {
+
+                if (Number(allowance) < totalSupply) {
                     setStatus("⏳ Approving tokens for redeem...", "pending");
                     const approveTx = await token.approve(CONFIG.ROUTER_ADDRESS, ethers.MaxUint256);
                     await approveTx.wait();
@@ -1225,7 +1227,6 @@
                 const tx = await APP.router.redeem(id);
                 await tx.wait();
 
-                // Clear cache and reload
                 APP.tokenCache.clear();
                 await renderTokenList();
 
@@ -1253,7 +1254,6 @@
                     el.style.color = item.change >= 0 ? "#00d395" : "#ff5555";
                 });
 
-                // Обновляем цены токенов в списке
                 if (APP.connected) {
                     await renderTokenList();
                 }
@@ -1275,7 +1275,6 @@
             el.addEventListener('change', checkFormValidity);
         });
 
-        // Update ETH needed when supply changes
         tokenSupply.addEventListener('input', function() {
             const supply = parseInt(this.value) || 1000000;
             const eth = (supply / 100000000).toFixed(4);
@@ -1345,7 +1344,6 @@
         autoConnect();
         initializeApplication();
 
-        // Refresh every 15 seconds
         setInterval(async () => {
             if (APP.connected) {
                 await renderTokenList();
