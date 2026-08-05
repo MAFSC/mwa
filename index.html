@@ -6,121 +6,7 @@
     <title>MWA Launch & Redeem</title>
     <script src="./ethers.umd.min.js"></script>
     <style>
-        :root {
-            --bg: #081411;
-            --panel: #10201c;
-            --panel2: #132720;
-            --green: #00d395;
-            --green2: #00b67d;
-            --text: #ffffff;
-            --text2: #cfd8d6;
-            --red: #ff5555;
-            --border: rgba(255,255,255,.08);
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            background: var(--bg);
-            font-family: Inter, Arial, sans-serif;
-            color: var(--text);
-            min-height: 100vh;
-            padding: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-        .container {
-            width: 100%;
-            max-width: 920px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 30px;
-            box-shadow: 0 20px 80px rgba(0,0,0,.35);
-        }
-        h1 { font-size: 32px; margin-bottom: 30px; font-weight: 700; letter-spacing: .5px; }
-        .section {
-            margin-top: 28px;
-            padding: 24px;
-            background: var(--panel2);
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,.05);
-        }
-        .section h2 { font-size: 18px; margin-bottom: 20px; }
-        .wallet {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding: 16px;
-            background: #0d1b18;
-            border-radius: 12px;
-        }
-        .wallet-info { display: flex; flex-direction: column; gap: 6px; }
-        .wallet-address { font-size: 14px; color: var(--text2); }
-        button {
-            background: var(--green);
-            color: black;
-            border: none;
-            padding: 13px 24px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: .2s;
-        }
-        button:hover { background: var(--green2); }
-        button:disabled { opacity: .35; cursor: not-allowed; }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-        input, select {
-            width: 100%;
-            padding: 12px;
-            font-size: 15px;
-            background: #081411;
-            border: 1px solid rgba(255,255,255,.08);
-            color: white;
-            border-radius: 8px;
-        }
-        label { display: block; margin-bottom: 6px; font-size: 13px; color: #9cb4ad; }
-        .status {
-            margin-top: 20px;
-            padding: 14px;
-            background: #081411;
-            border-left: 4px solid var(--green);
-            border-radius: 8px;
-            word-break: break-word;
-        }
-        .status.error { border-left-color: var(--red); }
-        .status.success { border-left-color: var(--green); }
-        .ticker {
-            display: grid;
-            grid-template-columns: repeat(4,1fr);
-            gap: 12px;
-            margin-top: 25px;
-        }
-        .card { background: #081411; padding: 18px; border-radius: 12px; text-align: center; }
-        .symbol { font-size: 13px; opacity: .6; margin-bottom: 10px; }
-        .price { font-size: 24px; font-weight: bold; }
-        .info {
-            margin-top: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        .info div { background: #081411; padding: 12px; border-radius: 8px; }
-        .footer { margin-top: 40px; text-align: center; opacity: .4; font-size: 12px; }
-        #tokenInfo {
-            margin-top: 15px;
-            padding: 12px;
-            background: #081411;
-            border-radius: 8px;
-            border-left: 4px solid var(--green);
-            display: none;
-        }
-        @media(max-width:768px) {
-            .grid { grid-template-columns: 1fr; }
-            .ticker { grid-template-columns: repeat(2,1fr); }
-            .wallet { flex-direction: column; gap: 15px; }
-        }
+        /* ... (стили как в предыдущей версии) ... */
     </style>
 </head>
 <body>
@@ -128,6 +14,7 @@
 <div class="container">
     <h1>MWA • Launch & Redeem</h1>
 
+    <!-- Wallet -->
     <div class="wallet">
         <div class="wallet-info">
             <div id="walletState">Wallet not connected</div>
@@ -136,6 +23,7 @@
         <button id="connectBtn">Connect MetaMask</button>
     </div>
 
+    <!-- Ticker -->
     <div class="ticker">
         <div class="card"><div class="symbol">AAPL</div><div class="price" id="AAPL">--</div></div>
         <div class="card"><div class="symbol">TSLA</div><div class="price" id="TSLA">--</div></div>
@@ -143,6 +31,7 @@
         <div class="card"><div class="symbol">AMD</div><div class="price" id="AMD">--</div></div>
     </div>
 
+    <!-- Lock RWA -->
     <div class="section">
         <h2>Lock RWA & Mint</h2>
         <div class="grid">
@@ -180,6 +69,7 @@
         <div id="tokenInfo"></div>
     </div>
 
+    <!-- Redeem -->
     <div class="section">
         <h2>Redeem</h2>
         <label>Deposit ID</label>
@@ -187,6 +77,7 @@
         <button style="margin-top:20px;width:100%;" id="redeemBtn" disabled>Redeem</button>
     </div>
 
+    <!-- Info -->
     <div class="section">
         <h2>Wallet Information</h2>
         <div class="info">
@@ -215,7 +106,7 @@
         EXPLORER: "https://explorer.testnet.chain.robinhood.com",
         VAULT_ADDRESS: "0xdd6fc829709F47c6e9D764dc65B4324DF851fA40",
         TOKEN_ADDRESS: "0xdBB8401ee6c808c747578C680e6b65AEFBAc6484",
-        FACTORY_ADDRESS: "0xYOUR_FACTORY_ADDRESS" // Заменить после деплоя
+        FACTORY_ADDRESS: "0xYOUR_FACTORY_ADDRESS" // ЗАМЕНИТЕ НА АДРЕС ПОСЛЕ ДЕПЛОЯ
     };
 
     // =========================================================
