@@ -13,121 +13,100 @@
 
     <style>
         :root {
-            --bg: #081411;
-            --panel: #10201c;
-            --panel2: #132720;
-            --panel3: #0d1b18;
+            --bg: #07110f;
+            --panel: #0e1d19;
+            --panel2: #12251f;
+            --panel3: #091714;
 
             --green: #00d395;
             --green2: #00b67d;
 
-            --text: #ffffff;
-            --text2: #cfd8d6;
-            --muted: #8fa59f;
-
+            --yellow: #f5b942;
             --red: #ff5555;
-            --orange: #f39c12;
-            --blue: #5da9ff;
+            --blue: #5aa9ff;
 
-            --border: rgba(255, 255, 255, 0.08);
+            --text: #ffffff;
+            --text2: #c9d6d2;
+            --muted: #8da49d;
+
+            --border: rgba(255,255,255,0.08);
         }
 
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
 
         body {
+            min-height: 100vh;
+            padding: 25px;
             background:
                 radial-gradient(
                     circle at top,
-                    rgba(0, 211, 149, 0.08),
+                    rgba(0,211,149,0.08),
                     transparent 35%
                 ),
                 var(--bg);
 
             color: var(--text);
-
             font-family:
                 Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
                 Arial,
-                Helvetica,
                 sans-serif;
-
-            min-height: 100vh;
-            padding: 30px;
         }
 
         .container {
             width: 100%;
             max-width: 1100px;
-
-            margin: 0 auto;
+            margin: auto;
 
             background: var(--panel);
-
             border: 1px solid var(--border);
-            border-radius: 18px;
+            border-radius: 20px;
 
-            padding: 30px;
+            padding: 28px;
 
             box-shadow:
-                0 20px 80px
-                rgba(0, 0, 0, 0.35);
+                0 25px 100px rgba(0,0,0,0.45);
         }
 
         h1 {
-            font-size: 32px;
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 13px;
             margin-bottom: 25px;
-            font-weight: 700;
         }
 
-        h2 {
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
-
-        .section {
-            margin-top: 28px;
-
-            padding: 24px;
-
-            background: var(--panel2);
-
-            border-radius: 14px;
-
-            border:
-                1px solid
-                rgba(255, 255, 255, 0.05);
-        }
-
-        /* =========================
+        /* =====================================================
            WALLET
-        ========================= */
+        ===================================================== */
 
         .wallet {
             display: flex;
-
             justify-content: space-between;
             align-items: center;
-
-            gap: 20px;
 
             padding: 18px;
 
             background: var(--panel3);
+            border: 1px solid var(--border);
+            border-radius: 14px;
 
-            border-radius: 12px;
-
-            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .wallet-info {
+        .wallet-left {
             display: flex;
             flex-direction: column;
-
-            gap: 7px;
+            gap: 6px;
         }
 
         .wallet-state {
@@ -135,148 +114,89 @@
         }
 
         .wallet-address {
-            font-size: 13px;
-            color: var(--text2);
-            word-break: break-all;
-        }
-
-        .network-info {
-            font-size: 12px;
             color: var(--muted);
+            font-size: 13px;
         }
-
-        /* =========================
-           BUTTONS
-        ========================= */
 
         button {
-            background: var(--green);
+            border: 0;
+            border-radius: 9px;
 
-            color: #000;
-
-            border: none;
-
-            padding: 12px 20px;
+            padding: 11px 18px;
 
             font-size: 14px;
             font-weight: 700;
 
             cursor: pointer;
 
-            border-radius: 9px;
-
             transition:
                 background 0.2s,
-                opacity 0.2s,
-                transform 0.1s;
+                transform 0.1s,
+                opacity 0.2s;
         }
 
         button:hover:not(:disabled) {
-            background: var(--green2);
             transform: translateY(-1px);
         }
 
         button:disabled {
             opacity: 0.35;
             cursor: not-allowed;
-            transform: none;
         }
 
-        button.small {
-            padding: 7px 12px;
-            font-size: 12px;
-        }
-
-        .btn-buy {
+        .btn-green {
             background: var(--green);
+            color: #00140e;
         }
 
-        .btn-sell {
+        .btn-green:hover:not(:disabled) {
+            background: var(--green2);
+        }
+
+        .btn-red {
             background: var(--red);
             color: white;
         }
 
-        .btn-sell:hover:not(:disabled) {
-            background: #d94444;
+        .btn-yellow {
+            background: var(--yellow);
+            color: #171000;
         }
 
-        .btn-approve {
-            background: var(--orange);
-            color: #000;
-        }
-
-        .btn-return {
+        .btn-blue {
             background: var(--blue);
-            color: #000;
+            color: #00101e;
         }
 
-        .btn-return:hover:not(:disabled) {
-            background: #3f8de0;
-        }
-
-        /* =========================
-           TICKER
-        ========================= */
-
-        .ticker {
-            display: grid;
-
-            grid-template-columns:
-                repeat(4, 1fr);
-
-            gap: 12px;
-
-            margin-top: 25px;
-        }
-
-        .card {
-            background: #081411;
-
-            padding: 18px;
-
-            border-radius: 12px;
-
-            text-align: center;
-
-            border:
-                1px solid
-                rgba(255, 255, 255, 0.04);
-        }
-
-        .symbol {
-            font-size: 13px;
-            opacity: 0.65;
-
-            margin-bottom: 8px;
-        }
-
-        .price {
-            font-size: 24px;
-            font-weight: 700;
-
-            min-height: 29px;
-        }
-
-        .change {
+        .btn-small {
+            padding: 7px 12px;
             font-size: 12px;
-            margin-top: 5px;
-            color: var(--muted);
+        }
+
+        /* =====================================================
+           MARKET
+        ===================================================== */
+
+        .market-section {
+            margin-top: 20px;
+        }
+
+        .market-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 10px;
+        }
+
+        .market-title {
+            font-size: 18px;
+            font-weight: 700;
         }
 
         .market-status {
-            margin-top: 12px;
-
-            padding: 10px 14px;
-
-            border-radius: 8px;
-
-            background: #081411;
-
+            font-size: 12px;
             color: var(--muted);
-
-            font-size: 13px;
-
-            word-break: break-word;
         }
 
         .market-status.ok {
@@ -287,17 +207,68 @@
             color: var(--red);
         }
 
-        /* =========================
-           FORM
-        ========================= */
+        .ticker {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .ticker-card {
+            background: var(--panel3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .ticker-symbol {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .ticker-price {
+            font-size: 25px;
+            font-weight: 800;
+        }
+
+        .ticker-change {
+            margin-top: 5px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* =====================================================
+           SECTIONS
+        ===================================================== */
+
+        .section {
+            margin-top: 22px;
+
+            padding: 22px;
+
+            background: var(--panel2);
+            border: 1px solid var(--border);
+
+            border-radius: 15px;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            margin-bottom: 18px;
+        }
 
         .grid {
             display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
 
-            grid-template-columns:
-                repeat(2, 1fr);
+        label {
+            display: block;
+            margin-bottom: 6px;
 
-            gap: 16px;
+            color: var(--muted);
+            font-size: 12px;
         }
 
         input,
@@ -306,257 +277,194 @@
 
             padding: 12px;
 
-            font-size: 14px;
-
-            background: #081411;
-
-            border:
-                1px solid
-                rgba(255, 255, 255, 0.08);
-
-            color: white;
-
             border-radius: 8px;
+            border: 1px solid var(--border);
+
+            background: var(--panel3);
+            color: white;
 
             outline: none;
         }
 
         input:focus,
         select:focus {
-            border-color:
-                rgba(0, 211, 149, 0.5);
+            border-color: rgba(0,211,149,0.5);
         }
 
-        label {
-            display: block;
-
-            margin-bottom: 6px;
-
-            font-size: 13px;
-
-            color: #9cb4ad;
-        }
-
-        .eth-amount {
+        .eth-info {
             margin-top: 15px;
 
-            font-size: 13px;
-
             color: var(--muted);
+            font-size: 12px;
         }
 
-        /* =========================
-           STATUS
-        ========================= */
-
-        .status {
-            margin-top: 20px;
-
-            padding: 14px;
-
-            background: #081411;
-
-            border-left:
-                4px solid
-                var(--green);
-
-            border-radius: 8px;
-
-            word-break: break-word;
-
-            line-height: 1.5;
+        .launch-button {
+            width: 100%;
+            margin-top: 18px;
         }
 
-        .status.error {
-            border-left-color: var(--red);
-        }
-
-        .status.success {
-            border-left-color: var(--green);
-        }
-
-        .status.pending {
-            border-left-color: var(--orange);
-        }
-
-        .status.info {
-            border-left-color: var(--blue);
-        }
-
-        /* =========================
+        /* =====================================================
            TOKEN TABLE
-        ========================= */
+        ===================================================== */
 
         .table-wrapper {
             width: 100%;
-
             overflow-x: auto;
         }
 
         table {
             width: 100%;
-
             border-collapse: collapse;
 
             min-width: 900px;
         }
 
-        th,
-        td {
-            padding: 13px 10px;
-
+        th {
             text-align: left;
 
-            border-bottom:
-                1px solid
-                rgba(255, 255, 255, 0.06);
+            padding: 12px;
 
-            vertical-align: middle;
-        }
-
-        th {
             font-size: 11px;
-
             text-transform: uppercase;
 
             color: var(--muted);
 
-            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
         }
 
         td {
-            font-size: 13px;
+            padding: 14px 12px;
+
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+
+            vertical-align: middle;
         }
 
         .token-name {
             font-weight: 700;
         }
 
+        .token-symbol {
+            color: var(--green);
+            font-size: 12px;
+        }
+
         .token-address {
-            font-size: 11px;
+            margin-top: 4px;
 
             color: var(--muted);
-
-            margin-top: 3px;
+            font-size: 11px;
         }
 
         .deposit-id {
-            font-size: 11px;
-            color: var(--muted);
-        }
-
-        .badge {
-            display: inline-block;
-
-            padding: 4px 8px;
-
-            border-radius: 5px;
-
-            font-size: 11px;
-
             font-weight: 700;
         }
 
-        .badge-active {
-            background:
-                rgba(0, 211, 149, 0.15);
-
+        .balance {
             color: var(--green);
+            font-weight: 700;
         }
 
-        .badge-expired {
-            background:
-                rgba(243, 156, 18, 0.15);
-
-            color: var(--orange);
+        .deadline {
+            font-size: 12px;
         }
 
-        .badge-redeemed {
-            background:
-                rgba(255, 85, 85, 0.15);
+        .expired {
+            color: var(--yellow);
+            font-weight: 700;
+        }
 
+        .active {
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        .redeemed {
             color: var(--red);
-        }
-
-        .badge-claimed {
-            background:
-                rgba(93, 169, 255, 0.15);
-
-            color: var(--blue);
+            font-weight: 700;
         }
 
         .actions {
             display: flex;
-
-            gap: 5px;
-
+            gap: 6px;
             flex-wrap: wrap;
         }
 
-        .trade-input {
-            width: 75px;
-
+        .amount-input {
+            width: 80px;
             padding: 7px 8px;
-
             font-size: 12px;
         }
 
-        .empty {
-            padding: 30px;
+        /* =====================================================
+           STATUS
+        ===================================================== */
 
-            text-align: center;
+        .status {
+            margin-top: 20px;
 
-            color: var(--muted);
+            padding: 14px;
+
+            border-radius: 9px;
+
+            background: var(--panel3);
+
+            border-left: 4px solid var(--green);
+
+            font-size: 13px;
+
+            word-break: break-word;
         }
 
-        .info-line {
-            font-size: 12px;
-            color: var(--muted);
+        .status.error {
+            border-left-color: var(--red);
+        }
 
+        .status.pending {
+            border-left-color: var(--yellow);
+        }
+
+        .status.info {
+            border-left-color: var(--blue);
+        }
+
+        .market-error {
             margin-top: 8px;
 
-            line-height: 1.5;
-        }
+            color: var(--red);
 
-        .warning {
-            margin-top: 12px;
+            font-size: 11px;
 
-            padding: 12px;
-
-            border-radius: 8px;
-
-            background:
-                rgba(243, 156, 18, 0.08);
-
-            color: #dcb06b;
-
-            font-size: 12px;
-
-            line-height: 1.5;
+            word-break: break-word;
         }
 
         .footer {
-            margin-top: 40px;
-
             text-align: center;
 
-            opacity: 0.4;
+            margin-top: 30px;
 
-            font-size: 12px;
+            color: var(--muted);
+
+            font-size: 11px;
         }
 
-        .hidden {
-            display: none !important;
-        }
+        /* =====================================================
+           MOBILE
+        ===================================================== */
 
         @media(max-width: 800px) {
 
             body {
-                padding: 12px;
+                padding: 10px;
             }
 
             .container {
-                padding: 18px;
+                padding: 16px;
+            }
+
+            .wallet {
+                flex-direction: column;
+                align-items: stretch;
             }
 
             .grid {
@@ -564,13 +472,7 @@
             }
 
             .ticker {
-                grid-template-columns:
-                    repeat(2, 1fr);
-            }
-
-            .wallet {
-                flex-direction: column;
-                align-items: stretch;
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
@@ -578,10 +480,6 @@
 
             .ticker {
                 grid-template-columns: 1fr;
-            }
-
-            h1 {
-                font-size: 25px;
             }
         }
     </style>
@@ -593,151 +491,162 @@
 
     <h1>MWA • Launch & Trade</h1>
 
+    <div class="subtitle">
+        MWA Protocol v3 • Robinhood Testnet
+    </div>
+
     <!-- =====================================================
          WALLET
     ====================================================== -->
 
     <div class="wallet">
 
-        <div class="wallet-info">
+        <div class="wallet-left">
 
             <div
-                id="walletState"
                 class="wallet-state"
+                id="walletState"
             >
                 Wallet not connected
             </div>
 
             <div
-                id="walletAddress"
                 class="wallet-address"
+                id="walletAddress"
             >
                 —
             </div>
 
-            <div
-                id="networkInfo"
-                class="network-info"
-            >
-                Network: —
-            </div>
-
         </div>
 
-        <button id="connectBtn">
+        <button
+            id="connectBtn"
+            class="btn-green"
+        >
             Connect MetaMask
         </button>
 
     </div>
 
-
     <!-- =====================================================
-         MARKET DATA
+         MARKET
     ====================================================== -->
 
-    <div class="ticker">
+    <div class="market-section">
 
-        <div class="card">
+        <div class="market-header">
 
-            <div class="symbol">
-                AAPL
+            <div class="market-title">
+                Market
             </div>
 
             <div
-                class="price"
-                id="AAPL"
+                id="marketStatus"
+                class="market-status"
             >
-                --
-            </div>
-
-            <div
-                class="change"
-                id="AAPL_change"
-            >
-                --
+                Connecting...
             </div>
 
         </div>
 
+        <div class="ticker">
 
-        <div class="card">
+            <div class="ticker-card">
 
-            <div class="symbol">
-                TSLA
+                <div class="ticker-symbol">
+                    AAPL
+                </div>
+
+                <div
+                    id="AAPL"
+                    class="ticker-price"
+                >
+                    --
+                </div>
+
+                <div
+                    id="AAPL_CHANGE"
+                    class="ticker-change"
+                >
+                    --
+                </div>
+
             </div>
 
-            <div
-                class="price"
-                id="TSLA"
-            >
-                --
+            <div class="ticker-card">
+
+                <div class="ticker-symbol">
+                    TSLA
+                </div>
+
+                <div
+                    id="TSLA"
+                    class="ticker-price"
+                >
+                    --
+                </div>
+
+                <div
+                    id="TSLA_CHANGE"
+                    class="ticker-change"
+                >
+                    --
+                </div>
+
             </div>
 
-            <div
-                class="change"
-                id="TSLA_change"
-            >
-                --
+            <div class="ticker-card">
+
+                <div class="ticker-symbol">
+                    NVDA
+                </div>
+
+                <div
+                    id="NVDA"
+                    class="ticker-price"
+                >
+                    --
+                </div>
+
+                <div
+                    id="NVDA_CHANGE"
+                    class="ticker-change"
+                >
+                    --
+                </div>
+
+            </div>
+
+            <div class="ticker-card">
+
+                <div class="ticker-symbol">
+                    AMD
+                </div>
+
+                <div
+                    id="AMD"
+                    class="ticker-price"
+                >
+                    --
+                </div>
+
+                <div
+                    id="AMD_CHANGE"
+                    class="ticker-change"
+                >
+                    --
+                </div>
+
             </div>
 
         </div>
 
-
-        <div class="card">
-
-            <div class="symbol">
-                NVDA
-            </div>
-
-            <div
-                class="price"
-                id="NVDA"
-            >
-                --
-            </div>
-
-            <div
-                class="change"
-                id="NVDA_change"
-            >
-                --
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <div class="symbol">
-                AMD
-            </div>
-
-            <div
-                class="price"
-                id="AMD"
-            >
-                --
-            </div>
-
-            <div
-                class="change"
-                id="AMD_change"
-            >
-                --
-            </div>
-
-        </div>
+        <div
+            id="marketError"
+            class="market-error"
+        ></div>
 
     </div>
-
-
-    <div
-        id="marketStatus"
-        class="market-status"
-    >
-        Market data connecting...
-    </div>
-
 
     <!-- =====================================================
          LAUNCH
@@ -759,13 +668,11 @@
 
                 <input
                     id="tokenName"
-                    placeholder="Token name"
                     value="My Meme"
                     maxlength="60"
                 >
 
             </div>
-
 
             <div>
 
@@ -775,13 +682,11 @@
 
                 <input
                     id="tokenSymbol"
-                    placeholder="Symbol"
                     value="MEME"
                     maxlength="20"
                 >
 
             </div>
-
 
             <div>
 
@@ -792,13 +697,11 @@
                 <input
                     id="tokenSupply"
                     type="number"
-                    min="1"
-                    step="1"
                     value="1000000"
+                    min="1"
                 >
 
             </div>
-
 
             <div>
 
@@ -830,7 +733,6 @@
 
             </div>
 
-
             <div>
 
                 <label>
@@ -842,12 +744,7 @@
                     value="1000000000000000000"
                 >
 
-                <div class="info-line">
-                    Amount of RWA token locked by the launch.
-                </div>
-
             </div>
-
 
             <div>
 
@@ -866,33 +763,25 @@
 
         </div>
 
-
-        <div class="eth-amount">
+        <div class="eth-info">
 
             ⚡ ETH needed for liquidity:
-
-            <span id="ethNeeded">
+            <strong id="ethNeeded">
                 0.01
-            </span>
-
+            </strong>
             ETH
 
         </div>
 
-
         <button
-            id="depositBtn"
+            id="launchBtn"
+            class="btn-green launch-button"
             disabled
-            style="
-                margin-top:20px;
-                width:100%;
-            "
         >
             🚀 Launch Token
         </button>
 
     </div>
-
 
     <!-- =====================================================
          TOKENS
@@ -904,73 +793,21 @@
             📊 Your Tokens
         </h2>
 
-        <div class="table-wrapper">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            Token
-                        </th>
-
-                        <th>
-                            Balance
-                        </th>
-
-                        <th>
-                            Supply
-                        </th>
-
-                        <th>
-                            Deadline
-                        </th>
-
-                        <th>
-                            Status
-                        </th>
-
-                        <th>
-                            Actions
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody id="tokenTableBody">
-
-                    <tr>
-
-                        <td
-                            colspan="6"
-                            class="empty"
-                        >
-                            Connect wallet to load tokens.
-                        </td>
-
-                    </tr>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-        <div class="warning">
-
-            ⚠️
-            <b>Return RWA</b> becomes available only after
-            the lock period has expired and only if the
-            deployed Router contains a supported expired
-            deposit recovery function.
-
+        <div
+            id="tokenList"
+        >
+            <div
+                style="
+                    color:#8da49d;
+                    padding:20px;
+                    text-align:center;
+                "
+            >
+                Connect wallet to load tokens.
+            </div>
         </div>
 
     </div>
-
 
     <!-- =====================================================
          REDEEM
@@ -979,17 +816,10 @@
     <div class="section">
 
         <h2>
-            🔄 Redeem RWA
+            🔄 Return RWA
         </h2>
 
-        <div
-            style="
-                display:grid;
-                grid-template-columns:1fr auto;
-                gap:12px;
-                align-items:end;
-            "
-        >
+        <div class="grid">
 
             <div>
 
@@ -999,57 +829,62 @@
 
                 <input
                     id="depositId"
-                    value="1"
+                    type="number"
                     min="1"
+                    value="1"
                 >
 
             </div>
 
-            <button
-                id="redeemBtn"
-                disabled
-            >
-                Redeem
-            </button>
-
         </div>
 
-        <div class="info-line">
+        <button
+            id="redeemBtn"
+            class="btn-yellow"
+            style="margin-top:15px;"
+            disabled
+        >
+            🔄 Return RWA
+        </button>
 
-            Standard redeem operation.
-
+        <div
+            style="
+                margin-top:10px;
+                color:#8da49d;
+                font-size:12px;
+            "
+        >
+            After the lock period expires, the borrower can attempt
+            to return the required token position and receive the RWA
+            back, provided the Router contract permits the operation.
         </div>
 
     </div>
-
 
     <!-- =====================================================
          STATUS
     ====================================================== -->
 
     <div
-        class="status info"
         id="status"
+        class="status"
     >
         Ready.
     </div>
 
-
     <div class="footer">
-        MWA Protocol v3 — Router
+        MWA Protocol v3 • Router
     </div>
 
 </div>
 
 
 <script>
-
 "use strict";
 
-
-/* =========================================================
-   CONFIG
-========================================================= */
+/* ============================================================
+   CONFIGURATION
+============================================================ */
 
 const CONFIG = {
 
@@ -1057,8 +892,7 @@ const CONFIG = {
 
     CHAIN_HEX: "0xb626",
 
-    CHAIN_NAME:
-        "Robinhood Testnet",
+    CHAIN_NAME: "Robinhood Testnet",
 
     RPC_URL:
         "https://rpc.testnet.chain.robinhood.com",
@@ -1069,106 +903,85 @@ const CONFIG = {
     ROUTER_ADDRESS:
         "0x0e5b59459F8F0315E4eF513bF64BD154EE3A2B6A",
 
-    LAUNCH_ETH:
-        "0.01",
+    /*
+     * IMPORTANT:
+     *
+     * First request is always same-origin:
+     *
+     *     /api/quotes
+     *
+     * This avoids CORS when the frontend and API
+     * are served by the same server.
+     */
 
-    PRICE_API:
-        "http://194.5.152.242:3000/api/quotes",
+    PRICE_ENDPOINTS: [
+        "/api/quotes",
+        "http://194.5.152.242:3000/api/quotes"
+    ],
 
-    PRICE_INTERVAL:
-        15000
-
+    PRICE_INTERVAL: 15000
 };
 
 
-/* =========================================================
+/* ============================================================
    DOM
-========================================================= */
+============================================================ */
 
 const connectBtn =
-    document.getElementById(
-        "connectBtn"
-    );
+    document.getElementById("connectBtn");
 
 const walletState =
-    document.getElementById(
-        "walletState"
-    );
+    document.getElementById("walletState");
 
 const walletAddress =
-    document.getElementById(
-        "walletAddress"
-    );
+    document.getElementById("walletAddress");
 
-const networkInfo =
-    document.getElementById(
-        "networkInfo"
-    );
-
-const statusEl =
-    document.getElementById(
-        "status"
-    );
-
-const depositBtn =
-    document.getElementById(
-        "depositBtn"
-    );
+const launchBtn =
+    document.getElementById("launchBtn");
 
 const redeemBtn =
-    document.getElementById(
-        "redeemBtn"
-    );
+    document.getElementById("redeemBtn");
+
+const tokenList =
+    document.getElementById("tokenList");
+
+const statusBox =
+    document.getElementById("status");
+
+const marketStatus =
+    document.getElementById("marketStatus");
+
+const marketError =
+    document.getElementById("marketError");
 
 const tokenName =
-    document.getElementById(
-        "tokenName"
-    );
+    document.getElementById("tokenName");
 
 const tokenSymbol =
-    document.getElementById(
-        "tokenSymbol"
-    );
+    document.getElementById("tokenSymbol");
 
 const tokenSupply =
-    document.getElementById(
-        "tokenSupply"
-    );
+    document.getElementById("tokenSupply");
 
 const assetSelect =
-    document.getElementById(
-        "assetSelect"
-    );
+    document.getElementById("assetSelect");
 
 const assetAmount =
-    document.getElementById(
-        "assetAmount"
-    );
+    document.getElementById("assetAmount");
 
 const lockDuration =
-    document.getElementById(
-        "lockDuration"
-    );
+    document.getElementById("lockDuration");
 
 const depositId =
-    document.getElementById(
-        "depositId"
-    );
-
-const tokenTableBody =
-    document.getElementById(
-        "tokenTableBody"
-    );
+    document.getElementById("depositId");
 
 const ethNeeded =
-    document.getElementById(
-        "ethNeeded"
-    );
+    document.getElementById("ethNeeded");
 
 
-/* =========================================================
+/* ============================================================
    ROUTER ABI
-========================================================= */
+============================================================ */
 
 const ROUTER_ABI = [
 
@@ -1190,31 +1003,13 @@ const ROUTER_ABI = [
 
     "function depositCounter() view returns(uint256)",
 
-    "function tokenInfoMap(address) view returns(address tokenAddress,string name,string symbol,uint256 totalSupply,uint256 reserveETH,uint256 reserveTokens,uint256 price,uint256 lastUpdate,bool isActive)",
-
-
-    /*
-     * Optional expired-recovery functions.
-     *
-     * They are intentionally included only as ABI candidates.
-     *
-     * If the deployed Router doesn't contain them,
-     * call will fail and UI will explain that the Router
-     * does not implement expired recovery.
-     */
-
-    "function reclaimExpired(uint256)",
-
-    "function claimExpired(uint256)",
-
-    "function returnExpired(uint256)"
-
+    "function tokenInfoMap(address) view returns(address tokenAddress,string name,string symbol,uint256 totalSupply,uint256 reserveETH,uint256 reserveTokens,uint256 price,uint256 lastUpdate,bool isActive)"
 ];
 
 
-/* =========================================================
+/* ============================================================
    TOKEN ABI
-========================================================= */
+============================================================ */
 
 const TOKEN_ABI = [
 
@@ -1224,18 +1019,15 @@ const TOKEN_ABI = [
 
     "function symbol() view returns(string)",
 
-    "function decimals() view returns(uint8)",
-
     "function approve(address,uint256) returns(bool)",
 
     "function allowance(address,address) view returns(uint256)"
-
 ];
 
 
-/* =========================================================
+/* ============================================================
    APP STATE
-========================================================= */
+============================================================ */
 
 const APP = {
 
@@ -1249,698 +1041,634 @@ const APP = {
 
     connected: false,
 
-    connecting: false,
-
-    eventsAdded: false,
-
     deposits: [],
 
     tokenCache: new Map(),
 
-    priceCache: {},
+    priceTimer: null,
 
-    priceOnline: false,
-
-    priceLastUpdate: 0
-
+    initialized: false
 };
 
 
-/* =========================================================
-   HELPERS
-========================================================= */
+/* ============================================================
+   STATUS
+============================================================ */
 
 function setStatus(
-    text,
-    type = "info"
+    message,
+    type = "success"
 ) {
 
-    statusEl.textContent =
-        text;
+    statusBox.textContent = message;
 
-    statusEl.className =
-        "status";
+    statusBox.className = "status";
 
-    statusEl.classList.add(
-        type
-    );
+    if (type === "error") {
+        statusBox.classList.add("error");
+    }
+
+    if (type === "pending") {
+        statusBox.classList.add("pending");
+    }
+
+    if (type === "info") {
+        statusBox.classList.add("info");
+    }
 }
 
 
-function shortAddress(
-    address
-) {
+/* ============================================================
+   ADDRESS
+============================================================ */
 
-    if (
-        !address ||
-        address ===
-            ethers.ZeroAddress
-    ) {
+function shortAddress(address) {
+
+    if (!address) {
         return "—";
     }
 
     return (
         address.substring(0, 6) +
         "..." +
-        address.substring(
-            address.length - 4
-        )
+        address.substring(address.length - 4)
     );
 }
 
 
-function isZeroAddress(
-    address
-) {
-
-    if (!address) {
-        return true;
-    }
+function isZeroAddress(address) {
 
     return (
+        !address ||
         address.toLowerCase() ===
-        ethers.ZeroAddress.toLowerCase()
+        "0x0000000000000000000000000000000000000000"
     );
 }
 
 
-function toBigInt(
-    value
-) {
+/* ============================================================
+   PRICE FORMAT
+============================================================ */
 
-    try {
+function formatPrice(value) {
 
-        return BigInt(
-            value.toString()
-        );
+    const number = Number(value);
 
-    } catch {
-
-        return null;
-
+    if (!Number.isFinite(number)) {
+        return "--";
     }
-}
 
-
-function formatBigInt(
-    value,
-    decimals = 0
-) {
-
-    try {
-
-        return Number(
-            ethers.formatUnits(
-                value,
-                decimals
-            )
-        ).toLocaleString(
-            "en-US",
-            {
-                maximumFractionDigits:
-                    6
-            }
-        );
-
-    } catch {
-
-        return "0";
-
-    }
-}
-
-
-function escapeHTML(
-    value
-) {
-
-    return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-
-function getErrorMessage(
-    error
-) {
-
-    return (
-        error?.reason ||
-        error?.shortMessage ||
-        error?.info?.error?.message ||
-        error?.message ||
-        "Unknown error"
+    return "$" + number.toLocaleString(
+        "en-US",
+        {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }
     );
-
 }
 
 
-function txUrl(
-    hash
-) {
+/* ============================================================
+   GENERIC PRICE PARSER
+============================================================ */
 
-    return (
-        CONFIG.EXPLORER +
-        "/tx/" +
-        hash
-    );
+/*
+ * Supports all of these possible API responses:
+ *
+ * [
+ *   {"symbol":"AAPL","price":309.38}
+ * ]
+ *
+ * {
+ *   "quotes":[...]
+ * }
+ *
+ * {
+ *   "data":[...]
+ * }
+ *
+ * {
+ *   "AAPL":{"price":309.38}
+ * }
+ *
+ * {
+ *   "AAPL":309.38
+ * }
+ */
 
-}
+function normalizeQuotes(payload) {
 
+    let raw = null;
 
-/* =========================================================
-   NETWORK
-========================================================= */
+    if (Array.isArray(payload)) {
 
-async function ensureNetwork() {
+        raw = payload;
 
-    const network =
-        await APP.provider.getNetwork();
-
-    if (
-        Number(network.chainId) ===
-        CONFIG.CHAIN_ID
+    } else if (
+        payload &&
+        Array.isArray(payload.quotes)
     ) {
 
-        return true;
+        raw = payload.quotes;
 
+    } else if (
+        payload &&
+        Array.isArray(payload.data)
+    ) {
+
+        raw = payload.data;
+
+    } else if (
+        payload &&
+        Array.isArray(payload.results)
+    ) {
+
+        raw = payload.results;
+
+    } else if (
+        payload &&
+        typeof payload === "object"
+    ) {
+
+        raw = Object.entries(payload).map(
+            ([symbol, value]) => {
+
+                if (
+                    typeof value === "number"
+                ) {
+
+                    return {
+                        symbol,
+                        price: value
+                    };
+
+                }
+
+                if (
+                    value &&
+                    typeof value === "object"
+                ) {
+
+                    return {
+                        symbol:
+                            value.symbol ||
+                            symbol,
+
+                        price:
+                            value.price ??
+                            value.last ??
+                            value.close ??
+                            value.value,
+
+                        change:
+                            value.change ??
+                            value.changePercent
+                    };
+                }
+
+                return null;
+
+            }
+        ).filter(Boolean);
     }
 
+    if (!raw) {
+        return [];
+    }
 
-    try {
+    return raw.map(item => {
 
-        await window.ethereum.request({
+        if (!item) {
+            return null;
+        }
 
-            method:
-                "wallet_switchEthereumChain",
+        const symbol = String(
+            item.symbol ||
+            item.ticker ||
+            item.code ||
+            ""
+        ).toUpperCase();
 
-            params: [
-                {
-                    chainId:
-                        CONFIG.CHAIN_HEX
-                }
-            ]
+        const price = Number(
+            item.price ??
+            item.last ??
+            item.close ??
+            item.current ??
+            item.value
+        );
 
-        });
-
-    } catch (error) {
+        const change =
+            item.change ??
+            item.changePercent ??
+            item.percentChange ??
+            null;
 
         if (
-            error.code === 4902
+            !symbol ||
+            !Number.isFinite(price)
+        ) {
+            return null;
+        }
+
+        return {
+            symbol,
+            price,
+            change
+        };
+
+    }).filter(Boolean);
+}
+
+
+/* ============================================================
+   UPDATE TICKER
+============================================================ */
+
+function updateTicker(quotes) {
+
+    const required = [
+        "AAPL",
+        "TSLA",
+        "NVDA",
+        "AMD"
+    ];
+
+    let found = 0;
+
+    for (const symbol of required) {
+
+        const item =
+            quotes.find(
+                q => q.symbol === symbol
+            );
+
+        const priceElement =
+            document.getElementById(symbol);
+
+        const changeElement =
+            document.getElementById(
+                symbol + "_CHANGE"
+            );
+
+        if (!item) {
+
+            priceElement.textContent = "--";
+
+            changeElement.textContent = "--";
+
+            continue;
+        }
+
+        found++;
+
+        priceElement.textContent =
+            formatPrice(item.price);
+
+        if (
+            item.change !== null &&
+            item.change !== undefined
         ) {
 
-            await window.ethereum.request({
+            const change =
+                Number(item.change);
 
-                method:
-                    "wallet_addEthereumChain",
+            if (Number.isFinite(change)) {
 
-                params: [
+                changeElement.textContent =
+                    (
+                        change >= 0
+                        ? "+"
+                        : ""
+                    ) +
+                    change.toFixed(2) +
+                    "%";
 
-                    {
-
-                        chainId:
-                            CONFIG.CHAIN_HEX,
-
-                        chainName:
-                            CONFIG.CHAIN_NAME,
-
-                        rpcUrls:
-                            [
-                                CONFIG.RPC_URL
-                            ],
-
-                        nativeCurrency:
-                            {
-                                name: "ETH",
-                                symbol: "ETH",
-                                decimals: 18
-                            },
-
-                        blockExplorerUrls:
-                            [
-                                CONFIG.EXPLORER
-                            ]
-
-                    }
-
-                ]
-
-            });
+                changeElement.style.color =
+                    change >= 0
+                    ? "var(--green)"
+                    : "var(--red)";
+            }
 
         } else {
 
-            throw error;
-
+            changeElement.textContent =
+                "Market";
         }
-
     }
 
-    return true;
+    if (found > 0) {
 
-}
+        marketStatus.textContent =
+            "● Market data live";
 
+        marketStatus.className =
+            "market-status ok";
 
-/* =========================================================
-   WALLET
-========================================================= */
-
-function updateWalletUI() {
-
-    if (
-        APP.connected &&
-        APP.account
-    ) {
-
-        walletState.textContent =
-            "Wallet Connected";
-
-        walletAddress.textContent =
-            APP.account;
-
-        connectBtn.textContent =
-            "Connected";
-
-        connectBtn.disabled =
-            false;
-
-        networkInfo.textContent =
-            "Network: " +
-            CONFIG.CHAIN_NAME +
-            " (" +
-            CONFIG.CHAIN_ID +
-            ")";
-
-        checkFormValidity();
+        marketError.textContent = "";
 
     } else {
 
-        walletState.textContent =
-            "Wallet not connected";
-
-        walletAddress.textContent =
-            "—";
-
-        connectBtn.textContent =
-            "Connect MetaMask";
-
-        networkInfo.textContent =
-            "Network: —";
-
-        depositBtn.disabled =
-            true;
-
-        redeemBtn.disabled =
-            true;
-
-    }
-
-}
-
-
-async function connectWallet() {
-
-    if (
-        APP.connecting
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        typeof window.ethereum ===
-        "undefined"
-    ) {
-
-        setStatus(
-            "MetaMask is not installed.",
-            "error"
-        );
-
-        return;
-
-    }
-
-
-    APP.connecting =
-        true;
-
-    connectBtn.disabled =
-        true;
-
-    connectBtn.textContent =
-        "Connecting...";
-
-
-    try {
-
-        APP.provider =
-            new ethers.BrowserProvider(
-                window.ethereum
-            );
-
-
-        await ensureNetwork();
-
-
-        const accounts =
-            await APP.provider.send(
-                "eth_requestAccounts",
-                []
-            );
-
-
-        if (
-            !accounts.length
-        ) {
-
-            throw new Error(
-                "No wallet account returned."
-            );
-
-        }
-
-
-        APP.account =
-            accounts[0];
-
-
-        APP.signer =
-            await APP.provider.getSigner();
-
-
-        APP.router =
-            new ethers.Contract(
-                CONFIG.ROUTER_ADDRESS,
-                ROUTER_ABI,
-                APP.signer
-            );
-
-
-        APP.connected =
-            true;
-
-
-        updateWalletUI();
-
-
-        setStatus(
-            "Wallet connected successfully.",
-            "success"
-        );
-
-
-        await loadDepositCounter();
-
-        await renderTokenTable();
-
-
-    } catch (error) {
-
-        console.error(
-            "[WALLET]",
-            error
-        );
-
-
-        APP.connected =
-            false;
-
-        APP.account =
-            null;
-
-        APP.signer =
-            null;
-
-        APP.router =
-            null;
-
-
-        updateWalletUI();
-
-
-        setStatus(
-            getErrorMessage(error),
-            "error"
-        );
-
-
-    } finally {
-
-        APP.connecting =
-            false;
-
-        connectBtn.disabled =
-            false;
-
-        if (
-            APP.connected
-        ) {
-
-            connectBtn.textContent =
-                "Connected";
-
-        } else {
-
-            connectBtn.textContent =
-                "Connect MetaMask";
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   DEPOSIT COUNTER
-========================================================= */
-
-async function loadDepositCounter() {
-
-    if (
-        !APP.router
-    ) {
-
-        return;
-
-    }
-
-
-    try {
-
-        const counter =
-            await APP.router.depositCounter();
-
-        const number =
-            Number(counter);
-
-        if (
-            number > 0
-        ) {
-
-            depositId.value =
-                number;
-
-        }
-
-        console.log(
-            "[ROUTER] depositCounter:",
-            number
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "[ROUTER] depositCounter failed:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   TOKEN CONTRACT
-========================================================= */
-
-async function getTokenContract(
-    address
-) {
-
-    if (
-        !APP.signer
-    ) {
-
         throw new Error(
-            "Wallet not connected."
+            "API returned no AAPL/TSLA/NVDA/AMD quotes"
         );
-
     }
-
-
-    return new ethers.Contract(
-        address,
-        TOKEN_ABI,
-        APP.signer
-    );
-
 }
 
+
+/* ============================================================
+   RAW HTTP REQUEST
+============================================================ */
+
+function httpGet(url, timeoutMs = 12000) {
+
+    return new Promise(
+        (resolve, reject) => {
+
+            const xhr =
+                new XMLHttpRequest();
+
+            xhr.open(
+                "GET",
+                url,
+                true
+            );
+
+            xhr.timeout = timeoutMs;
+
+            xhr.setRequestHeader(
+                "Accept",
+                "application/json"
+            );
+
+            xhr.onload = function() {
+
+                if (
+                    xhr.status >= 200 &&
+                    xhr.status < 300
+                ) {
+
+                    resolve({
+                        status: xhr.status,
+                        text: xhr.responseText,
+                        contentType:
+                            xhr.getResponseHeader(
+                                "content-type"
+                            )
+                    });
+
+                } else {
+
+                    reject(
+                        new Error(
+                            "HTTP " +
+                            xhr.status +
+                            " from " +
+                            url
+                        )
+                    );
+                }
+            };
+
+            xhr.onerror = function() {
+
+                reject(
+                    new Error(
+                        "Network/CORS error: " +
+                        url
+                    )
+                );
+            };
+
+            xhr.ontimeout = function() {
+
+                reject(
+                    new Error(
+                        "Timeout: " +
+                        url
+                    )
+                );
+            };
+
+            xhr.onabort = function() {
+
+                reject(
+                    new Error(
+                        "Request aborted: " +
+                        url
+                    )
+                );
+            };
+
+            xhr.send();
+        }
+    );
+}
+
+
+/* ============================================================
+   LOAD MARKET DATA
+============================================================ */
+
+async function refreshPrices() {
+
+    marketStatus.textContent =
+        "Updating...";
+
+    marketStatus.className =
+        "market-status";
+
+    marketError.textContent = "";
+
+    let lastError = null;
+
+    for (
+        const endpoint
+        of CONFIG.PRICE_ENDPOINTS
+    ) {
+
+        try {
+
+            console.log(
+                "[MWA MARKET] Request:",
+                endpoint
+            );
+
+            const response =
+                await httpGet(
+                    endpoint,
+                    12000
+                );
+
+            console.log(
+                "[MWA MARKET] HTTP:",
+                response.status
+            );
+
+            console.log(
+                "[MWA MARKET] Content-Type:",
+                response.contentType
+            );
+
+            console.log(
+                "[MWA MARKET] RAW:",
+                response.text
+            );
+
+            let json;
+
+            try {
+
+                json =
+                    JSON.parse(
+                        response.text
+                    );
+
+            } catch (parseError) {
+
+                throw new Error(
+                    "API returned invalid JSON: " +
+                    response.text.substring(
+                        0,
+                        300
+                    )
+                );
+            }
+
+            const quotes =
+                normalizeQuotes(json);
+
+            console.log(
+                "[MWA MARKET] Normalized:",
+                quotes
+            );
+
+            updateTicker(quotes);
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+                "[MWA MARKET] Failed:",
+                endpoint,
+                error
+            );
+
+            lastError = error;
+        }
+    }
+
+    marketStatus.textContent =
+        "⚠ Market data unavailable";
+
+    marketStatus.className =
+        "market-status error";
+
+    marketError.textContent =
+        lastError
+        ? lastError.message
+        : "Unknown market data error";
+
+    return false;
+}
+
+
+/* ============================================================
+   TOKEN INFO
+============================================================ */
 
 async function getTokenInfo(
-    address
+    tokenAddress
 ) {
 
     const key =
-        address.toLowerCase();
-
+        tokenAddress.toLowerCase();
 
     if (
         APP.tokenCache.has(key)
     ) {
 
         return APP.tokenCache.get(key);
-
     }
-
 
     try {
 
         const token =
-            await getTokenContract(
-                address
+            new ethers.Contract(
+                tokenAddress,
+                TOKEN_ABI,
+                APP.signer
             );
-
 
         const [
             name,
-            symbol,
-            decimals
-        ] =
-            await Promise.all([
-                token.name(),
-                token.symbol(),
-                token.decimals()
-            ]);
+            symbol
+        ] = await Promise.all([
+            token.name(),
+            token.symbol()
+        ]);
 
-
-        const info = {
-
-            contract: token,
-
+        const result = {
             name,
-
             symbol,
-
-            decimals:
-                Number(decimals)
-
+            contract: token
         };
-
 
         APP.tokenCache.set(
             key,
-            info
+            result
         );
 
-
-        return info;
+        return result;
 
     } catch (error) {
 
-        console.warn(
-            "Token info failed:",
-            address,
+        console.error(
+            "Token info error:",
             error
         );
 
-        return {
-
-            contract:
-                await getTokenContract(
-                    address
-                ),
-
-            name:
-                "Unknown Token",
-
-            symbol:
-                "TOKEN",
-
-            decimals:
-                18
-
-        };
-
+        return null;
     }
-
 }
 
 
-/* =========================================================
+/* ============================================================
    TOKEN BALANCE
-========================================================= */
+============================================================ */
 
 async function getTokenBalance(
-    address,
-    decimals
+    tokenAddress
 ) {
 
     try {
 
         const token =
-            await getTokenContract(
-                address
+            new ethers.Contract(
+                tokenAddress,
+                TOKEN_ABI,
+                APP.provider
             );
 
-
-        const balance =
-            await token.balanceOf(
-                APP.account
-            );
-
-
-        return {
-
-            raw: balance,
-
-            formatted:
-                formatBigInt(
-                    balance,
-                    decimals
-                )
-
-        };
+        return await token.balanceOf(
+            APP.account
+        );
 
     } catch (error) {
 
-        console.warn(
+        console.error(
             "Balance error:",
             error
         );
 
-        return {
-
-            raw: 0n,
-
-            formatted: "0"
-
-        };
-
+        return 0n;
     }
-
 }
 
 
-/* =========================================================
+/* ============================================================
    LOAD DEPOSITS
-========================================================= */
+============================================================ */
 
 async function loadDeposits() {
 
@@ -1950,37 +1678,20 @@ async function loadDeposits() {
     ) {
 
         return [];
-
     }
-
-
-    const deposits = [];
-
 
     try {
 
         const counter =
-            await APP.router.depositCounter();
+            Number(
+                await APP.router.depositCounter()
+            );
 
-
-        const total =
-            Number(counter);
-
-
-        console.log(
-            "[DEPOSITS] Total:",
-            total
-        );
-
-
-        /*
-         * Sequential loading is intentional.
-         * It avoids RPC rate spikes.
-         */
+        const result = [];
 
         for (
             let id = 1;
-            id <= total;
+            id <= counter;
             id++
         ) {
 
@@ -1991,19 +1702,15 @@ async function loadDeposits() {
                         id
                     );
 
-
                 if (
                     isZeroAddress(
                         d.memeToken
                     )
                 ) {
-
                     continue;
-
                 }
 
-
-                deposits.push({
+                result.push({
 
                     id,
 
@@ -2023,152 +1730,98 @@ async function loadDeposits() {
                         d.redemptionDeadline,
 
                     isRedeemed:
-                        Boolean(
-                            d.isRedeemed
-                        ),
+                        d.isRedeemed,
 
                     isClaimed:
-                        Boolean(
-                            d.isClaimed
-                        )
-
+                        d.isClaimed
                 });
 
             } catch (error) {
 
                 console.warn(
-                    `[DEPOSIT ${id}]`,
+                    "Deposit read error:",
+                    id,
                     error
                 );
-
             }
-
         }
 
-
         APP.deposits =
-            deposits;
+            result;
 
-
-        return deposits;
-
+        return result;
 
     } catch (error) {
 
         console.error(
-            "[DEPOSITS]",
+            "Deposit counter error:",
             error
         );
 
         return [];
-
     }
-
 }
 
 
-/* =========================================================
-   DEADLINE
-========================================================= */
-
-function isExpired(
-    deadline
-) {
-
-    const now =
-        Math.floor(
-            Date.now() / 1000
-        );
-
-
-    return (
-        BigInt(deadline) <=
-        BigInt(now)
-    );
-
-}
-
-
-/* =========================================================
+/* ============================================================
    RENDER TOKEN TABLE
-========================================================= */
+============================================================ */
 
-async function renderTokenTable() {
+async function renderTokenList() {
 
-    if (
-        !APP.connected
-    ) {
+    if (!APP.connected) {
 
-        tokenTableBody.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="6"
-                    class="empty"
-                >
-                    Connect wallet to load tokens.
-                </td>
-
-            </tr>
-
-        `;
+        tokenList.innerHTML =
+            `
+            <div style="
+                color:#8da49d;
+                padding:20px;
+                text-align:center;
+            ">
+                Connect wallet to load tokens.
+            </div>
+            `;
 
         return;
-
     }
 
-
-    tokenTableBody.innerHTML = `
-
-        <tr>
-
-            <td
-                colspan="6"
-                class="empty"
-            >
-                Loading blockchain data...
-            </td>
-
-        </tr>
-
-    `;
-
+    tokenList.innerHTML =
+        `
+        <div style="
+            color:#8da49d;
+            padding:20px;
+            text-align:center;
+        ">
+            Loading blockchain data...
+        </div>
+        `;
 
     const deposits =
         await loadDeposits();
-
 
     if (
         deposits.length === 0
     ) {
 
-        tokenTableBody.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="6"
-                    class="empty"
-                >
-                    No tokens found.
-                    Launch your first token.
-                </td>
-
-            </tr>
-
-        `;
+        tokenList.innerHTML =
+            `
+            <div style="
+                color:#8da49d;
+                padding:20px;
+                text-align:center;
+            ">
+                No deposits/tokens found.
+            </div>
+            `;
 
         return;
-
     }
 
-
-    let html = "";
-
+    let rows = "";
 
     for (
-        const deposit of deposits
+        const deposit
+        of deposits
     ) {
 
         const info =
@@ -2176,350 +1829,274 @@ async function renderTokenTable() {
                 deposit.memeToken
             );
 
+        if (!info) {
+            continue;
+        }
 
         const balance =
             await getTokenBalance(
-                deposit.memeToken,
-                info.decimals
+                deposit.memeToken
             );
 
+        const totalSupply =
+            BigInt(
+                deposit.memeTokenAmount
+            );
 
-        const expired =
-            isExpired(
+        const deadline =
+            Number(
                 deposit.redemptionDeadline
             );
 
+        const now =
+            Math.floor(
+                Date.now() / 1000
+            );
 
-        let badgeClass =
-            "badge-active";
+        const expired =
+            now >= deadline;
 
-        let badgeText =
-            "🟢 Active";
+        let stateText;
 
+        let stateClass;
 
-        if (
-            deposit.isClaimed
-        ) {
+        if (deposit.isRedeemed) {
 
-            badgeClass =
-                "badge-claimed";
+            stateText =
+                "REDEEMED";
 
-            badgeText =
-                "🔵 RWA Returned";
+            stateClass =
+                "redeemed";
 
-        } else if (
-            deposit.isRedeemed
-        ) {
+        } else if (expired) {
 
-            badgeClass =
-                "badge-redeemed";
+            stateText =
+                "EXPIRED";
 
-            badgeText =
-                "🔴 Redeemed";
+            stateClass =
+                "expired";
 
-        } else if (
-            expired
-        ) {
+        } else {
 
-            badgeClass =
-                "badge-expired";
+            stateText =
+                "ACTIVE";
 
-            badgeText =
-                "🔓 Expired";
-
+            stateClass =
+                "active";
         }
 
+        const balanceFormatted =
+            ethers.formatUnits(
+                balance,
+                18
+            );
 
-        const deadline =
-            new Date(
-                Number(
-                    deposit.redemptionDeadline
-                ) * 1000
-            ).toLocaleString();
+        const supplyFormatted =
+            ethers.formatUnits(
+                totalSupply,
+                18
+            );
 
+        rows += `
 
-        let actions = `
+        <tr>
 
-            <input
-                type="number"
-                class="trade-input"
-                id="amount_${deposit.id}"
-                value="1"
-                min="1"
-                step="1"
-            >
+            <td>
 
-            <button
-                class="small btn-buy"
-                data-token="${escapeHTML(deposit.memeToken)}"
-                data-id="${deposit.id}"
-                ${expired ? "disabled" : ""}
-            >
-                Buy
-            </button>
+                <div class="token-name">
+                    ${escapeHtml(info.name)}
+                </div>
 
-            <button
-                class="small btn-sell"
-                data-token="${escapeHTML(deposit.memeToken)}"
-                data-id="${deposit.id}"
-                ${expired ? "disabled" : ""}
-            >
-                Sell
-            </button>
+                <div class="token-symbol">
+                    ${escapeHtml(info.symbol)}
+                </div>
 
-            <button
-                class="small btn-approve"
-                data-token="${escapeHTML(deposit.memeToken)}"
-            >
-                Approve
-            </button>
-
-        `;
-
-
-        /*
-         * Expired deposit:
-         *
-         * show Return RWA.
-         */
-
-        if (
-            expired &&
-            !deposit.isClaimed &&
-            !deposit.isRedeemed
-        ) {
-
-            actions += `
-
-                <button
-                    class="small btn-return"
-                    data-id="${deposit.id}"
-                >
-                    🔓 Return RWA
-                </button>
-
-            `;
-
-        }
-
-
-        html += `
-
-            <tr>
-
-                <td>
-
-                    <div class="token-name">
-
-                        ${escapeHTML(
-                            info.name
-                        )}
-
-                        (${escapeHTML(
-                            info.symbol
-                        )})
-
-                    </div>
-
-                    <div class="token-address">
-
-                        ${shortAddress(
-                            deposit.memeToken
-                        )}
-
-                    </div>
-
-                    <div class="deposit-id">
-
-                        Deposit #${deposit.id}
-
-                    </div>
-
-                </td>
-
-
-                <td>
-
-                    ${escapeHTML(
-                        balance.formatted
+                <div class="token-address">
+                    ${shortAddress(
+                        deposit.memeToken
                     )}
+                </div>
 
-                    ${escapeHTML(
-                        info.symbol
-                    )}
+            </td>
 
-                </td>
+            <td>
 
+                <div class="deposit-id">
+                    #${deposit.id}
+                </div>
 
-                <td>
+            </td>
 
-                    ${formatBigInt(
-                        deposit.memeTokenAmount,
-                        info.decimals
-                    )}
+            <td>
 
-                </td>
+                <div class="balance">
+                    ${balanceFormatted}
+                </div>
 
+                <div class="token-address">
+                    / ${supplyFormatted}
+                </div>
 
-                <td>
+            </td>
 
-                    ${escapeHTML(
-                        deadline
-                    )}
+            <td>
 
-                </td>
+                <div class="${stateClass}">
+                    ${stateText}
+                </div>
 
+                <div class="deadline">
 
-                <td>
+                    ${new Date(
+                        deadline * 1000
+                    ).toLocaleString()}
 
-                    <span
-                        class="badge ${badgeClass}"
+                </div>
+
+            </td>
+
+            <td>
+
+                <div class="actions">
+
+                    <input
+                        class="amount-input"
+                        type="number"
+                        min="1"
+                        value="1"
+                        id="amount_${deposit.id}"
                     >
-                        ${badgeText}
-                    </span>
 
-                </td>
+                    <button
+                        class="btn-green btn-small"
+                        onclick="
+                            buyToken(
+                                '${deposit.memeToken}',
+                                ${deposit.id}
+                            )
+                        "
+                    >
+                        Buy
+                    </button>
 
+                    <button
+                        class="btn-red btn-small"
+                        onclick="
+                            sellToken(
+                                '${deposit.memeToken}',
+                                ${deposit.id}
+                            )
+                        "
+                    >
+                        Sell
+                    </button>
 
-                <td>
+                    <button
+                        class="btn-yellow btn-small"
+                        onclick="
+                            returnRWA(
+                                ${deposit.id}
+                            )
+                        "
+                    >
+                        Return RWA
+                    </button>
 
-                    <div class="actions">
+                </div>
 
-                        ${actions}
+            </td>
 
-                    </div>
-
-                </td>
-
-            </tr>
+        </tr>
 
         `;
-
     }
 
+    if (!rows) {
 
-    tokenTableBody.innerHTML =
-        html;
+        tokenList.innerHTML =
+            `
+            <div style="
+                color:#8da49d;
+                padding:20px;
+                text-align:center;
+            ">
+                Tokens could not be loaded.
+            </div>
+            `;
 
+        return;
+    }
 
-    bindTokenButtons();
+    tokenList.innerHTML = `
 
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Token
+                        </th>
+
+                        <th>
+                            Deposit
+                        </th>
+
+                        <th>
+                            Balance / Supply
+                        </th>
+
+                        <th>
+                            Lock
+                        </th>
+
+                        <th>
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    ${rows}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    `;
 }
 
 
-/* =========================================================
-   BUTTON BINDING
-========================================================= */
+/* ============================================================
+   HTML ESCAPE
+============================================================ */
 
-function bindTokenButtons() {
+function escapeHtml(value) {
 
-    document
-        .querySelectorAll(
-            ".btn-buy"
-        )
-        .forEach(
-            button => {
-
-                button.onclick =
-                    () => {
-
-                        buyToken(
-                            button.dataset.token,
-                            button.dataset.id
-                        );
-
-                    };
-
-            }
-        );
-
-
-    document
-        .querySelectorAll(
-            ".btn-sell"
-        )
-        .forEach(
-            button => {
-
-                button.onclick =
-                    () => {
-
-                        sellToken(
-                            button.dataset.token,
-                            button.dataset.id
-                        );
-
-                    };
-
-            }
-        );
-
-
-    document
-        .querySelectorAll(
-            ".btn-approve"
-        )
-        .forEach(
-            button => {
-
-                button.onclick =
-                    () => {
-
-                        approveToken(
-                            button.dataset.token
-                        );
-
-                    };
-
-            }
-        );
-
-
-    document
-        .querySelectorAll(
-            ".btn-return"
-        )
-        .forEach(
-            button => {
-
-                button.onclick =
-                    () => {
-
-                        returnExpiredRWA(
-                            Number(
-                                button.dataset.id
-                            )
-                        );
-
-                    };
-
-            }
-        );
-
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
 
 
-/* =========================================================
+/* ============================================================
    APPROVE
-========================================================= */
+============================================================ */
 
 async function approveToken(
     tokenAddress
 ) {
-
-    if (
-        !APP.connected
-    ) {
-
-        setStatus(
-            "Connect wallet first.",
-            "error"
-        );
-
-        return;
-
-    }
-
 
     try {
 
@@ -2528,12 +2105,12 @@ async function approveToken(
             "pending"
         );
 
-
         const token =
-            await getTokenContract(
-                tokenAddress
+            new ethers.Contract(
+                tokenAddress,
+                TOKEN_ABI,
+                APP.signer
             );
-
 
         const tx =
             await token.approve(
@@ -2541,44 +2118,29 @@ async function approveToken(
                 ethers.MaxUint256
             );
 
-
-        setStatus(
-            "⏳ Waiting for approval...",
-            "pending"
-        );
-
-
         await tx.wait();
 
-
         setStatus(
-            `✅ Token approved. TX: ${tx.hash}`,
+            "✅ Token approved.",
             "success"
         );
 
-
     } catch (error) {
 
-        console.error(
-            "[APPROVE]",
-            error
-        );
-
+        console.error(error);
 
         setStatus(
             "❌ Approval failed: " +
             getErrorMessage(error),
             "error"
         );
-
     }
-
 }
 
 
-/* =========================================================
+/* ============================================================
    BUY
-========================================================= */
+============================================================ */
 
 async function buyToken(
     tokenAddress,
@@ -2587,207 +2149,112 @@ async function buyToken(
 
     try {
 
-        if (
-            !APP.connected
-        ) {
-
-            throw new Error(
-                "Connect wallet first."
-            );
-
-        }
-
-
         const input =
             document.getElementById(
-                `amount_${id}`
+                "amount_" + id
             );
-
-
-        const info =
-            await getTokenInfo(
-                tokenAddress
-            );
-
-
-        const amountText =
-            input.value.trim();
-
-
-        if (
-            !/^\d+$/.test(
-                amountText
-            )
-        ) {
-
-            throw new Error(
-                "Invalid token amount."
-            );
-
-        }
-
 
         const amount =
-            ethers.parseUnits(
-                amountText,
-                info.decimals
+            BigInt(
+                input.value
             );
-
 
         if (
             amount <= 0n
         ) {
-
             throw new Error(
-                "Amount must be greater than zero."
+                "Amount must be positive."
             );
-
         }
 
-
         setStatus(
-            `Buying ${amountText} ${info.symbol}...`,
+            "Calculating buy...",
             "pending"
         );
-
 
         const reserves =
             await APP.router.getReserves(
                 tokenAddress
             );
 
-
         const reserveETH =
-            toBigInt(
-                reserves[0]
-            );
+            BigInt(reserves[0]);
 
         const reserveTokens =
-            toBigInt(
-                reserves[1]
-            );
-
+            BigInt(reserves[1]);
 
         if (
-            reserveETH === null ||
-            reserveTokens === null ||
             reserveETH <= 0n ||
             reserveTokens <= 0n
         ) {
 
             throw new Error(
-                "Invalid liquidity reserves."
+                "No liquidity."
             );
-
         }
 
-
         /*
-         * Constant-product approximation.
+         * Simple proportional estimate.
          *
-         * ETH input required:
-         *
-         * dx = x * dy / (y - dy)
-         *
-         * then +1% safety margin.
+         * The exact pricing formula should ideally
+         * be taken from the Router contract.
          */
 
-        const denominator =
-            reserveTokens -
-            amount;
-
-
-        if (
-            denominator <= 0n
-        ) {
-
-            throw new Error(
-                "Requested amount is too large for available liquidity."
-            );
-
-        }
-
-
-        let ethRequired =
-            (
-                reserveETH *
-                amount
-            ) /
-            denominator;
-
-
-        ethRequired =
-            (
-                ethRequired *
-                101n
-            ) /
-            100n;
-
-
-        /*
-         * Minimum output is the requested
-         * amount with 5% tolerance.
-         */
-
-        const minAmountOut =
+        const ethRequired =
             (
                 amount *
-                95n
+                reserveETH
             ) /
-            100n;
+            reserveTokens;
 
+        const ethWithBuffer =
+            ethRequired +
+            (
+                ethRequired *
+                2n /
+                100n
+            );
+
+        setStatus(
+            "Waiting for buy transaction...",
+            "pending"
+        );
 
         const tx =
             await APP.router.buy(
                 tokenAddress,
-                minAmountOut,
+                amount,
                 {
                     value:
-                        ethRequired
+                        ethWithBuffer
                 }
             );
 
-
-        setStatus(
-            "⏳ Waiting for buy confirmation...",
-            "pending"
-        );
-
-
         await tx.wait();
 
-
         setStatus(
-            `✅ Bought ${amountText} ${info.symbol}. TX: ${tx.hash}`,
+            "✅ Tokens purchased.",
             "success"
         );
 
-
-        await renderTokenTable();
-
+        await renderTokenList();
 
     } catch (error) {
 
-        console.error(
-            "[BUY]",
-            error
-        );
-
+        console.error(error);
 
         setStatus(
             "❌ Buy failed: " +
             getErrorMessage(error),
             "error"
         );
-
     }
-
 }
 
 
-/* =========================================================
+/* ============================================================
    SELL
-========================================================= */
+============================================================ */
 
 async function sellToken(
     tokenAddress,
@@ -2796,62 +2263,35 @@ async function sellToken(
 
     try {
 
-        if (
-            !APP.connected
-        ) {
-
-            throw new Error(
-                "Connect wallet first."
-            );
-
-        }
-
-
         const input =
             document.getElementById(
-                `amount_${id}`
+                "amount_" + id
             );
-
-
-        const info =
-            await getTokenInfo(
-                tokenAddress
-            );
-
-
-        const amountText =
-            input.value.trim();
-
-
-        if (
-            !/^\d+$/.test(
-                amountText
-            )
-        ) {
-
-            throw new Error(
-                "Invalid token amount."
-            );
-
-        }
-
 
         const amount =
-            ethers.parseUnits(
-                amountText,
-                info.decimals
+            BigInt(
+                input.value
             );
 
+        if (
+            amount <= 0n
+        ) {
+            throw new Error(
+                "Amount must be positive."
+            );
+        }
 
         const token =
-            info.contract;
-
+            new ethers.Contract(
+                tokenAddress,
+                TOKEN_ABI,
+                APP.signer
+            );
 
         const balance =
             await token.balanceOf(
                 APP.account
             );
-
 
         if (
             balance < amount
@@ -2860,9 +2300,7 @@ async function sellToken(
             throw new Error(
                 "Insufficient token balance."
             );
-
         }
-
 
         const allowance =
             await token.allowance(
@@ -2870,585 +2308,8 @@ async function sellToken(
                 CONFIG.ROUTER_ADDRESS
             );
 
-
         if (
             allowance < amount
-        ) {
-
-            setStatus(
-                "Approving token for sale...",
-                "pending"
-            );
-
-
-            const approveTx =
-                await token.approve(
-                    CONFIG.ROUTER_ADDRESS,
-                    ethers.MaxUint256
-                );
-
-
-            await approveTx.wait();
-
-        }
-
-
-        setStatus(
-            `Selling ${amountText} ${info.symbol}...`,
-            "pending"
-        );
-
-
-        const reserves =
-            await APP.router.getReserves(
-                tokenAddress
-            );
-
-
-        const reserveETH =
-            toBigInt(
-                reserves[0]
-            );
-
-        const reserveTokens =
-            toBigInt(
-                reserves[1]
-            );
-
-
-        if (
-            reserveETH <= 0n ||
-            reserveTokens <= 0n
-        ) {
-
-            throw new Error(
-                "Invalid liquidity reserves."
-            );
-
-        }
-
-
-        /*
-         * Approximate ETH output:
-         *
-         * dy = dx * ETH / (tokens + dx)
-         */
-
-        const ethOut =
-            (
-                amount *
-                reserveETH
-            ) /
-            (
-                reserveTokens +
-                amount
-            );
-
-
-        const minEthOut =
-            (
-                ethOut *
-                95n
-            ) /
-            100n;
-
-
-        const tx =
-            await APP.router.sell(
-                tokenAddress,
-                amount,
-                minEthOut
-            );
-
-
-        setStatus(
-            "⏳ Waiting for sell confirmation...",
-            "pending"
-        );
-
-
-        await tx.wait();
-
-
-        setStatus(
-            `✅ Sold ${amountText} ${info.symbol}. TX: ${tx.hash}`,
-            "success"
-        );
-
-
-        await renderTokenTable();
-
-
-    } catch (error) {
-
-        console.error(
-            "[SELL]",
-            error
-        );
-
-
-        setStatus(
-            "❌ Sell failed: " +
-            getErrorMessage(error),
-            "error"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   EXPIRED RWA RETURN
-========================================================= */
-
-
-/*
- * Important:
- *
- * The actual deployed Router must implement one of
- * these functions.
- *
- * We cannot create a Solidity function from HTML.
- */
-
-const EXPIRED_METHODS = [
-
-    "reclaimExpired",
-
-    "claimExpired",
-
-    "returnExpired"
-
-];
-
-
-async function findExpiredMethod() {
-
-    if (
-        !APP.router
-    ) {
-
-        return null;
-
-    }
-
-
-    for (
-        const method of
-        EXPIRED_METHODS
-    ) {
-
-        try {
-
-            /*
-             * ethers Contract method existence in ABI
-             * does NOT prove the deployed bytecode has it.
-             *
-             * We therefore only return candidates here.
-             */
-
-            if (
-                typeof APP.router[method] ===
-                "function"
-            ) {
-
-                return method;
-
-            }
-
-        } catch {
-
-        }
-
-    }
-
-
-    return null;
-
-}
-
-
-async function returnExpiredRWA(
-    id
-) {
-
-    if (
-        !APP.connected
-    ) {
-
-        setStatus(
-            "Connect wallet first.",
-            "error"
-        );
-
-        return;
-
-    }
-
-
-    try {
-
-        const deposit =
-            await APP.router.getDeposit(
-                id
-            );
-
-
-        if (
-            isZeroAddress(
-                deposit.memeToken
-            )
-        ) {
-
-            throw new Error(
-                `Deposit ${id} does not exist.`
-            );
-
-        }
-
-
-        if (
-            deposit.isClaimed
-        ) {
-
-            throw new Error(
-                `Deposit ${id} is already claimed.`
-            );
-
-        }
-
-
-        if (
-            deposit.isRedeemed
-        ) {
-
-            throw new Error(
-                `Deposit ${id} is already redeemed.`
-            );
-
-        }
-
-
-        if (
-            !isExpired(
-                deposit.redemptionDeadline
-            )
-        ) {
-
-            const deadline =
-                new Date(
-                    Number(
-                        deposit.redemptionDeadline
-                    ) * 1000
-                );
-
-
-            throw new Error(
-                "Lock period has not expired. " +
-                "Unlocks at " +
-                deadline.toLocaleString()
-            );
-
-        }
-
-
-        /*
-         * We must first have the full meme-token amount.
-         *
-         * The expected contract design is:
-         *
-         * user returns the outstanding meme tokens
-         * -> Router releases the locked RWA.
-         */
-
-        const info =
-            await getTokenInfo(
-                deposit.memeToken
-            );
-
-
-        const balance =
-            await info.contract.balanceOf(
-                APP.account
-            );
-
-
-        const required =
-            deposit.memeTokenAmount;
-
-
-        if (
-            balance < required
-        ) {
-
-            throw new Error(
-                "Insufficient token balance for RWA return. " +
-                "Required: " +
-                formatBigInt(
-                    required,
-                    info.decimals
-                ) +
-                " " +
-                info.symbol +
-                ", available: " +
-                formatBigInt(
-                    balance,
-                    info.decimals
-                )
-            );
-
-        }
-
-
-        /*
-         * Approve Router to receive the token balance.
-         */
-
-        const allowance =
-            await info.contract.allowance(
-                APP.account,
-                CONFIG.ROUTER_ADDRESS
-            );
-
-
-        if (
-            allowance < required
-        ) {
-
-            setStatus(
-                "⏳ Approving remaining tokens...",
-                "pending"
-            );
-
-
-            const approveTx =
-                await info.contract.approve(
-                    CONFIG.ROUTER_ADDRESS,
-                    ethers.MaxUint256
-                );
-
-
-            await approveTx.wait();
-
-        }
-
-
-        /*
-         * IMPORTANT:
-         *
-         * Do not blindly call redeem().
-         *
-         * Expired recovery requires a dedicated Router
-         * function.
-         */
-
-        const method =
-            await findExpiredMethod();
-
-
-        if (
-            !method
-        ) {
-
-            throw new Error(
-                "Router ABI does not expose an expired-RWA recovery function. " +
-                "The deployed Router must implement reclaimExpired(uint256), " +
-                "claimExpired(uint256), or returnExpired(uint256)."
-            );
-
-        }
-
-
-        setStatus(
-            `⏳ Returning RWA for deposit ${id}...`,
-            "pending"
-        );
-
-
-        let tx;
-
-
-        try {
-
-            tx =
-                await APP.router[method](
-                    id
-                );
-
-        } catch (error) {
-
-            /*
-             * If selector/function does not exist on
-             * deployed bytecode, give explicit explanation.
-             */
-
-            throw new Error(
-                `Router rejected ${method}(${id}): ` +
-                getErrorMessage(error)
-            );
-
-        }
-
-
-        setStatus(
-            "⏳ Waiting for RWA return confirmation...",
-            "pending"
-        );
-
-
-        await tx.wait();
-
-
-        setStatus(
-            `✅ RWA returned for deposit ${id}. TX: ${tx.hash}`,
-            "success"
-        );
-
-
-        APP.tokenCache.clear();
-
-
-        await renderTokenTable();
-
-
-    } catch (error) {
-
-        console.error(
-            "[RETURN RWA]",
-            error
-        );
-
-
-        setStatus(
-            "❌ RWA return failed: " +
-            getErrorMessage(error),
-            "error"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   STANDARD REDEEM
-========================================================= */
-
-async function executeRedeem() {
-
-    if (
-        !APP.connected
-    ) {
-
-        setStatus(
-            "Connect wallet first.",
-            "error"
-        );
-
-        return;
-
-    }
-
-
-    try {
-
-        const id =
-            Number(
-                depositId.value
-            );
-
-
-        if (
-            !Number.isInteger(id) ||
-            id <= 0
-        ) {
-
-            throw new Error(
-                "Invalid deposit ID."
-            );
-
-        }
-
-
-        const deposit =
-            await APP.router.getDeposit(
-                id
-            );
-
-
-        if (
-            isZeroAddress(
-                deposit.memeToken
-            )
-        ) {
-
-            throw new Error(
-                `Deposit ${id} does not exist.`
-            );
-
-        }
-
-
-        if (
-            deposit.isRedeemed
-        ) {
-
-            throw new Error(
-                "Deposit already redeemed."
-            );
-
-        }
-
-
-        if (
-            isExpired(
-                deposit.redemptionDeadline
-            )
-        ) {
-
-            throw new Error(
-                "Deposit has expired. " +
-                "Use Return RWA instead."
-            );
-
-        }
-
-
-        const info =
-            await getTokenInfo(
-                deposit.memeToken
-            );
-
-
-        const balance =
-            await info.contract.balanceOf(
-                APP.account
-            );
-
-
-        if (
-            balance <
-            deposit.memeTokenAmount
-        ) {
-
-            throw new Error(
-                "Insufficient meme-token balance."
-            );
-
-        }
-
-
-        const allowance =
-            await info.contract.allowance(
-                APP.account,
-                CONFIG.ROUTER_ADDRESS
-            );
-
-
-        if (
-            allowance <
-            deposit.memeTokenAmount
         ) {
 
             setStatus(
@@ -3456,136 +2317,560 @@ async function executeRedeem() {
                 "pending"
             );
 
-
-            const approvalTx =
-                await info.contract.approve(
+            const approveTx =
+                await token.approve(
                     CONFIG.ROUTER_ADDRESS,
                     ethers.MaxUint256
                 );
 
-
-            await approvalTx.wait();
-
+            await approveTx.wait();
         }
 
+        const reserves =
+            await APP.router.getReserves(
+                tokenAddress
+            );
+
+        const reserveETH =
+            BigInt(reserves[0]);
+
+        const reserveTokens =
+            BigInt(reserves[1]);
+
+        const estimatedETH =
+            (
+                amount *
+                reserveETH
+            ) /
+            reserveTokens;
+
+        const minETH =
+            estimatedETH *
+            95n /
+            100n;
 
         setStatus(
-            `⏳ Redeeming deposit ${id}...`,
+            "Waiting for sell transaction...",
             "pending"
         );
 
+        const tx =
+            await APP.router.sell(
+                tokenAddress,
+                amount,
+                minETH
+            );
+
+        await tx.wait();
+
+        setStatus(
+            "✅ Tokens sold.",
+            "success"
+        );
+
+        await renderTokenList();
+
+    } catch (error) {
+
+        console.error(error);
+
+        setStatus(
+            "❌ Sell failed: " +
+            getErrorMessage(error),
+            "error"
+        );
+    }
+}
+
+
+/* ============================================================
+   RETURN RWA
+============================================================ */
+
+async function returnRWA(
+    id
+) {
+
+    try {
+
+        if (!APP.connected) {
+
+            throw new Error(
+                "Connect wallet first."
+            );
+        }
+
+        setStatus(
+            "Reading deposit...",
+            "pending"
+        );
+
+        const deposit =
+            await APP.router.getDeposit(
+                id
+            );
+
+        if (
+            isZeroAddress(
+                deposit.memeToken
+            )
+        ) {
+
+            throw new Error(
+                "Invalid deposit."
+            );
+        }
+
+        if (
+            deposit.isRedeemed
+        ) {
+
+            throw new Error(
+                "Deposit is already redeemed."
+            );
+        }
+
+        const deadline =
+            Number(
+                deposit.redemptionDeadline
+            );
+
+        const now =
+            Math.floor(
+                Date.now() / 1000
+            );
+
+        /*
+         * IMPORTANT:
+         *
+         * We intentionally do NOT reject an expired
+         * deposit here.
+         *
+         * The Router contract is the authority.
+         *
+         * If redeem() is designed to allow redemption
+         * after expiry, this call will work.
+         *
+         * If the Router does not allow it, the contract
+         * will revert.
+         */
+
+        if (now >= deadline) {
+
+            setStatus(
+                "⏳ Lock expired. Preparing RWA return...",
+                "pending"
+            );
+
+        } else {
+
+            setStatus(
+                "⏳ Lock is still active. Checking Router rules...",
+                "pending"
+            );
+        }
+
+        const token =
+            new ethers.Contract(
+                deposit.memeToken,
+                TOKEN_ABI,
+                APP.signer
+            );
+
+        const required =
+            BigInt(
+                deposit.memeTokenAmount
+            );
+
+        const balance =
+            await token.balanceOf(
+                APP.account
+            );
+
+        /*
+         * redeem() normally requires the complete
+         * token amount to be returned.
+         *
+         * This is the critical condition for receiving
+         * the RWA back.
+         */
+
+        if (
+            balance < required
+        ) {
+
+            throw new Error(
+                "Not enough tokens to return RWA. " +
+                "Required: " +
+                ethers.formatUnits(
+                    required,
+                    18
+                ) +
+                ", current balance: " +
+                ethers.formatUnits(
+                    balance,
+                    18
+                )
+            );
+        }
+
+        const allowance =
+            await token.allowance(
+                APP.account,
+                CONFIG.ROUTER_ADDRESS
+            );
+
+        if (
+            allowance < required
+        ) {
+
+            setStatus(
+                "⏳ Approving tokens for RWA return...",
+                "pending"
+            );
+
+            const approveTx =
+                await token.approve(
+                    CONFIG.ROUTER_ADDRESS,
+                    ethers.MaxUint256
+                );
+
+            await approveTx.wait();
+        }
+
+        setStatus(
+            "⏳ Returning RWA...",
+            "pending"
+        );
 
         const tx =
             await APP.router.redeem(
                 id
             );
 
-
         await tx.wait();
-
-
-        setStatus(
-            `✅ Deposit ${id} redeemed. TX: ${tx.hash}`,
-            "success"
-        );
-
 
         APP.tokenCache.clear();
 
+        await renderTokenList();
 
-        await renderTokenTable();
-
+        setStatus(
+            "✅ RWA successfully returned.",
+            "success"
+        );
 
     } catch (error) {
 
         console.error(
-            "[REDEEM]",
+            "RWA return error:",
             error
         );
 
-
         setStatus(
-            "❌ Redeem failed: " +
+            "❌ RWA return failed: " +
             getErrorMessage(error),
             "error"
         );
-
     }
-
 }
 
 
-/* =========================================================
-   FORM VALIDATION
-========================================================= */
+/* ============================================================
+   ERROR PARSER
+============================================================ */
 
-function checkFormValidity() {
+function getErrorMessage(error) {
+
+    if (!error) {
+        return "Unknown error";
+    }
 
     if (
-        !APP.connected
+        error.reason
+    ) {
+        return error.reason;
+    }
+
+    if (
+        error.shortMessage
+    ) {
+        return error.shortMessage;
+    }
+
+    if (
+        error.info &&
+        error.info.error &&
+        error.info.error.message
     ) {
 
-        depositBtn.disabled =
+        return error.info.error.message;
+    }
+
+    if (
+        error.message
+    ) {
+
+        return error.message;
+    }
+
+    return String(error);
+}
+
+
+/* ============================================================
+   NETWORK
+============================================================ */
+
+async function ensureNetwork() {
+
+    const network =
+        await APP.provider.getNetwork();
+
+    if (
+        Number(network.chainId) ===
+        CONFIG.CHAIN_ID
+    ) {
+
+        return;
+    }
+
+    try {
+
+        await window.ethereum.request({
+
+            method:
+                "wallet_switchEthereumChain",
+
+            params: [
+                {
+                    chainId:
+                        CONFIG.CHAIN_HEX
+                }
+            ]
+        });
+
+    } catch (error) {
+
+        if (
+            error.code !== 4902
+        ) {
+
+            throw error;
+        }
+
+        await window.ethereum.request({
+
+            method:
+                "wallet_addEthereumChain",
+
+            params: [
+
+                {
+
+                    chainId:
+                        CONFIG.CHAIN_HEX,
+
+                    chainName:
+                        CONFIG.CHAIN_NAME,
+
+                    rpcUrls: [
+                        CONFIG.RPC_URL
+                    ],
+
+                    nativeCurrency: {
+
+                        name: "ETH",
+
+                        symbol: "ETH",
+
+                        decimals: 18
+                    },
+
+                    blockExplorerUrls: [
+                        CONFIG.EXPLORER
+                    ]
+                }
+
+            ]
+        });
+    }
+}
+
+
+/* ============================================================
+   WALLET UI
+============================================================ */
+
+function updateWalletUI() {
+
+    if (APP.connected) {
+
+        walletState.textContent =
+            "Wallet Connected";
+
+        walletAddress.textContent =
+            shortAddress(
+                APP.account
+            );
+
+        connectBtn.textContent =
+            "Connected";
+
+        connectBtn.disabled =
+            false;
+
+        launchBtn.disabled =
+            false;
+
+        redeemBtn.disabled =
+            false;
+
+    } else {
+
+        walletState.textContent =
+            "Wallet not connected";
+
+        walletAddress.textContent =
+            "—";
+
+        connectBtn.textContent =
+            "Connect MetaMask";
+
+        launchBtn.disabled =
             true;
 
         redeemBtn.disabled =
             true;
-
-        return;
-
     }
-
-
-    const name =
-        tokenName.value.trim();
-
-    const symbol =
-        tokenSymbol.value.trim();
-
-    const supply =
-        tokenSupply.value.trim();
-
-    const asset =
-        assetSelect.value.trim();
-
-    const amount =
-        assetAmount.value.trim();
-
-    const duration =
-        lockDuration.value.trim();
-
-
-    let valid =
-        name.length > 0 &&
-        symbol.length > 0 &&
-        /^\d+$/.test(supply) &&
-        BigInt(supply) > 0n &&
-        ethers.isAddress(asset) &&
-        /^\d+$/.test(amount) &&
-        BigInt(amount) > 0n &&
-        /^\d+$/.test(duration) &&
-        Number(duration) >= 60;
-
-
-    depositBtn.disabled =
-        !valid;
-
-
-    redeemBtn.disabled =
-        false;
-
 }
 
 
-/* =========================================================
-   LAUNCH
-========================================================= */
+/* ============================================================
+   CONNECT
+============================================================ */
 
-async function executeLaunch() {
+async function connectWallet() {
 
     if (
-        !APP.connected
+        typeof window.ethereum ===
+        "undefined"
     ) {
+
+        setStatus(
+            "MetaMask is not installed.",
+            "error"
+        );
+
+        return;
+    }
+
+    connectBtn.disabled =
+        true;
+
+    connectBtn.textContent =
+        "Connecting...";
+
+    try {
+
+        APP.provider =
+            new ethers.BrowserProvider(
+                window.ethereum
+            );
+
+        await ensureNetwork();
+
+        const accounts =
+            await APP.provider.send(
+                "eth_requestAccounts",
+                []
+            );
+
+        if (
+            !accounts.length
+        ) {
+
+            throw new Error(
+                "No wallet account."
+            );
+        }
+
+        APP.account =
+            accounts[0];
+
+        APP.signer =
+            await APP.provider.getSigner();
+
+        APP.router =
+            new ethers.Contract(
+                CONFIG.ROUTER_ADDRESS,
+                ROUTER_ABI,
+                APP.signer
+            );
+
+        APP.connected =
+            true;
+
+        updateWalletUI();
+
+        setStatus(
+            "✅ Wallet connected.",
+            "success"
+        );
+
+        await renderTokenList();
+
+        try {
+
+            const counter =
+                Number(
+                    await APP.router.depositCounter()
+                );
+
+            depositId.value =
+                String(
+                    counter + 1
+                );
+
+        } catch (error) {
+
+            console.warn(
+                "depositCounter unavailable",
+                error
+            );
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Wallet connection error:",
+            error
+        );
+
+        APP.connected =
+            false;
+
+        updateWalletUI();
+
+        setStatus(
+            getErrorMessage(error),
+            "error"
+        );
+
+    } finally {
+
+        connectBtn.disabled =
+            false;
+    }
+}
+
+
+/* ============================================================
+   LAUNCH
+============================================================ */
+
+async function launchToken() {
+
+    if (!APP.connected) {
 
         setStatus(
             "Connect wallet first.",
@@ -3593,13 +2878,10 @@ async function executeLaunch() {
         );
 
         return;
-
     }
 
-
-    depositBtn.disabled =
+    launchBtn.disabled =
         true;
-
 
     try {
 
@@ -3611,177 +2893,74 @@ async function executeLaunch() {
 
         const supply =
             BigInt(
-                tokenSupply.value.trim()
+                tokenSupply.value
             );
 
-        const rwaAddress =
-            assetSelect.value.trim();
+        const asset =
+            assetSelect.value;
 
-        const rwaAmount =
+        const assetAmountValue =
             BigInt(
-                assetAmount.value.trim()
+                assetAmount.value
             );
 
         const duration =
-            BigInt(
-                lockDuration.value.trim()
+            Number(
+                lockDuration.value
             );
 
-
-        if (
-            !name
-        ) {
-
+        if (!name) {
             throw new Error(
                 "Token name required."
             );
-
         }
 
-
-        if (
-            !symbol
-        ) {
-
+        if (!symbol) {
             throw new Error(
                 "Token symbol required."
             );
-
         }
-
 
         if (
             supply <= 0n
         ) {
 
             throw new Error(
-                "Supply must be greater than zero."
+                "Supply must be positive."
             );
-
         }
 
-
         if (
-            !ethers.isAddress(
-                rwaAddress
-            )
+            !ethers.isAddress(asset)
         ) {
 
             throw new Error(
                 "Invalid RWA asset address."
             );
-
         }
 
-
         if (
-            rwaAmount <= 0n
+            assetAmountValue <= 0n
         ) {
 
             throw new Error(
-                "RWA amount must be greater than zero."
+                "Asset amount must be positive."
             );
-
         }
 
-
         if (
-            duration < 60n
+            duration < 60
         ) {
 
             throw new Error(
                 "Lock duration must be at least 60 seconds."
             );
-
         }
-
-
-        /*
-         * IMPORTANT:
-         *
-         * Before launch the Router normally needs
-         * allowance to transfer the RWA token.
-         */
-
-        const rwaToken =
-            await getTokenContract(
-                rwaAddress
-            );
-
-
-        const allowance =
-            await rwaToken.allowance(
-                APP.account,
-                CONFIG.ROUTER_ADDRESS
-            );
-
-
-        if (
-            allowance <
-            rwaAmount
-        ) {
-
-            setStatus(
-                "⏳ Approving RWA asset for Router...",
-                "pending"
-            );
-
-
-            const approvalTx =
-                await rwaToken.approve(
-                    CONFIG.ROUTER_ADDRESS,
-                    ethers.MaxUint256
-                );
-
-
-            await approvalTx.wait();
-
-
-            setStatus(
-                "RWA approved. Launching token...",
-                "pending"
-            );
-
-        }
-
-
-        /*
-         * Verify user actually owns enough RWA.
-         */
-
-        const rwaBalance =
-            await rwaToken.balanceOf(
-                APP.account
-            );
-
-
-        if (
-            rwaBalance <
-            rwaAmount
-        ) {
-
-            throw new Error(
-                "Insufficient RWA token balance. " +
-                "Required: " +
-                rwaAmount.toString() +
-                ", available: " +
-                rwaBalance.toString()
-            );
-
-        }
-
 
         setStatus(
-            `🚀 Launching ${name} (${symbol})...`,
+            "⏳ Launch transaction...",
             "pending"
         );
-
-
-        const ethValue =
-            ethers.parseEther(
-                CONFIG.LAUNCH_ETH
-            );
-
 
         const tx =
             await APP.router.launch(
@@ -3792,63 +2971,59 @@ async function executeLaunch() {
 
                 supply,
 
-                rwaAddress,
+                asset,
 
-                rwaAmount,
+                assetAmountValue,
 
                 duration,
 
                 {
                     value:
-                        ethValue
+                        ethers.parseEther(
+                            "0.01"
+                        )
                 }
-
             );
 
-
         setStatus(
-            "⏳ Waiting for launch confirmation...",
+            "⏳ Waiting for blockchain confirmation...",
             "pending"
         );
 
-
         const receipt =
             await tx.wait();
-
 
         if (
             receipt.status !== 1
         ) {
 
             throw new Error(
-                "Launch transaction failed."
+                "Transaction failed."
             );
-
         }
 
+        const counter =
+            await APP.router.depositCounter();
 
-        await loadDepositCounter();
-
+        depositId.value =
+            counter.toString();
 
         APP.tokenCache.clear();
 
-
-        await renderTokenTable();
-
+        await renderTokenList();
 
         setStatus(
-            `✅ ${name} (${symbol}) launched successfully. TX: ${tx.hash}`,
+            "✅ Token launched. Deposit ID: " +
+            counter.toString(),
             "success"
         );
-
 
     } catch (error) {
 
         console.error(
-            "[LAUNCH]",
+            "Launch error:",
             error
         );
-
 
         setStatus(
             "❌ Launch failed: " +
@@ -3858,824 +3033,70 @@ async function executeLaunch() {
 
     } finally {
 
-        checkFormValidity();
-
+        launchBtn.disabled =
+            !APP.connected;
     }
-
 }
 
 
-/* =========================================================
-   MARKET DATA
-========================================================= */
+/* ============================================================
+   INPUT VALIDATION
+============================================================ */
 
-function parsePrice(
-    value
-) {
+function validateForm() {
 
-    if (
-        value === null ||
-        value === undefined
-    ) {
-
-        return null;
-
-    }
-
-
-    if (
-        typeof value === "number"
-    ) {
-
-        return Number.isFinite(value)
-            ? value
-            : null;
-
-    }
-
-
-    if (
-        typeof value === "string"
-    ) {
-
-        let text =
-            value
-                .replace("$", "")
-                .trim();
-
-
-        /*
-         * Handle both:
-         *
-         * 309.38
-         * 309,38
-         */
-
-        if (
-            text.includes(",") &&
-            !text.includes(".")
-        ) {
-
-            text =
-                text.replace(
-                    ",",
-                    "."
-                );
-
-        }
-
-
-        const n =
-            Number(text);
-
-
-        return Number.isFinite(n)
-            ? n
-            : null;
-
-    }
-
-
-    return null;
-
+    launchBtn.disabled =
+        !(
+            APP.connected &&
+            tokenName.value.trim() &&
+            tokenSymbol.value.trim() &&
+            tokenSupply.value &&
+            Number(tokenSupply.value) > 0 &&
+            assetAmount.value &&
+            Number(assetAmount.value) > 0 &&
+            Number(lockDuration.value) >= 60
+        );
 }
 
 
-/*
- * Universal quote parser.
- */
-
-function extractQuotes(
-    payload
-) {
-
-    const result = {};
-
-
-    function add(
-        symbol,
-        price,
-        change = null
-    ) {
-
-        if (
-            !symbol
-        ) {
-
-            return;
-
-        }
-
-
-        symbol =
-            String(symbol)
-                .toUpperCase();
-
-
-        if (
-            ![
-                "AAPL",
-                "TSLA",
-                "NVDA",
-                "AMD"
-            ].includes(symbol)
-        ) {
-
-            return;
-
-        }
-
-
-        const p =
-            parsePrice(price);
-
-
-        if (
-            p === null
-        ) {
-
-            return;
-
-        }
-
-
-        result[symbol] = {
-
-            price: p,
-
-            change:
-                parsePrice(change)
-
-        };
-
-    }
-
-
-    function inspect(
-        value,
-        fallbackSymbol = null
-    ) {
-
-        if (
-            value === null ||
-            value === undefined
-        ) {
-
-            return;
-
-        }
-
-
-        if (
-            typeof value ===
-            "number"
-        ) {
-
-            if (
-                fallbackSymbol
-            ) {
-
-                add(
-                    fallbackSymbol,
-                    value
-                );
-
-            }
-
-            return;
-
-        }
-
-
-        if (
-            typeof value ===
-            "string"
-        ) {
-
-            if (
-                fallbackSymbol
-            ) {
-
-                add(
-                    fallbackSymbol,
-                    value
-                );
-
-            }
-
-            return;
-
-        }
-
-
-        if (
-            Array.isArray(value)
-        ) {
-
-            for (
-                const item of value
-            ) {
-
-                inspect(item);
-
-            }
-
-            return;
-
-        }
-
-
-        if (
-            typeof value !==
-            "object"
-        ) {
-
-            return;
-
-        }
-
-
-        const symbol =
-            value.symbol ??
-            value.ticker ??
-            value.sym ??
-            value.SYMBOL ??
-            fallbackSymbol;
-
-
-        const price =
-            value.price ??
-            value.last ??
-            value.close ??
-            value.current ??
-            value.value ??
-            value.p ??
-            value.l;
-
-
-        const change =
-            value.change ??
-            value.changePercent ??
-            value.change_percentage ??
-            value.changepct ??
-            value.percentChange ??
-            value.cp;
-
-
-        if (
-            symbol &&
-            price !== undefined
-        ) {
-
-            add(
-                symbol,
-                price,
-                change
-            );
-
-        }
-
-
-        for (
-            const [
-                key,
-                child
-            ]
-            of Object.entries(value)
-        ) {
-
-            const upper =
-                String(key)
-                    .toUpperCase();
-
-
-            if (
-                [
-                    "AAPL",
-                    "TSLA",
-                    "NVDA",
-                    "AMD"
-                ].includes(upper)
-            ) {
-
-                inspect(
-                    child,
-                    upper
-                );
-
-            }
-
-        }
-
-
-        for (
-            const key of [
-                "data",
-                "quotes",
-                "results",
-                "items",
-                "prices"
-            ]
-        ) {
-
-            if (
-                value[key] !==
-                undefined
-            ) {
-
-                inspect(
-                    value[key]
-                );
-
-            }
-
-        }
-
-    }
-
-
-    inspect(payload);
-
-
-    return result;
-
-}
-
-
-/* =========================================================
-   MARKET RENDER
-========================================================= */
-
-function formatPrice(
-    price
-) {
-
-    return (
-        "$" +
-        Number(price)
-            .toLocaleString(
-                "en-US",
-                {
-                    minimumFractionDigits:
-                        2,
-
-                    maximumFractionDigits:
-                        2
-                }
-            )
-    );
-
-}
-
-
-function renderPrices(
-    quotes
-) {
-
-    const symbols = [
-        "AAPL",
-        "TSLA",
-        "NVDA",
-        "AMD"
-    ];
-
-
-    for (
-        const symbol of symbols
-    ) {
-
-        const priceEl =
-            document.getElementById(
-                symbol
-            );
-
-
-        const changeEl =
-            document.getElementById(
-                symbol +
-                "_change"
-            );
-
-
-        if (
-            !priceEl
-        ) {
-
-            continue;
-
-        }
-
-
-        const quote =
-            quotes[symbol] ||
-            APP.priceCache[symbol];
-
-
-        if (
-            quote
-        ) {
-
-            priceEl.textContent =
-                formatPrice(
-                    quote.price
-                );
-
-
-            if (
-                quote.change !==
-                null &&
-                quote.change !==
-                undefined
-            ) {
-
-                const change =
-                    Number(
-                        quote.change
-                    );
-
-
-                changeEl.textContent =
-                    (
-                        change >= 0
-                            ? "+"
-                            : ""
-                    ) +
-                    change.toFixed(2) +
-                    "%";
-
-
-                changeEl.style.color =
-                    change >= 0
-                        ? "#00d395"
-                        : "#ff5555";
-
-
-                priceEl.style.color =
-                    change >= 0
-                        ? "#00d395"
-                        : "#ff5555";
-
-            } else {
-
-                changeEl.textContent =
-                    "Live";
-
-                changeEl.style.color =
-                    "#8fa59f";
-
-                priceEl.style.color =
-                    "#ffffff";
-
-            }
-
-        } else {
-
-            priceEl.textContent =
-                "--";
-
-            changeEl.textContent =
-                "--";
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   MARKET FETCH
-========================================================= */
-
-async function fetchWithTimeout(
-    url,
-    timeout
-) {
-
-    const controller =
-        new AbortController();
-
-
-    const timer =
-        setTimeout(
-            () => controller.abort(),
-            timeout
-        );
-
-
-    try {
-
-        return await fetch(
-            url,
-            {
-
-                method:
-                    "GET",
-
-                mode:
-                    "cors",
-
-                cache:
-                    "no-store",
-
-                headers:
-                    {
-                        "Accept":
-                            "application/json"
-                    },
-
-                signal:
-                    controller.signal
-
-            }
-        );
-
-    } finally {
-
-        clearTimeout(
-            timer
-        );
-
-    }
-
-}
-
-
-function setMarketStatus(
-    text,
-    success
-) {
-
-    const element =
-        document.getElementById(
-            "marketStatus"
-        );
-
-
-    element.textContent =
-        text;
-
-
-    element.className =
-        "market-status " +
-        (
-            success
-                ? "ok"
-                : "error"
-        );
-
-}
-
-
-async function refreshPrices() {
-
-    try {
-
-        console.log(
-            "[MARKET] Request:",
-            CONFIG.PRICE_API
-        );
-
-
-        const response =
-            await fetchWithTimeout(
-                CONFIG.PRICE_API,
-                8000
-            );
-
-
-        console.log(
-            "[MARKET] HTTP:",
-            response.status,
-            response.statusText
-        );
-
-
-        if (
-            !response.ok
-        ) {
-
-            throw new Error(
-                `HTTP ${response.status}`
-            );
-
-        }
-
-
-        const raw =
-            await response.text();
-
-
-        console.log(
-            "[MARKET] RAW:",
-            raw
-        );
-
-
-        if (
-            !raw.trim()
-        ) {
-
-            throw new Error(
-                "Empty API response"
-            );
-
-        }
-
-
-        let payload;
-
-
-        try {
-
-            payload =
-                JSON.parse(raw);
-
-        } catch {
-
-            throw new Error(
-                "API response is not valid JSON"
-            );
-
-        }
-
-
-        console.log(
-            "[MARKET] JSON:",
-            payload
-        );
-
-
-        const quotes =
-            extractQuotes(
-                payload
-            );
-
-
-        console.log(
-            "[MARKET] Parsed quotes:",
-            quotes
-        );
-
-
-        const count =
-            Object.keys(
-                quotes
-            ).length;
-
-
-        if (
-            count === 0
-        ) {
-
-            throw new Error(
-                "No AAPL/TSLA/NVDA/AMD quotes found in response"
-            );
-
-        }
-
-
-        for (
-            const [
-                symbol,
-                quote
-            ]
-            of Object.entries(
-                quotes
-            )
-        ) {
-
-            APP.priceCache[
-                symbol
-            ] = quote;
-
-        }
-
-
-        renderPrices(
-            quotes
-        );
-
-
-        APP.priceOnline =
-            true;
-
-        APP.priceLastUpdate =
-            Date.now();
-
-
-        setMarketStatus(
-            `● Market data connected • ${count}/4 symbols • ${new Date().toLocaleTimeString()}`,
-            true
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "[MARKET DATA ERROR]",
-            error
-        );
-
-
-        APP.priceOnline =
-            false;
-
-
-        /*
-         * Keep last successful prices.
-         */
-
-        renderPrices({});
-
-
-        const cached =
-            Object.keys(
-                APP.priceCache
-            ).length;
-
-
-        if (
-            cached > 0
-        ) {
-
-            setMarketStatus(
-                `⚠ Market API temporarily unavailable. Showing last prices (${cached}/4). ${error.message}`,
-                false
-            );
-
-        } else {
-
-            setMarketStatus(
-                "⚠ Market data unavailable: " +
-                error.message,
-                false
-            );
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   ETH CALCULATION
-========================================================= */
-
-function updateETHNeeded() {
-
-    const supply =
-        Number(
-            tokenSupply.value
-        );
-
-
-    if (
-        !Number.isFinite(
-            supply
-        ) ||
-        supply <= 0
-    ) {
-
-        ethNeeded.textContent =
-            CONFIG.LAUNCH_ETH;
-
-        return;
-
-    }
-
-
-    /*
-     * UI estimate only.
-     * Actual launch ETH is CONFIG.LAUNCH_ETH.
-     */
-
-    ethNeeded.textContent =
-        CONFIG.LAUNCH_ETH;
-
-}
-
-
-/* =========================================================
+/* ============================================================
    EVENTS
-========================================================= */
+============================================================ */
 
 connectBtn.addEventListener(
     "click",
     connectWallet
 );
 
-
-depositBtn.addEventListener(
+launchBtn.addEventListener(
     "click",
-    executeLaunch
+    launchToken
 );
-
 
 redeemBtn.addEventListener(
     "click",
-    executeRedeem
+    async () => {
+
+        const id =
+            Number(
+                depositId.value
+            );
+
+        if (
+            !Number.isInteger(id) ||
+            id <= 0
+        ) {
+
+            setStatus(
+                "Invalid deposit ID.",
+                "error"
+            );
+
+            return;
+        }
+
+        await returnRWA(id);
+    }
 );
 
 
@@ -4686,71 +3107,63 @@ redeemBtn.addEventListener(
     assetSelect,
     assetAmount,
     lockDuration
-]
-.forEach(
+].forEach(
     element => {
 
         element.addEventListener(
             "input",
-            checkFormValidity
+            validateForm
         );
 
         element.addEventListener(
             "change",
-            checkFormValidity
+            validateForm
         );
-
     }
 );
 
+
+/* ============================================================
+   ETH DISPLAY
+============================================================ */
 
 tokenSupply.addEventListener(
     "input",
-    updateETHNeeded
+    () => {
+
+        const supply =
+            Number(
+                tokenSupply.value
+            ) || 1000000;
+
+        const eth =
+            (
+                supply /
+                100000000
+            ).toFixed(4);
+
+        ethNeeded.textContent =
+            eth;
+    }
 );
 
 
-/* =========================================================
-   WALLET EVENTS
-========================================================= */
+/* ============================================================
+   METAMASK EVENTS
+============================================================ */
 
-function initializeWalletEvents() {
-
-    if (
-        APP.eventsAdded
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        typeof window.ethereum ===
-        "undefined"
-    ) {
-
-        return;
-
-    }
-
-
-    APP.eventsAdded =
-        true;
-
+if (
+    typeof window.ethereum !==
+    "undefined"
+) {
 
     window.ethereum.on(
         "accountsChanged",
         async accounts => {
 
-            console.log(
-                "[WALLET] accountsChanged",
-                accounts
-            );
-
-
             if (
-                !accounts.length
+                !accounts ||
+                accounts.length === 0
             ) {
 
                 APP.connected =
@@ -4759,185 +3172,39 @@ function initializeWalletEvents() {
                 APP.account =
                     null;
 
-                APP.signer =
-                    null;
-
-                APP.router =
-                    null;
-
                 updateWalletUI();
 
-                await renderTokenTable();
+                await renderTokenList();
 
                 return;
-
             }
 
-
-            /*
-             * Do not reload page.
-             * Reinitialize provider/signature.
-             */
-
-            APP.connected =
-                false;
-
             await connectWallet();
-
         }
     );
-
 
     window.ethereum.on(
         "chainChanged",
         () => {
 
             window.location.reload();
-
         }
     );
-
 }
 
 
-/* =========================================================
-   AUTO CONNECT
-========================================================= */
-
-async function autoConnect() {
-
-    if (
-        typeof window.ethereum ===
-        "undefined"
-    ) {
-
-        return;
-
-    }
-
-
-    try {
-
-        APP.provider =
-            new ethers.BrowserProvider(
-                window.ethereum
-            );
-
-
-        const accounts =
-            await APP.provider.send(
-                "eth_accounts",
-                []
-            );
-
-
-        if (
-            accounts.length
-        ) {
-
-            await connectWallet();
-
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "[AUTO CONNECT]",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   PERIODIC REFRESH
-========================================================= */
-
-setInterval(
-    async () => {
-
-        await refreshPrices();
-
-    },
-    CONFIG.PRICE_INTERVAL
-);
-
-
-setInterval(
-    async () => {
-
-        if (
-            APP.connected
-        ) {
-
-            try {
-
-                await renderTokenTable();
-
-            } catch (error) {
-
-                console.warn(
-                    "[TOKEN REFRESH]",
-                    error
-                );
-
-            }
-
-        }
-
-    },
-    15000
-);
-
-
-/* =========================================================
-   VISIBILITY
-========================================================= */
-
-document.addEventListener(
-    "visibilitychange",
-    async () => {
-
-        if (
-            document.hidden
-        ) {
-
-            return;
-
-        }
-
-
-        await refreshPrices();
-
-
-        if (
-            APP.connected
-        ) {
-
-            APP.tokenCache.clear();
-
-            await renderTokenTable();
-
-        }
-
-    }
-);
-
-
-/* =========================================================
+/* ============================================================
    INITIALIZATION
-========================================================= */
+============================================================ */
 
-async function initializeApplication() {
+async function initialize() {
 
     console.log(
-        "========================================"
+        "======================================"
     );
 
     console.log(
-        "MWA Launch & Trade v4"
+        "MWA Launch & Trade v3"
     );
 
     console.log(
@@ -4946,64 +3213,122 @@ async function initializeApplication() {
     );
 
     console.log(
-        "RPC:",
-        CONFIG.RPC_URL
+        "Current origin:",
+        window.location.origin
     );
 
     console.log(
-        "Market API:",
-        CONFIG.PRICE_API
+        "Price endpoints:",
+        CONFIG.PRICE_ENDPOINTS
     );
 
     console.log(
-        "========================================"
+        "======================================"
     );
-
-
-    initializeWalletEvents();
-
-
-    updateETHNeeded();
-
 
     /*
-     * Market data does NOT depend on MetaMask.
+     * MARKET DATA IS COMPLETELY INDEPENDENT
+     * FROM METAMASK.
      *
-     * Therefore start it immediately.
+     * Therefore load it immediately.
      */
 
     await refreshPrices();
 
+    APP.priceTimer =
+        setInterval(
+            refreshPrices,
+            CONFIG.PRICE_INTERVAL
+        );
 
     /*
-     * Then try wallet.
+     * Wallet
      */
 
-    await autoConnect();
-
-
     if (
-        !APP.connected
+        typeof window.ethereum ===
+        "undefined"
     ) {
 
-        updateWalletUI();
-
         setStatus(
-            "Click Connect MetaMask to continue.",
+            "MetaMask not detected. Market data is still available.",
             "info"
         );
 
+        return;
     }
 
+    try {
 
-    console.log(
-        "MWA application initialized."
-    );
+        APP.provider =
+            new ethers.BrowserProvider(
+                window.ethereum
+            );
 
+        const accounts =
+            await APP.provider.send(
+                "eth_accounts",
+                []
+            );
+
+        if (
+            accounts.length
+        ) {
+
+            await connectWallet();
+
+        } else {
+
+            updateWalletUI();
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Initialization error:",
+            error
+        );
+
+        updateWalletUI();
+    }
+
+    validateForm();
 }
 
 
-initializeApplication();
+/* ============================================================
+   VISIBILITY
+============================================================ */
+
+document.addEventListener(
+    "visibilitychange",
+    async () => {
+
+        if (
+            document.hidden
+        ) {
+            return;
+        }
+
+        await refreshPrices();
+
+        if (
+            APP.connected
+        ) {
+
+            APP.tokenCache.clear();
+
+            await renderTokenList();
+        }
+    }
+);
+
+
+/* ============================================================
+   START
+============================================================ */
+
+initialize();
 
 </script>
 
