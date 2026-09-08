@@ -240,6 +240,43 @@
         }
 
         /* =====================================================
+           PRICE PREVIEW
+        ===================================================== */
+
+        .price-preview {
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--panel3);
+            border-radius: 9px;
+            border-left: 4px solid var(--blue);
+            display: none;
+        }
+
+        .price-preview.active {
+            display: block;
+        }
+
+        .price-preview .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 14px;
+        }
+
+        .price-preview .row .label {
+            color: var(--muted);
+        }
+
+        .price-preview .row .value {
+            color: var(--text2);
+            font-weight: 600;
+        }
+
+        .price-preview .row .value.green {
+            color: var(--green);
+        }
+
+        /* =====================================================
            TOKEN TABLE
         ===================================================== */
 
@@ -330,43 +367,6 @@
             width: 80px;
             padding: 7px 8px;
             font-size: 12px;
-        }
-
-        /* =====================================================
-           PRICE DISPLAY
-        ===================================================== */
-
-        .price-preview {
-            margin-top: 15px;
-            padding: 15px;
-            background: var(--panel3);
-            border-radius: 9px;
-            border-left: 4px solid var(--blue);
-            display: none;
-        }
-
-        .price-preview.active {
-            display: block;
-        }
-
-        .price-preview .row {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            font-size: 14px;
-        }
-
-        .price-preview .row .label {
-            color: var(--muted);
-        }
-
-        .price-preview .row .value {
-            color: var(--text2);
-            font-weight: 600;
-        }
-
-        .price-preview .row .value.green {
-            color: var(--green);
         }
 
         /* =====================================================
@@ -529,9 +529,29 @@
                 <input
                     id="tokenSupply"
                     type="number"
-                    value="1000000"
+                    value="21000000"
                     min="1"
                 >
+
+            </div>
+
+            <div>
+
+                <label>
+                    Asset Type
+                </label>
+
+                <select id="assetTypeSelect">
+
+                    <option value="stock">
+                        Stock (AMD, TSLA, AAPL)
+                    </option>
+
+                    <option value="crypto" selected>
+                        Cryptocurrency (BTC, ETH, SOL, USDT)
+                    </option>
+
+                </select>
 
             </div>
 
@@ -543,51 +563,75 @@
 
                 <select id="assetSelect">
 
-                    <option
-                        value="0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E"
-                    >
-                        AMD (Stock)
-                    </option>
+                    <!-- Crypto options (default) -->
+                    <optgroup label="Cryptocurrencies">
 
-                    <option
-                        value="0x71178BAc73cBeb415514eB542a8995b82669778d"
-                    >
-                        TSLA (Stock)
-                    </option>
+                        <option
+                            value="CRYPTO:BTC"
+                            data-symbol="BTC"
+                            data-decimals="8"
+                        >
+                            Bitcoin (BTC)
+                        </option>
 
-                    <option
-                        value="0x7dF7F09271136b49bD1E44937FA758264024858C"
-                    >
-                        AAPL (Stock)
-                    </option>
+                        <option
+                            value="CRYPTO:ETH"
+                            data-symbol="ETH"
+                            data-decimals="18"
+                        >
+                            Ethereum (ETH)
+                        </option>
 
-                    <option
-                        value="CRYPTO:BTC"
-                        data-symbol="BTC"
-                    >
-                        Bitcoin (BTC)
-                    </option>
+                        <option
+                            value="CRYPTO:SOL"
+                            data-symbol="SOL"
+                            data-decimals="9"
+                        >
+                            Solana (SOL)
+                        </option>
 
-                    <option
-                        value="CRYPTO:ETH"
-                        data-symbol="ETH"
-                    >
-                        Ethereum (ETH)
-                    </option>
+                        <option
+                            value="CRYPTO:USDT"
+                            data-symbol="USDT"
+                            data-decimals="6"
+                        >
+                            Tether (USDT)
+                        </option>
 
-                    <option
-                        value="CRYPTO:SOL"
-                        data-symbol="SOL"
-                    >
-                        Solana (SOL)
-                    </option>
+                    </optgroup>
 
-                    <option
-                        value="CRYPTO:USDT"
-                        data-symbol="USDT"
+                    <!-- Stock options (hidden by default) -->
+                    <optgroup
+                        id="stockOptions"
+                        label="Stocks"
+                        style="display:none;"
                     >
-                        Tether (USDT)
-                    </option>
+
+                        <option
+                            value="0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E"
+                            data-symbol="AMD"
+                            data-decimals="18"
+                        >
+                            AMD
+                        </option>
+
+                        <option
+                            value="0x71178BAc73cBeb415514eB542a8995b82669778d"
+                            data-symbol="TSLA"
+                            data-decimals="18"
+                        >
+                            TSLA
+                        </option>
+
+                        <option
+                            value="0x7dF7F09271136b49bD1E44937FA758264024858C"
+                            data-symbol="AAPL"
+                            data-decimals="18"
+                        >
+                            AAPL
+                        </option>
+
+                    </optgroup>
 
                 </select>
 
@@ -596,13 +640,27 @@
             <div>
 
                 <label>
-                    Asset Amount (wei)
+                    Asset Amount
                 </label>
 
                 <input
                     id="assetAmount"
-                    value="1000000000000000000"
+                    type="number"
+                    step="any"
+                    value="1"
+                    min="0.000001"
                 >
+
+                <div
+                    style="
+                        margin-top: 4px;
+                        font-size: 11px;
+                        color: var(--muted);
+                    "
+                >
+                    Enter the amount of the asset you want to lock
+                    <span id="assetUnitLabel">(BTC)</span>
+                </div>
 
             </div>
 
@@ -650,12 +708,12 @@
             <div class="row">
 
                 <span class="label">
-                    Token Price
+                    Amount Locked
                 </span>
 
                 <span
                     class="value"
-                    id="tokenPriceDisplay"
+                    id="amountLockedDisplay"
                 >
                     --
                 </span>
@@ -671,6 +729,21 @@
                 <span
                     class="value"
                     id="totalValueDisplay"
+                >
+                    --
+                </span>
+
+            </div>
+
+            <div class="row">
+
+                <span class="label">
+                    Token Price
+                </span>
+
+                <span
+                    class="value green"
+                    id="tokenPriceDisplay"
                 >
                     --
                 </span>
@@ -821,7 +894,7 @@ const CONFIG = {
 
     // CoinGecko API (no API key required, CORS-friendly)
     PRICE_URL:
-        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,tether,apple,telsa,amd&vs_currencies=usd&include_24hr_change=true",
+        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,tether&vs_currencies=usd&include_24hr_change=true",
 
     // Mapping from our select values to CoinGecko IDs
     ASSET_TO_ID: {
@@ -831,8 +904,7 @@ const CONFIG = {
         "CRYPTO:USDT": "tether"
     },
 
-    // For stocks, we use a fallback or a separate API
-    // For now, we'll use hardcoded demo prices for stocks
+    // For stocks, we use fallback prices
     STOCK_FALLBACK: {
         "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E": 489.28,
         "0x71178BAc73cBeb415514eB542a8995b82669778d": 319.53,
@@ -877,11 +949,17 @@ const tokenSymbol =
 const tokenSupply =
     document.getElementById("tokenSupply");
 
+const assetTypeSelect =
+    document.getElementById("assetTypeSelect");
+
 const assetSelect =
     document.getElementById("assetSelect");
 
 const assetAmount =
     document.getElementById("assetAmount");
+
+const assetUnitLabel =
+    document.getElementById("assetUnitLabel");
 
 const lockDuration =
     document.getElementById("lockDuration");
@@ -898,11 +976,17 @@ const pricePreview =
 const assetPriceDisplay =
     document.getElementById("assetPriceDisplay");
 
-const tokenPriceDisplay =
-    document.getElementById("tokenPriceDisplay");
+const amountLockedDisplay =
+    document.getElementById("amountLockedDisplay");
 
 const totalValueDisplay =
     document.getElementById("totalValueDisplay");
+
+const tokenPriceDisplay =
+    document.getElementById("tokenPriceDisplay");
+
+const stockOptions =
+    document.getElementById("stockOptions");
 
 
 /* ============================================================
@@ -1055,6 +1139,106 @@ function formatPrice(value) {
 
 
 /* ============================================================
+   WEI CONVERSION
+============================================================ */
+
+function amountToWei(
+    amount,
+    decimals
+) {
+
+    try {
+
+        // Convert to string to handle large numbers
+        const amountStr =
+            String(amount);
+
+        // Split into integer and decimal parts
+        const parts =
+            amountStr.split(".");
+
+        const integerPart =
+            parts[0] || "0";
+
+        const decimalPart =
+            (parts[1] || "")
+            .padEnd(
+                decimals,
+                "0"
+            )
+            .slice(
+                0,
+                decimals
+            );
+
+        const weiStr =
+            integerPart +
+            decimalPart;
+
+        // Remove leading zeros
+        const trimmed =
+            weiStr.replace(
+                /^0+/,
+                ""
+            ) || "0";
+
+        return BigInt(trimmed);
+
+    } catch (error) {
+
+        console.error(
+            "Conversion error:",
+            error
+        );
+
+        return 0n;
+    }
+}
+
+
+function weiToAmount(
+    wei,
+    decimals
+) {
+
+    const weiStr =
+        wei.toString();
+
+    const padded =
+        weiStr.padStart(
+            decimals + 1,
+            "0"
+        );
+
+    const integerPart =
+        padded.slice(
+            0,
+            -decimals
+        ) || "0";
+
+    const decimalPart =
+        padded.slice(
+            -decimals
+        ).replace(
+            /0+$/,
+            ""
+        );
+
+    if (
+        decimalPart === ""
+    ) {
+        return integerPart;
+    }
+
+    return (
+        integerPart +
+        "." +
+        decimalPart
+    );
+}
+
+
+/* ============================================================
    FETCH ASSET PRICE
 ============================================================ */
 
@@ -1176,12 +1360,31 @@ async function updatePricePreview() {
     const supply =
         Number(
             tokenSupply.value
-        ) || 1000000;
+        ) || 21000000;
 
     const amount =
         Number(
             assetAmount.value
         ) || 0;
+
+    // Get decimals for the selected asset
+    const selectedOption =
+        assetSelect.options[
+            assetSelect.selectedIndex
+        ];
+
+    const decimals =
+        parseInt(
+            selectedOption.dataset.decimals
+        ) || 18;
+
+    const symbol =
+        selectedOption.dataset.symbol ||
+        "Units";
+
+    // Update unit label
+    assetUnitLabel.textContent =
+        "(" + symbol + ")";
 
     try {
 
@@ -1196,11 +1399,13 @@ async function updatePricePreview() {
         const assetPrice =
             result.price;
 
-        const tokenPrice =
-            assetPrice / supply;
-
         const totalValue =
             assetPrice * amount;
+
+        const tokenPrice =
+            supply > 0
+            ? totalValue / supply
+            : 0;
 
         // Show preview
         pricePreview.className =
@@ -1209,17 +1414,23 @@ async function updatePricePreview() {
         assetPriceDisplay.textContent =
             formatPrice(assetPrice);
 
-        tokenPriceDisplay.textContent =
-            formatPrice(tokenPrice);
+        amountLockedDisplay.textContent =
+            amount + " " + symbol;
 
         totalValueDisplay.textContent =
             formatPrice(totalValue);
+
+        tokenPriceDisplay.textContent =
+            formatPrice(tokenPrice);
 
         // Store for launch
         return {
             assetPrice,
             tokenPrice,
-            totalValue
+            totalValue,
+            amount,
+            decimals,
+            symbol
         };
 
     } catch (error) {
@@ -1235,14 +1446,110 @@ async function updatePricePreview() {
         assetPriceDisplay.textContent =
             "⚠ Error";
 
-        tokenPriceDisplay.textContent =
+        amountLockedDisplay.textContent =
             "⚠ Error";
 
         totalValueDisplay.textContent =
             "⚠ Error";
 
+        tokenPriceDisplay.textContent =
+            "⚠ Error";
+
         return null;
     }
+}
+
+
+/* ============================================================
+   TOGGLE ASSET TYPE
+============================================================ */
+
+function toggleAssetType() {
+
+    const type =
+        assetTypeSelect.value;
+
+    // Show/hide stock options
+    if (
+        type === "stock"
+    ) {
+
+        stockOptions.style.display =
+            "";
+
+        // Select first stock option if current is crypto
+        if (
+            assetSelect.value
+            .startsWith(
+                "CRYPTO:"
+            )
+        ) {
+
+            const stockOptionsList =
+                stockOptions.querySelectorAll(
+                    "option"
+                );
+
+            if (
+                stockOptionsList.length >
+                0
+            ) {
+
+                assetSelect.value =
+                    stockOptionsList[0]
+                    .value;
+
+                // Update symbol and decimals
+                const opt =
+                    stockOptionsList[0];
+
+                const symbol =
+                    opt.dataset.symbol ||
+                    "Stock";
+
+                assetUnitLabel.textContent =
+                    "(" + symbol + ")";
+            }
+        }
+
+    } else {
+
+        stockOptions.style.display =
+            "none";
+
+        // Select first crypto option if current is stock
+        if (
+            !assetSelect.value
+            .startsWith(
+                "CRYPTO:"
+            )
+        ) {
+
+            const cryptoOpts =
+                assetSelect.querySelectorAll(
+                    "optgroup:not([style*='display:none']) option"
+                );
+
+            if (
+                cryptoOpts.length > 0
+            ) {
+
+                assetSelect.value =
+                    cryptoOpts[0].value;
+
+                const symbol =
+                    cryptoOpts[0].dataset
+                    .symbol ||
+                    "Crypto";
+
+                assetUnitLabel.textContent =
+                    "(" + symbol + ")";
+            }
+        }
+    }
+
+    // Update preview
+    updatePricePreview();
 }
 
 
@@ -2542,11 +2849,6 @@ async function launchToken() {
         const asset =
             assetSelect.value;
 
-        const assetAmountValue =
-            BigInt(
-                assetAmount.value
-            );
-
         const duration =
             Number(
                 lockDuration.value
@@ -2584,15 +2886,6 @@ async function launchToken() {
         }
 
         if (
-            assetAmountValue <= 0n
-        ) {
-
-            throw new Error(
-                "Asset amount must be positive."
-            );
-        }
-
-        if (
             duration < 60
         ) {
 
@@ -2601,11 +2894,35 @@ async function launchToken() {
             );
         }
 
-        // STEP 1: Fetch current asset price
+        // STEP 1: Get asset price and amount
         setStatus(
             "⏳ Fetching asset price...",
             "pending"
         );
+
+        const selectedOption =
+            assetSelect.options[
+                assetSelect.selectedIndex
+            ];
+
+        const decimals =
+            parseInt(
+                selectedOption.dataset.decimals
+            ) || 18;
+
+        const amount =
+            parseFloat(
+                assetAmount.value
+            ) || 0;
+
+        if (
+            amount <= 0
+        ) {
+
+            throw new Error(
+                "Asset amount must be positive."
+            );
+        }
 
         const priceResult =
             await fetchAssetPrice(
@@ -2615,19 +2932,34 @@ async function launchToken() {
         const assetPrice =
             priceResult.price;
 
-        const tokenPrice =
-            assetPrice / Number(supply);
+        // Convert amount to wei
+        const assetAmountWei =
+            amountToWei(
+                amount,
+                decimals
+            );
 
-        // Display price in status
-        setStatus(
-            `Asset price: ${formatPrice(assetPrice)} | Token price: ${formatPrice(tokenPrice)}`,
-            "info"
-        );
+        if (
+            assetAmountWei <= 0n
+        ) {
+
+            throw new Error(
+                "Asset amount too small."
+            );
+        }
+
+        const totalValue =
+            assetPrice * amount;
+
+        const tokenPrice =
+            Number(supply) > 0
+            ? totalValue / Number(supply)
+            : 0;
 
         // STEP 2: Launch transaction
         setStatus(
-            "⏳ Launch transaction...",
-            "pending"
+            `Launching ${name} (${symbol}) | Asset: ${formatPrice(assetPrice)} | Token: ${formatPrice(tokenPrice)}`,
+            "info"
         );
 
         const tx =
@@ -2639,14 +2971,13 @@ async function launchToken() {
 
                 supply,
 
-                // For crypto assets, we need to pass a valid address
-                // For now, we use a placeholder address and store the asset type
-                // In production, you'd want to store this in a separate mapping
+                // For crypto assets, we use placeholder address
+                // In production, you'd store asset type in a mapping
                 asset.startsWith("CRYPTO:")
                     ? "0x0000000000000000000000000000000000000000"
                     : asset,
 
-                assetAmountValue,
+                assetAmountWei,
 
                 duration,
 
@@ -2686,7 +3017,7 @@ async function launchToken() {
         await renderTokenList();
 
         setStatus(
-            `✅ Token launched! Asset: ${formatPrice(assetPrice)} | Token: ${name} (${symbol}) | Deposit ID: ${counter}`,
+            `✅ Token launched! ${name} (${symbol}) | Asset: ${formatPrice(assetPrice)} | Token price: ${formatPrice(tokenPrice)} | Deposit ID: ${counter}`,
             "success"
         );
 
@@ -2781,12 +3112,37 @@ redeemBtn.addEventListener(
     }
 );
 
+assetTypeSelect.addEventListener(
+    "change",
+    toggleAssetType
+);
+
+assetSelect.addEventListener(
+    "change",
+    () => {
+
+        // Update unit label when asset changes
+        const selectedOption =
+            assetSelect.options[
+                assetSelect.selectedIndex
+            ];
+
+        const symbol =
+            selectedOption.dataset.symbol ||
+            "Units";
+
+        assetUnitLabel.textContent =
+            "(" + symbol + ")";
+
+        updatePricePreview();
+    }
+);
+
 
 [
     tokenName,
     tokenSymbol,
     tokenSupply,
-    assetSelect,
     assetAmount,
     lockDuration
 ].forEach(
@@ -2816,7 +3172,7 @@ tokenSupply.addEventListener(
         const supply =
             Number(
                 tokenSupply.value
-            ) || 1000000;
+            ) || 21000000;
 
         const eth =
             (
@@ -2902,6 +3258,9 @@ async function initialize() {
     console.log(
         "======================================"
     );
+
+    // Set initial state
+    toggleAssetType();
 
     /*
      * Wallet
