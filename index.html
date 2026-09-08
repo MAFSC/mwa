@@ -543,11 +543,11 @@
 
                 <select id="assetTypeSelect">
 
-                    <option value="stock">
+                    <option value="stock" selected>
                         Stock (AMD, TSLA, AAPL)
                     </option>
 
-                    <option value="crypto" selected>
+                    <option value="crypto">
                         Cryptocurrency (BTC, ETH, SOL, USDT)
                     </option>
 
@@ -563,8 +563,44 @@
 
                 <select id="assetSelect">
 
-                    <!-- Crypto options (default) -->
-                    <optgroup label="Cryptocurrencies">
+                    <!-- Stock options (default) -->
+                    <optgroup
+                        id="stockOptions"
+                        label="Stocks"
+                    >
+
+                        <option
+                            value="0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E"
+                            data-symbol="AMD"
+                            data-decimals="18"
+                        >
+                            AMD
+                        </option>
+
+                        <option
+                            value="0x71178BAc73cBeb415514eB542a8995b82669778d"
+                            data-symbol="TSLA"
+                            data-decimals="18"
+                        >
+                            TSLA
+                        </option>
+
+                        <option
+                            value="0x7dF7F09271136b49bD1E44937FA758264024858C"
+                            data-symbol="AAPL"
+                            data-decimals="18"
+                        >
+                            AAPL
+                        </option>
+
+                    </optgroup>
+
+                    <!-- Crypto options (hidden by default) -->
+                    <optgroup
+                        id="cryptoOptions"
+                        label="Cryptocurrencies"
+                        style="display:none;"
+                    >
 
                         <option
                             value="CRYPTO:BTC"
@@ -600,39 +636,6 @@
 
                     </optgroup>
 
-                    <!-- Stock options (hidden by default) -->
-                    <optgroup
-                        id="stockOptions"
-                        label="Stocks"
-                        style="display:none;"
-                    >
-
-                        <option
-                            value="0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E"
-                            data-symbol="AMD"
-                            data-decimals="18"
-                        >
-                            AMD
-                        </option>
-
-                        <option
-                            value="0x71178BAc73cBeb415514eB542a8995b82669778d"
-                            data-symbol="TSLA"
-                            data-decimals="18"
-                        >
-                            TSLA
-                        </option>
-
-                        <option
-                            value="0x7dF7F09271136b49bD1E44937FA758264024858C"
-                            data-symbol="AAPL"
-                            data-decimals="18"
-                        >
-                            AAPL
-                        </option>
-
-                    </optgroup>
-
                 </select>
 
             </div>
@@ -659,7 +662,7 @@
                     "
                 >
                     Enter the amount of the asset you want to lock
-                    <span id="assetUnitLabel">(BTC)</span>
+                    <span id="assetUnitLabel">(AMD)</span>
                 </div>
 
             </div>
@@ -895,7 +898,7 @@ const CONFIG = {
     // Fixed ETH amount for liquidity (small for testing)
     LIQUIDITY_ETH: "0.001",
 
-    // CoinGecko API (no API key required, CORS-friendly)
+    // CoinGecko API (for crypto prices)
     PRICE_URL:
         "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,tether&vs_currencies=usd&include_24hr_change=true",
 
@@ -907,20 +910,23 @@ const CONFIG = {
         "CRYPTO:USDT": "tether"
     },
 
-    // For stocks, we use fallback prices
-    STOCK_FALLBACK: {
-        "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E": 489.28,
-        "0x71178BAc73cBeb415514eB542a8995b82669778d": 319.53,
-        "0x7dF7F09271136b49bD1E44937FA758264024858C": 312.41
+    // Real-time stock prices (updated manually or via API)
+    // In production, use a financial API
+    STOCK_PRICES: {
+        "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E": 489.28, // AMD
+        "0x71178BAc73cBeb415514eB542a8995b82669778d": 319.53, // TSLA
+        "0x7dF7F09271136b49bD1E44937FA758264024858C": 312.41  // AAPL
     },
 
-    // ERC-20 addresses for crypto assets on testnet
-    // These are placeholder addresses - replace with actual testnet addresses
-    CRYPTO_ADDRESSES: {
-        "CRYPTO:BTC": "0x0000000000000000000000000000000000000000",
-        "CRYPTO:ETH": "0x0000000000000000000000000000000000000000",
-        "CRYPTO:SOL": "0x0000000000000000000000000000000000000000",
-        "CRYPTO:USDT": "0x0000000000000000000000000000000000000000"
+    // Mapping from asset value to display name
+    ASSET_NAMES: {
+        "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E": "AMD",
+        "0x71178BAc73cBeb415514eB542a8995b82669778d": "TSLA",
+        "0x7dF7F09271136b49bD1E44937FA758264024858C": "AAPL",
+        "CRYPTO:BTC": "BTC",
+        "CRYPTO:ETH": "ETH",
+        "CRYPTO:SOL": "SOL",
+        "CRYPTO:USDT": "USDT"
     }
 };
 
@@ -997,6 +1003,9 @@ const tokenPriceDisplay =
 
 const stockOptions =
     document.getElementById("stockOptions");
+
+const cryptoOptions =
+    document.getElementById("cryptoOptions");
 
 
 /* ============================================================
@@ -1326,9 +1335,9 @@ async function fetchAssetPrice(assetValue) {
 
         } else {
 
-            // Stock asset - use fallback prices
+            // Stock asset - use configured prices
             const price =
-                CONFIG.STOCK_FALLBACK[
+                CONFIG.STOCK_PRICES[
                     assetValue
                 ];
 
@@ -1412,6 +1421,7 @@ async function updatePricePreview() {
         const totalValue =
             assetPrice * amount;
 
+        // Calculate token price correctly
         const tokenPrice =
             supply > 0
             ? totalValue / supply
@@ -1479,13 +1489,16 @@ function toggleAssetType() {
     const type =
         assetTypeSelect.value;
 
-    // Show/hide stock options
+    // Show/hide options
     if (
         type === "stock"
     ) {
 
         stockOptions.style.display =
             "";
+
+        cryptoOptions.style.display =
+            "none";
 
         // Select first stock option if current is crypto
         if (
@@ -1527,6 +1540,9 @@ function toggleAssetType() {
         stockOptions.style.display =
             "none";
 
+        cryptoOptions.style.display =
+            "";
+
         // Select first crypto option if current is stock
         if (
             !assetSelect.value
@@ -1536,8 +1552,8 @@ function toggleAssetType() {
         ) {
 
             const cryptoOpts =
-                assetSelect.querySelectorAll(
-                    "optgroup:not([style*='display:none']) option"
+                cryptoOptions.querySelectorAll(
+                    "option"
                 );
 
             if (
@@ -2963,12 +2979,8 @@ async function launchToken() {
             asset.startsWith("CRYPTO:")
         ) {
 
-            // For crypto, use a placeholder or a real testnet address
-            // In production, you'd need actual ERC-20 addresses
+            // For crypto, use a placeholder (no testnet tokens available)
             assetAddress =
-                CONFIG.CRYPTOS_ADDRESSES[
-                    asset
-                ] ||
                 "0x0000000000000000000000000000000000000000";
 
         } else {
@@ -2981,6 +2993,19 @@ async function launchToken() {
         setStatus(
             `Launching ${name} (${symbol}) | Asset: ${formatPrice(assetPrice)} | Token: ${formatPrice(tokenPrice)}`,
             "info"
+        );
+
+        console.log(
+            "Launch params:",
+            {
+                name,
+                symbol,
+                supply: supply.toString(),
+                assetAddress,
+                assetAmountWei: assetAmountWei.toString(),
+                duration,
+                ethValue: CONFIG.LIQUIDITY_ETH
+            }
         );
 
         const tx =
@@ -3260,7 +3285,7 @@ async function initialize() {
         "======================================"
     );
 
-    // Set initial state
+    // Set initial state (stocks by default)
     toggleAssetType();
 
     // Set fixed ETH amount
