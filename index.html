@@ -174,71 +174,7 @@
         }
 
         /* =====================================================
-           MARKET
-        ===================================================== */
-
-        .market-section {
-            margin-top: 20px;
-        }
-
-        .market-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-
-            margin-bottom: 10px;
-        }
-
-        .market-title {
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .market-status {
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        .market-status.ok {
-            color: var(--green);
-        }
-
-        .market-status.error {
-            color: var(--red);
-        }
-
-        .ticker {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-        }
-
-        .ticker-card {
-            background: var(--panel3);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 18px;
-        }
-
-        .ticker-symbol {
-            font-size: 12px;
-            color: var(--muted);
-            margin-bottom: 8px;
-        }
-
-        .ticker-price {
-            font-size: 25px;
-            font-weight: 800;
-        }
-
-        .ticker-change {
-            margin-top: 5px;
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        /* =====================================================
-           SECTIONS
+           LAUNCH
         ===================================================== */
 
         .section {
@@ -397,6 +333,43 @@
         }
 
         /* =====================================================
+           PRICE DISPLAY
+        ===================================================== */
+
+        .price-preview {
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--panel3);
+            border-radius: 9px;
+            border-left: 4px solid var(--blue);
+            display: none;
+        }
+
+        .price-preview.active {
+            display: block;
+        }
+
+        .price-preview .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 14px;
+        }
+
+        .price-preview .row .label {
+            color: var(--muted);
+        }
+
+        .price-preview .row .value {
+            color: var(--text2);
+            font-weight: 600;
+        }
+
+        .price-preview .row .value.green {
+            color: var(--green);
+        }
+
+        /* =====================================================
            STATUS
         ===================================================== */
 
@@ -426,16 +399,6 @@
 
         .status.info {
             border-left-color: var(--blue);
-        }
-
-        .market-error {
-            margin-top: 8px;
-
-            color: var(--red);
-
-            font-size: 11px;
-
-            word-break: break-word;
         }
 
         .footer {
@@ -468,17 +431,6 @@
             }
 
             .grid {
-                grid-template-columns: 1fr;
-            }
-
-            .ticker {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media(max-width: 450px) {
-
-            .ticker {
                 grid-template-columns: 1fr;
             }
         }
@@ -525,126 +477,6 @@
         >
             Connect MetaMask
         </button>
-
-    </div>
-
-    <!-- =====================================================
-         MARKET
-    ====================================================== -->
-
-    <div class="market-section">
-
-        <div class="market-header">
-
-            <div class="market-title">
-                Market
-            </div>
-
-            <div
-                id="marketStatus"
-                class="market-status"
-            >
-                Connecting...
-            </div>
-
-        </div>
-
-        <div class="ticker">
-
-            <div class="ticker-card">
-
-                <div class="ticker-symbol">
-                    BTC
-                </div>
-
-                <div
-                    id="BTC"
-                    class="ticker-price"
-                >
-                    --
-                </div>
-
-                <div
-                    id="BTC_CHANGE"
-                    class="ticker-change"
-                >
-                    --
-                </div>
-
-            </div>
-
-            <div class="ticker-card">
-
-                <div class="ticker-symbol">
-                    ETH
-                </div>
-
-                <div
-                    id="ETH"
-                    class="ticker-price"
-                >
-                    --
-                </div>
-
-                <div
-                    id="ETH_CHANGE"
-                    class="ticker-change"
-                >
-                    --
-                </div>
-
-            </div>
-
-            <div class="ticker-card">
-
-                <div class="ticker-symbol">
-                    USDT
-                </div>
-
-                <div
-                    id="USDT"
-                    class="ticker-price"
-                >
-                    --
-                </div>
-
-                <div
-                    id="USDT_CHANGE"
-                    class="ticker-change"
-                >
-                    --
-                </div>
-
-            </div>
-
-            <div class="ticker-card">
-
-                <div class="ticker-symbol">
-                    SOL
-                </div>
-
-                <div
-                    id="SOL"
-                    class="ticker-price"
-                >
-                    --
-                </div>
-
-                <div
-                    id="SOL_CHANGE"
-                    class="ticker-change"
-                >
-                    --
-                </div>
-
-            </div>
-
-        </div>
-
-        <div
-            id="marketError"
-            class="market-error"
-        ></div>
 
     </div>
 
@@ -714,19 +546,47 @@
                     <option
                         value="0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E"
                     >
-                        AMD
+                        AMD (Stock)
                     </option>
 
                     <option
                         value="0x71178BAc73cBeb415514eB542a8995b82669778d"
                     >
-                        TSLA
+                        TSLA (Stock)
                     </option>
 
                     <option
                         value="0x7dF7F09271136b49bD1E44937FA758264024858C"
                     >
-                        AAPL
+                        AAPL (Stock)
+                    </option>
+
+                    <option
+                        value="CRYPTO:BTC"
+                        data-symbol="BTC"
+                    >
+                        Bitcoin (BTC)
+                    </option>
+
+                    <option
+                        value="CRYPTO:ETH"
+                        data-symbol="ETH"
+                    >
+                        Ethereum (ETH)
+                    </option>
+
+                    <option
+                        value="CRYPTO:SOL"
+                        data-symbol="SOL"
+                    >
+                        Solana (SOL)
+                    </option>
+
+                    <option
+                        value="CRYPTO:USDT"
+                        data-symbol="USDT"
+                    >
+                        Tether (USDT)
                     </option>
 
                 </select>
@@ -758,6 +618,62 @@
                     value="600"
                     min="60"
                 >
+
+            </div>
+
+        </div>
+
+        <!-- =====================================================
+             PRICE PREVIEW
+        ====================================================== -->
+
+        <div
+            id="pricePreview"
+            class="price-preview"
+        >
+
+            <div class="row">
+
+                <span class="label">
+                    Asset Price
+                </span>
+
+                <span
+                    class="value green"
+                    id="assetPriceDisplay"
+                >
+                    --
+                </span>
+
+            </div>
+
+            <div class="row">
+
+                <span class="label">
+                    Token Price
+                </span>
+
+                <span
+                    class="value"
+                    id="tokenPriceDisplay"
+                >
+                    --
+                </span>
+
+            </div>
+
+            <div class="row">
+
+                <span class="label">
+                    Total Value Locked
+                </span>
+
+                <span
+                    class="value"
+                    id="totalValueDisplay"
+                >
+                    --
+                </span>
 
             </div>
 
@@ -903,14 +819,25 @@ const CONFIG = {
     ROUTER_ADDRESS:
         "0x0e5b59459F8F0315E4eF513bF64BD154EE3A2B6A",
 
-    // CoinMarketCap API Configuration
-    CMC_API_KEY: 'c343eefdbc5b4aed8d525b5f2c6d01a8',
+    // CoinGecko API (no API key required, CORS-friendly)
+    PRICE_URL:
+        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,tether,apple,telsa,amd&vs_currencies=usd&include_24hr_change=true",
 
-    // Coin IDs: 1=BTC, 1027=ETH, 825=USDT, 7083=SOL
-    // You can add more IDs from https://coinmarketcap.com
-    CMC_IDS: '1,1027,825,7083',
+    // Mapping from our select values to CoinGecko IDs
+    ASSET_TO_ID: {
+        "CRYPTO:BTC": "bitcoin",
+        "CRYPTO:ETH": "ethereum",
+        "CRYPTO:SOL": "solana",
+        "CRYPTO:USDT": "tether"
+    },
 
-    CMC_URL: 'https://corsproxy.io/?https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest',
+    // For stocks, we use a fallback or a separate API
+    // For now, we'll use hardcoded demo prices for stocks
+    STOCK_FALLBACK: {
+        "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E": 489.28,
+        "0x71178BAc73cBeb415514eB542a8995b82669778d": 319.53,
+        "0x7dF7F09271136b49bD1E44937FA758264024858C": 312.41
+    },
 
     PRICE_INTERVAL: 30000 // 30 seconds
 };
@@ -941,12 +868,6 @@ const tokenList =
 const statusBox =
     document.getElementById("status");
 
-const marketStatus =
-    document.getElementById("marketStatus");
-
-const marketError =
-    document.getElementById("marketError");
-
 const tokenName =
     document.getElementById("tokenName");
 
@@ -970,6 +891,18 @@ const depositId =
 
 const ethNeeded =
     document.getElementById("ethNeeded");
+
+const pricePreview =
+    document.getElementById("pricePreview");
+
+const assetPriceDisplay =
+    document.getElementById("assetPriceDisplay");
+
+const tokenPriceDisplay =
+    document.getElementById("tokenPriceDisplay");
+
+const totalValueDisplay =
+    document.getElementById("totalValueDisplay");
 
 
 /* ============================================================
@@ -1038,7 +971,7 @@ const APP = {
 
     tokenCache: new Map(),
 
-    priceTimer: null,
+    currentAssetPrice: null,
 
     initialized: false
 };
@@ -1111,7 +1044,6 @@ function formatPrice(value) {
         return "--";
     }
 
-    // Use $ prefix for USD prices
     return "$" + number.toLocaleString(
         "en-US",
         {
@@ -1123,205 +1055,193 @@ function formatPrice(value) {
 
 
 /* ============================================================
-   LOAD MARKET DATA FROM COINMARKETCAP
+   FETCH ASSET PRICE
 ============================================================ */
 
-async function refreshPrices() {
-
-    marketStatus.textContent =
-        "Updating...";
-
-    marketStatus.className =
-        "market-status";
-
-    marketError.textContent = "";
+async function fetchAssetPrice(assetValue) {
 
     try {
 
-        console.log(
-            "[MWA MARKET] Fetching from CoinMarketCap..."
-        );
-
-        const response =
-            await fetch(
-                CONFIG.CMC_URL +
-                "?id=" +
-                CONFIG.CMC_IDS,
-                {
-                    headers: {
-                        'X-CMC_PRO_API_KEY':
-                            CONFIG.CMC_API_KEY,
-                        'Accept':
-                            'application/json'
-                    }
-                }
-            );
-
-        console.log(
-            "[MWA MARKET] HTTP status:",
-            response.status
-        );
-
+        // Check if it's a crypto asset
         if (
-            !response.ok
+            assetValue.startsWith("CRYPTO:")
         ) {
 
-            throw new Error(
-                "HTTP " +
-                response.status +
-                " from CoinMarketCap"
-            );
-        }
+            const coinId =
+                CONFIG.ASSET_TO_ID[assetValue];
 
-        const json =
-            await response.json();
-
-        console.log(
-            "[MWA MARKET] Raw response:",
-            json
-        );
-
-        if (
-            json.status &&
-            json.status.error_code !== 0
-        ) {
-
-            throw new Error(
-                "CoinMarketCap API error: " +
-                json.status.error_message
-            );
-        }
-
-        const data =
-            json.data || {};
-
-        // Mapping from CoinMarketCap ID to our symbol display
-        const idToSymbol = {
-            '1': 'BTC',
-            '1027': 'ETH',
-            '825': 'USDT',
-            '7083': 'SOL'
-        };
-
-        // Map from our symbol to the price element ID
-        const symbolToElement = {
-            'BTC': 'BTC',
-            'ETH': 'ETH',
-            'USDT': 'USDT',
-            'SOL': 'SOL'
-        };
-
-        let found = 0;
-
-        for (
-            const [
-                id,
-                quote
-            ] of Object.entries(data)
-        ) {
-
-            const symbol =
-                idToSymbol[id];
-
-            if (!symbol) {
-                continue;
+            if (!coinId) {
+                throw new Error(
+                    "Unknown crypto asset: " +
+                    assetValue
+                );
             }
+
+            const url =
+                "https://api.coingecko.com/api/v3/simple/price?ids=" +
+                coinId +
+                "&vs_currencies=usd&include_24hr_change=true";
+
+            console.log(
+                "[MWA PRICE] Fetching crypto:",
+                url
+            );
+
+            const response =
+                await fetch(url);
+
+            if (
+                !response.ok
+            ) {
+
+                throw new Error(
+                    "CoinGecko API error: " +
+                    response.status
+                );
+            }
+
+            const data =
+                await response.json();
+
+            console.log(
+                "[MWA PRICE] Crypto data:",
+                data
+            );
 
             const price =
-                quote.quote &&
-                quote.quote.USD &&
-                quote.quote.USD.price;
-
-            const percentChange =
-                quote.quote &&
-                quote.quote.USD &&
-                quote.quote.USD.percent_change_24h;
+                data[coinId] &&
+                data[coinId].usd;
 
             if (
-                typeof price !== 'number'
-            ) {
-                continue;
-            }
-
-            const priceEl =
-                document.getElementById(
-                    symbol
-                );
-
-            const changeEl =
-                document.getElementById(
-                    symbol + "_CHANGE"
-                );
-
-            if (priceEl) {
-
-                priceEl.textContent =
-                    formatPrice(price);
-
-                found++;
-            }
-
-            if (
-                changeEl &&
-                typeof percentChange === 'number'
+                typeof price !== "number"
             ) {
 
-                const change =
-                    Number(
-                        percentChange
-                    );
-
-                const sign =
-                    change >= 0
-                    ? "+"
-                    : "";
-
-                changeEl.textContent =
-                    sign +
-                    change.toFixed(2) +
-                    "%";
-
-                changeEl.style.color =
-                    change >= 0
-                    ? "var(--green)"
-                    : "var(--red)";
+                throw new Error(
+                    "Price not found for " +
+                    coinId
+                );
             }
-        }
 
-        if (found > 0) {
-
-            marketStatus.textContent =
-                "● Market data live";
-
-            marketStatus.className =
-                "market-status ok";
-
-            marketError.textContent =
-                "";
+            return {
+                price: price,
+                change:
+                    data[coinId] &&
+                    data[coinId].usd_24h_change ||
+                    null
+            };
 
         } else {
 
-            throw new Error(
-                "No price data received from CoinMarketCap"
-            );
+            // Stock asset - use fallback prices
+            const price =
+                CONFIG.STOCK_FALLBACK[
+                    assetValue
+                ];
+
+            if (!price) {
+
+                throw new Error(
+                    "Unknown stock asset: " +
+                    assetValue
+                );
+            }
+
+            return {
+                price: price,
+                change: null
+            };
         }
 
     } catch (error) {
 
         console.error(
-            "[MWA MARKET] Error:",
+            "[MWA PRICE] Error:",
             error
         );
 
-        marketStatus.textContent =
-            "⚠ Market data unavailable";
+        throw error;
+    }
+}
 
-        marketStatus.className =
-            "market-status error";
 
-        marketError.textContent =
-            error.message ||
-            "Unknown market data error";
+/* ============================================================
+   UPDATE PRICE PREVIEW
+============================================================ */
+
+async function updatePricePreview() {
+
+    const assetValue =
+        assetSelect.value;
+
+    const supply =
+        Number(
+            tokenSupply.value
+        ) || 1000000;
+
+    const amount =
+        Number(
+            assetAmount.value
+        ) || 0;
+
+    try {
+
+        const result =
+            await fetchAssetPrice(
+                assetValue
+            );
+
+        APP.currentAssetPrice =
+            result.price;
+
+        const assetPrice =
+            result.price;
+
+        const tokenPrice =
+            assetPrice / supply;
+
+        const totalValue =
+            assetPrice * amount;
+
+        // Show preview
+        pricePreview.className =
+            "price-preview active";
+
+        assetPriceDisplay.textContent =
+            formatPrice(assetPrice);
+
+        tokenPriceDisplay.textContent =
+            formatPrice(tokenPrice);
+
+        totalValueDisplay.textContent =
+            formatPrice(totalValue);
+
+        // Store for launch
+        return {
+            assetPrice,
+            tokenPrice,
+            totalValue
+        };
+
+    } catch (error) {
+
+        console.error(
+            "Price preview error:",
+            error
+        );
+
+        pricePreview.className =
+            "price-preview";
+
+        assetPriceDisplay.textContent =
+            "⚠ Error";
+
+        tokenPriceDisplay.textContent =
+            "⚠ Error";
+
+        totalValueDisplay.textContent =
+            "⚠ Error";
+
+        return null;
     }
 }
 
@@ -2654,7 +2574,8 @@ async function launchToken() {
         }
 
         if (
-            !ethers.isAddress(asset)
+            !ethers.isAddress(asset) &&
+            !asset.startsWith("CRYPTO:")
         ) {
 
             throw new Error(
@@ -2680,6 +2601,30 @@ async function launchToken() {
             );
         }
 
+        // STEP 1: Fetch current asset price
+        setStatus(
+            "⏳ Fetching asset price...",
+            "pending"
+        );
+
+        const priceResult =
+            await fetchAssetPrice(
+                asset
+            );
+
+        const assetPrice =
+            priceResult.price;
+
+        const tokenPrice =
+            assetPrice / Number(supply);
+
+        // Display price in status
+        setStatus(
+            `Asset price: ${formatPrice(assetPrice)} | Token price: ${formatPrice(tokenPrice)}`,
+            "info"
+        );
+
+        // STEP 2: Launch transaction
         setStatus(
             "⏳ Launch transaction...",
             "pending"
@@ -2694,7 +2639,12 @@ async function launchToken() {
 
                 supply,
 
-                asset,
+                // For crypto assets, we need to pass a valid address
+                // For now, we use a placeholder address and store the asset type
+                // In production, you'd want to store this in a separate mapping
+                asset.startsWith("CRYPTO:")
+                    ? "0x0000000000000000000000000000000000000000"
+                    : asset,
 
                 assetAmountValue,
 
@@ -2736,8 +2686,7 @@ async function launchToken() {
         await renderTokenList();
 
         setStatus(
-            "✅ Token launched. Deposit ID: " +
-            counter.toString(),
+            `✅ Token launched! Asset: ${formatPrice(assetPrice)} | Token: ${name} (${symbol}) | Deposit ID: ${counter}`,
             "success"
         );
 
@@ -2779,6 +2728,16 @@ function validateForm() {
             Number(assetAmount.value) > 0 &&
             Number(lockDuration.value) >= 60
         );
+
+    // Update price preview when form changes
+    if (
+        APP.connected &&
+        tokenSupply.value &&
+        assetAmount.value
+    ) {
+
+        updatePricePreview();
+    }
 }
 
 
@@ -2941,27 +2900,8 @@ async function initialize() {
     );
 
     console.log(
-        "CoinMarketCap API configured"
-    );
-
-    console.log(
         "======================================"
     );
-
-    /*
-     * MARKET DATA IS COMPLETELY INDEPENDENT
-     * FROM METAMASK.
-     *
-     * Therefore load it immediately.
-     */
-
-    await refreshPrices();
-
-    APP.priceTimer =
-        setInterval(
-            refreshPrices,
-            CONFIG.PRICE_INTERVAL
-        );
 
     /*
      * Wallet
@@ -2973,7 +2913,7 @@ async function initialize() {
     ) {
 
         setStatus(
-            "MetaMask not detected. Market data is still available.",
+            "MetaMask not detected.",
             "info"
         );
 
@@ -3032,8 +2972,6 @@ document.addEventListener(
             return;
         }
 
-        await refreshPrices();
-
         if (
             APP.connected
         ) {
@@ -3041,6 +2979,16 @@ document.addEventListener(
             APP.tokenCache.clear();
 
             await renderTokenList();
+        }
+
+        // Update price preview if visible
+        if (
+            APP.connected &&
+            tokenSupply.value &&
+            assetAmount.value
+        ) {
+
+            await updatePricePreview();
         }
     }
 );
