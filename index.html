@@ -756,7 +756,7 @@
 
             ⚡ ETH needed for liquidity:
             <strong id="ethNeeded">
-                0.01
+                0.001
             </strong>
             ETH
 
@@ -892,6 +892,9 @@ const CONFIG = {
     ROUTER_ADDRESS:
         "0x0e5b59459F8F0315E4eF513bF64BD154EE3A2B6A",
 
+    // Fixed ETH amount for liquidity (small for testing)
+    LIQUIDITY_ETH: "0.001",
+
     // CoinGecko API (no API key required, CORS-friendly)
     PRICE_URL:
         "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,tether&vs_currencies=usd&include_24hr_change=true",
@@ -911,7 +914,14 @@ const CONFIG = {
         "0x7dF7F09271136b49bD1E44937FA758264024858C": 312.41
     },
 
-    PRICE_INTERVAL: 30000 // 30 seconds
+    // ERC-20 addresses for crypto assets on testnet
+    // These are placeholder addresses - replace with actual testnet addresses
+    CRYPTO_ADDRESSES: {
+        "CRYPTO:BTC": "0x0000000000000000000000000000000000000000",
+        "CRYPTO:ETH": "0x0000000000000000000000000000000000000000",
+        "CRYPTO:SOL": "0x0000000000000000000000000000000000000000",
+        "CRYPTO:USDT": "0x0000000000000000000000000000000000000000"
+    }
 };
 
 
@@ -2876,16 +2886,6 @@ async function launchToken() {
         }
 
         if (
-            !ethers.isAddress(asset) &&
-            !asset.startsWith("CRYPTO:")
-        ) {
-
-            throw new Error(
-                "Invalid RWA asset address."
-            );
-        }
-
-        if (
             duration < 60
         ) {
 
@@ -2956,7 +2956,28 @@ async function launchToken() {
             ? totalValue / Number(supply)
             : 0;
 
-        // STEP 2: Launch transaction
+        // STEP 2: Determine the asset address for the contract
+        let assetAddress;
+
+        if (
+            asset.startsWith("CRYPTO:")
+        ) {
+
+            // For crypto, use a placeholder or a real testnet address
+            // In production, you'd need actual ERC-20 addresses
+            assetAddress =
+                CONFIG.CRYPTOS_ADDRESSES[
+                    asset
+                ] ||
+                "0x0000000000000000000000000000000000000000";
+
+        } else {
+
+            // For stocks, use the provided address
+            assetAddress = asset;
+        }
+
+        // STEP 3: Launch transaction with fixed ETH for liquidity
         setStatus(
             `Launching ${name} (${symbol}) | Asset: ${formatPrice(assetPrice)} | Token: ${formatPrice(tokenPrice)}`,
             "info"
@@ -2971,11 +2992,7 @@ async function launchToken() {
 
                 supply,
 
-                // For crypto assets, we use placeholder address
-                // In production, you'd store asset type in a mapping
-                asset.startsWith("CRYPTO:")
-                    ? "0x0000000000000000000000000000000000000000"
-                    : asset,
+                assetAddress,
 
                 assetAmountWei,
 
@@ -2984,7 +3001,7 @@ async function launchToken() {
                 {
                     value:
                         ethers.parseEther(
-                            "0.01"
+                            CONFIG.LIQUIDITY_ETH
                         )
                 }
             );
@@ -3165,25 +3182,9 @@ assetSelect.addEventListener(
    ETH DISPLAY
 ============================================================ */
 
-tokenSupply.addEventListener(
-    "input",
-    () => {
-
-        const supply =
-            Number(
-                tokenSupply.value
-            ) || 21000000;
-
-        const eth =
-            (
-                supply /
-                100000000
-            ).toFixed(4);
-
-        ethNeeded.textContent =
-            eth;
-    }
-);
+// Fixed ETH amount for liquidity
+ethNeeded.textContent =
+    CONFIG.LIQUIDITY_ETH;
 
 
 /* ============================================================
@@ -3261,6 +3262,10 @@ async function initialize() {
 
     // Set initial state
     toggleAssetType();
+
+    // Set fixed ETH amount
+    ethNeeded.textContent =
+        CONFIG.LIQUIDITY_ETH;
 
     /*
      * Wallet
