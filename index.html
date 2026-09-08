@@ -554,18 +554,18 @@
             <div class="ticker-card">
 
                 <div class="ticker-symbol">
-                    AAPL
+                    BTC
                 </div>
 
                 <div
-                    id="AAPL"
+                    id="BTC"
                     class="ticker-price"
                 >
                     --
                 </div>
 
                 <div
-                    id="AAPL_CHANGE"
+                    id="BTC_CHANGE"
                     class="ticker-change"
                 >
                     --
@@ -576,18 +576,18 @@
             <div class="ticker-card">
 
                 <div class="ticker-symbol">
-                    TSLA
+                    ETH
                 </div>
 
                 <div
-                    id="TSLA"
+                    id="ETH"
                     class="ticker-price"
                 >
                     --
                 </div>
 
                 <div
-                    id="TSLA_CHANGE"
+                    id="ETH_CHANGE"
                     class="ticker-change"
                 >
                     --
@@ -598,18 +598,18 @@
             <div class="ticker-card">
 
                 <div class="ticker-symbol">
-                    NVDA
+                    USDT
                 </div>
 
                 <div
-                    id="NVDA"
+                    id="USDT"
                     class="ticker-price"
                 >
                     --
                 </div>
 
                 <div
-                    id="NVDA_CHANGE"
+                    id="USDT_CHANGE"
                     class="ticker-change"
                 >
                     --
@@ -620,18 +620,18 @@
             <div class="ticker-card">
 
                 <div class="ticker-symbol">
-                    AMD
+                    SOL
                 </div>
 
                 <div
-                    id="AMD"
+                    id="SOL"
                     class="ticker-price"
                 >
                     --
                 </div>
 
                 <div
-                    id="AMD_CHANGE"
+                    id="SOL_CHANGE"
                     class="ticker-change"
                 >
                     --
@@ -903,23 +903,16 @@ const CONFIG = {
     ROUTER_ADDRESS:
         "0x0e5b59459F8F0315E4eF513bF64BD154EE3A2B6A",
 
-    /*
-     * IMPORTANT:
-     *
-     * First request is always same-origin:
-     *
-     *     /api/quotes
-     *
-     * This avoids CORS when the frontend and API
-     * are served by the same server.
-     */
+    // CoinMarketCap API Configuration
+    CMC_API_KEY: 'c343eefdbc5b4aed8d525b5f2c6d01a8',
 
-    PRICE_ENDPOINTS: [
-        "/api/quotes",
-        "https://interference-thomas-dam-due.trycloudflare.com/api/quotes "
-    ],
+    // Coin IDs: 1=BTC, 1027=ETH, 825=USDT, 7083=SOL
+    // You can add more IDs from https://coinmarketcap.com
+    CMC_IDS: '1,1027,825,7083',
 
-    PRICE_INTERVAL: 15000
+    CMC_URL: 'https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest',
+
+    PRICE_INTERVAL: 30000 // 30 seconds
 };
 
 
@@ -1118,6 +1111,7 @@ function formatPrice(value) {
         return "--";
     }
 
+    // Use $ prefix for USD prices
     return "$" + number.toLocaleString(
         "en-US",
         {
@@ -1129,344 +1123,7 @@ function formatPrice(value) {
 
 
 /* ============================================================
-   GENERIC PRICE PARSER
-============================================================ */
-
-/*
- * Supports all of these possible API responses:
- *
- * [
- *   {"symbol":"AAPL","price":309.38}
- * ]
- *
- * {
- *   "quotes":[...]
- * }
- *
- * {
- *   "data":[...]
- * }
- *
- * {
- *   "AAPL":{"price":309.38}
- * }
- *
- * {
- *   "AAPL":309.38
- * }
- */
-
-function normalizeQuotes(payload) {
-
-    let raw = null;
-
-    if (Array.isArray(payload)) {
-
-        raw = payload;
-
-    } else if (
-        payload &&
-        Array.isArray(payload.quotes)
-    ) {
-
-        raw = payload.quotes;
-
-    } else if (
-        payload &&
-        Array.isArray(payload.data)
-    ) {
-
-        raw = payload.data;
-
-    } else if (
-        payload &&
-        Array.isArray(payload.results)
-    ) {
-
-        raw = payload.results;
-
-    } else if (
-        payload &&
-        typeof payload === "object"
-    ) {
-
-        raw = Object.entries(payload).map(
-            ([symbol, value]) => {
-
-                if (
-                    typeof value === "number"
-                ) {
-
-                    return {
-                        symbol,
-                        price: value
-                    };
-
-                }
-
-                if (
-                    value &&
-                    typeof value === "object"
-                ) {
-
-                    return {
-                        symbol:
-                            value.symbol ||
-                            symbol,
-
-                        price:
-                            value.price ??
-                            value.last ??
-                            value.close ??
-                            value.value,
-
-                        change:
-                            value.change ??
-                            value.changePercent
-                    };
-                }
-
-                return null;
-
-            }
-        ).filter(Boolean);
-    }
-
-    if (!raw) {
-        return [];
-    }
-
-    return raw.map(item => {
-
-        if (!item) {
-            return null;
-        }
-
-        const symbol = String(
-            item.symbol ||
-            item.ticker ||
-            item.code ||
-            ""
-        ).toUpperCase();
-
-        const price = Number(
-            item.price ??
-            item.last ??
-            item.close ??
-            item.current ??
-            item.value
-        );
-
-        const change =
-            item.change ??
-            item.changePercent ??
-            item.percentChange ??
-            null;
-
-        if (
-            !symbol ||
-            !Number.isFinite(price)
-        ) {
-            return null;
-        }
-
-        return {
-            symbol,
-            price,
-            change
-        };
-
-    }).filter(Boolean);
-}
-
-
-/* ============================================================
-   UPDATE TICKER
-============================================================ */
-
-function updateTicker(quotes) {
-
-    const required = [
-        "AAPL",
-        "TSLA",
-        "NVDA",
-        "AMD"
-    ];
-
-    let found = 0;
-
-    for (const symbol of required) {
-
-        const item =
-            quotes.find(
-                q => q.symbol === symbol
-            );
-
-        const priceElement =
-            document.getElementById(symbol);
-
-        const changeElement =
-            document.getElementById(
-                symbol + "_CHANGE"
-            );
-
-        if (!item) {
-
-            priceElement.textContent = "--";
-
-            changeElement.textContent = "--";
-
-            continue;
-        }
-
-        found++;
-
-        priceElement.textContent =
-            formatPrice(item.price);
-
-        if (
-            item.change !== null &&
-            item.change !== undefined
-        ) {
-
-            const change =
-                Number(item.change);
-
-            if (Number.isFinite(change)) {
-
-                changeElement.textContent =
-                    (
-                        change >= 0
-                        ? "+"
-                        : ""
-                    ) +
-                    change.toFixed(2) +
-                    "%";
-
-                changeElement.style.color =
-                    change >= 0
-                    ? "var(--green)"
-                    : "var(--red)";
-            }
-
-        } else {
-
-            changeElement.textContent =
-                "Market";
-        }
-    }
-
-    if (found > 0) {
-
-        marketStatus.textContent =
-            "● Market data live";
-
-        marketStatus.className =
-            "market-status ok";
-
-        marketError.textContent = "";
-
-    } else {
-
-        throw new Error(
-            "API returned no AAPL/TSLA/NVDA/AMD quotes"
-        );
-    }
-}
-
-
-/* ============================================================
-   RAW HTTP REQUEST
-============================================================ */
-
-function httpGet(url, timeoutMs = 12000) {
-
-    return new Promise(
-        (resolve, reject) => {
-
-            const xhr =
-                new XMLHttpRequest();
-
-            xhr.open(
-                "GET",
-                url,
-                true
-            );
-
-            xhr.timeout = timeoutMs;
-
-            xhr.setRequestHeader(
-                "Accept",
-                "application/json"
-            );
-
-            xhr.onload = function() {
-
-                if (
-                    xhr.status >= 200 &&
-                    xhr.status < 300
-                ) {
-
-                    resolve({
-                        status: xhr.status,
-                        text: xhr.responseText,
-                        contentType:
-                            xhr.getResponseHeader(
-                                "content-type"
-                            )
-                    });
-
-                } else {
-
-                    reject(
-                        new Error(
-                            "HTTP " +
-                            xhr.status +
-                            " from " +
-                            url
-                        )
-                    );
-                }
-            };
-
-            xhr.onerror = function() {
-
-                reject(
-                    new Error(
-                        "Network/CORS error: " +
-                        url
-                    )
-                );
-            };
-
-            xhr.ontimeout = function() {
-
-                reject(
-                    new Error(
-                        "Timeout: " +
-                        url
-                    )
-                );
-            };
-
-            xhr.onabort = function() {
-
-                reject(
-                    new Error(
-                        "Request aborted: " +
-                        url
-                    )
-                );
-            };
-
-            xhr.send();
-        }
-    );
-}
-
-
-/* ============================================================
-   LOAD MARKET DATA
+   LOAD MARKET DATA FROM COINMARKETCAP
 ============================================================ */
 
 async function refreshPrices() {
@@ -1479,97 +1136,193 @@ async function refreshPrices() {
 
     marketError.textContent = "";
 
-    let lastError = null;
+    try {
 
-    for (
-        const endpoint
-        of CONFIG.PRICE_ENDPOINTS
-    ) {
+        console.log(
+            "[MWA MARKET] Fetching from CoinMarketCap..."
+        );
 
-        try {
-
-            console.log(
-                "[MWA MARKET] Request:",
-                endpoint
+        const response =
+            await fetch(
+                CONFIG.CMC_URL +
+                "?id=" +
+                CONFIG.CMC_IDS,
+                {
+                    headers: {
+                        'X-CMC_PRO_API_KEY':
+                            CONFIG.CMC_API_KEY,
+                        'Accept':
+                            'application/json'
+                    }
+                }
             );
 
-            const response =
-                await httpGet(
-                    endpoint,
-                    12000
-                );
+        console.log(
+            "[MWA MARKET] HTTP status:",
+            response.status
+        );
 
-            console.log(
-                "[MWA MARKET] HTTP:",
-                response.status
+        if (
+            !response.ok
+        ) {
+
+            throw new Error(
+                "HTTP " +
+                response.status +
+                " from CoinMarketCap"
             );
+        }
 
-            console.log(
-                "[MWA MARKET] Content-Type:",
-                response.contentType
+        const json =
+            await response.json();
+
+        console.log(
+            "[MWA MARKET] Raw response:",
+            json
+        );
+
+        if (
+            json.status &&
+            json.status.error_code !== 0
+        ) {
+
+            throw new Error(
+                "CoinMarketCap API error: " +
+                json.status.error_message
             );
+        }
 
-            console.log(
-                "[MWA MARKET] RAW:",
-                response.text
-            );
+        const data =
+            json.data || {};
 
-            let json;
+        // Mapping from CoinMarketCap ID to our symbol display
+        const idToSymbol = {
+            '1': 'BTC',
+            '1027': 'ETH',
+            '825': 'USDT',
+            '7083': 'SOL'
+        };
 
-            try {
+        // Map from our symbol to the price element ID
+        const symbolToElement = {
+            'BTC': 'BTC',
+            'ETH': 'ETH',
+            'USDT': 'USDT',
+            'SOL': 'SOL'
+        };
 
-                json =
-                    JSON.parse(
-                        response.text
-                    );
+        let found = 0;
 
-            } catch (parseError) {
+        for (
+            const [
+                id,
+                quote
+            ] of Object.entries(data)
+        ) {
 
-                throw new Error(
-                    "API returned invalid JSON: " +
-                    response.text.substring(
-                        0,
-                        300
-                    )
-                );
+            const symbol =
+                idToSymbol[id];
+
+            if (!symbol) {
+                continue;
             }
 
-            const quotes =
-                normalizeQuotes(json);
+            const price =
+                quote.quote &&
+                quote.quote.USD &&
+                quote.quote.USD.price;
 
-            console.log(
-                "[MWA MARKET] Normalized:",
-                quotes
-            );
+            const percentChange =
+                quote.quote &&
+                quote.quote.USD &&
+                quote.quote.USD.percent_change_24h;
 
-            updateTicker(quotes);
+            if (
+                typeof price !== 'number'
+            ) {
+                continue;
+            }
 
-            return true;
+            const priceEl =
+                document.getElementById(
+                    symbol
+                );
 
-        } catch (error) {
+            const changeEl =
+                document.getElementById(
+                    symbol + "_CHANGE"
+                );
 
-            console.error(
-                "[MWA MARKET] Failed:",
-                endpoint,
-                error
-            );
+            if (priceEl) {
 
-            lastError = error;
+                priceEl.textContent =
+                    formatPrice(price);
+
+                found++;
+            }
+
+            if (
+                changeEl &&
+                typeof percentChange === 'number'
+            ) {
+
+                const change =
+                    Number(
+                        percentChange
+                    );
+
+                const sign =
+                    change >= 0
+                    ? "+"
+                    : "";
+
+                changeEl.textContent =
+                    sign +
+                    change.toFixed(2) +
+                    "%";
+
+                changeEl.style.color =
+                    change >= 0
+                    ? "var(--green)"
+                    : "var(--red)";
+            }
         }
+
+        if (found > 0) {
+
+            marketStatus.textContent =
+                "● Market data live";
+
+            marketStatus.className =
+                "market-status ok";
+
+            marketError.textContent =
+                "";
+
+        } else {
+
+            throw new Error(
+                "No price data received from CoinMarketCap"
+            );
+        }
+
+    } catch (error) {
+
+        console.error(
+            "[MWA MARKET] Error:",
+            error
+        );
+
+        marketStatus.textContent =
+            "⚠ Market data unavailable";
+
+        marketStatus.className =
+            "market-status error";
+
+        marketError.textContent =
+            error.message ||
+            "Unknown market data error";
     }
-
-    marketStatus.textContent =
-        "⚠ Market data unavailable";
-
-    marketStatus.className =
-        "market-status error";
-
-    marketError.textContent =
-        lastError
-        ? lastError.message
-        : "Unknown market data error";
-
-    return false;
 }
 
 
@@ -2193,13 +1946,6 @@ async function buyToken(
             );
         }
 
-        /*
-         * Simple proportional estimate.
-         *
-         * The exact pricing formula should ideally
-         * be taken from the Router contract.
-         */
-
         const ethRequired =
             (
                 amount *
@@ -2440,21 +2186,6 @@ async function returnRWA(
                 Date.now() / 1000
             );
 
-        /*
-         * IMPORTANT:
-         *
-         * We intentionally do NOT reject an expired
-         * deposit here.
-         *
-         * The Router contract is the authority.
-         *
-         * If redeem() is designed to allow redemption
-         * after expiry, this call will work.
-         *
-         * If the Router does not allow it, the contract
-         * will revert.
-         */
-
         if (now >= deadline) {
 
             setStatus(
@@ -2486,14 +2217,6 @@ async function returnRWA(
             await token.balanceOf(
                 APP.account
             );
-
-        /*
-         * redeem() normally requires the complete
-         * token amount to be returned.
-         *
-         * This is the critical condition for receiving
-         * the RWA back.
-         */
 
         if (
             balance < required
@@ -3218,8 +2941,7 @@ async function initialize() {
     );
 
     console.log(
-        "Price endpoints:",
-        CONFIG.PRICE_ENDPOINTS
+        "CoinMarketCap API configured"
     );
 
     console.log(
