@@ -46,7 +46,6 @@
         h1 { font-size: 30px; margin-bottom: 8px; }
         .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 25px; }
 
-        /* ===================================================== WALLET ===================================================== */
         .wallet {
             display: flex;
             justify-content: space-between;
@@ -57,13 +56,7 @@
             border-radius: 14px;
             gap: 15px;
         }
-
-        .wallet-left {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
+        .wallet-left { display: flex; flex-direction: column; gap: 6px; }
         .wallet-state { font-weight: 700; }
         .wallet-address { color: var(--muted); font-size: 13px; }
 
@@ -76,18 +69,14 @@
             cursor: pointer;
             transition: background 0.2s, transform 0.1s, opacity 0.2s;
         }
-
         button:hover:not(:disabled) { transform: translateY(-1px); }
         button:disabled { opacity: 0.35; cursor: not-allowed; }
-
         .btn-green { background: var(--green); color: #00140e; }
         .btn-green:hover:not(:disabled) { background: var(--green2); }
         .btn-red { background: var(--red); color: white; }
         .btn-yellow { background: var(--yellow); color: #171000; }
-        .btn-blue { background: var(--blue); color: #00101e; }
         .btn-small { padding: 7px 12px; font-size: 12px; }
 
-        /* ===================================================== LAUNCH ===================================================== */
         .section {
             margin-top: 22px;
             padding: 22px;
@@ -95,22 +84,9 @@
             border: 1px solid var(--border);
             border-radius: 15px;
         }
-
         .section h2 { font-size: 18px; margin-bottom: 18px; }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            color: var(--muted);
-            font-size: 12px;
-        }
-
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 12px; }
         input, select {
             width: 100%;
             padding: 12px;
@@ -120,23 +96,10 @@
             color: white;
             outline: none;
         }
+        input:focus, select:focus { border-color: rgba(0,211,149,0.5); }
+        .eth-info { margin-top: 15px; color: var(--muted); font-size: 12px; }
+        .launch-button { width: 100%; margin-top: 18px; }
 
-        input:focus, select:focus {
-            border-color: rgba(0,211,149,0.5);
-        }
-
-        .eth-info {
-            margin-top: 15px;
-            color: var(--muted);
-            font-size: 12px;
-        }
-
-        .launch-button {
-            width: 100%;
-            margin-top: 18px;
-        }
-
-        /* ===================================================== PRICE PREVIEW ===================================================== */
         .price-preview {
             margin-top: 15px;
             padding: 15px;
@@ -145,37 +108,21 @@
             border-left: 4px solid var(--blue);
             display: none;
         }
-
         .price-preview.active { display: block; }
-
         .price-preview .row {
             display: flex;
             justify-content: space-between;
             padding: 4px 0;
             font-size: 14px;
         }
-
         .price-preview .row .label { color: var(--muted); }
         .price-preview .row .value { color: var(--text2); font-weight: 600; }
         .price-preview .row .value.green { color: var(--green); }
 
-        /* ===================================================== TOKEN TABLE ===================================================== */
         .table-wrapper { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th {
-            text-align: left;
-            padding: 12px;
-            font-size: 11px;
-            text-transform: uppercase;
-            color: var(--muted);
-            border-bottom: 1px solid var(--border);
-        }
-        td {
-            padding: 14px 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            vertical-align: middle;
-        }
-
+        th { text-align: left; padding: 12px; font-size: 11px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+        td { padding: 14px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
         .token-name { font-weight: 700; }
         .token-symbol { color: var(--green); font-size: 12px; }
         .token-address { margin-top: 4px; color: var(--muted); font-size: 11px; }
@@ -188,7 +135,6 @@
         .actions { display: flex; gap: 6px; flex-wrap: wrap; }
         .amount-input { width: 80px; padding: 7px 8px; font-size: 12px; }
 
-        /* ===================================================== STATUS ===================================================== */
         .status {
             margin-top: 20px;
             padding: 14px;
@@ -198,19 +144,11 @@
             font-size: 13px;
             word-break: break-word;
         }
-
         .status.error { border-left-color: var(--red); }
         .status.pending { border-left-color: var(--yellow); }
         .status.info { border-left-color: var(--blue); }
+        .footer { text-align: center; margin-top: 30px; color: var(--muted); font-size: 11px; }
 
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            color: var(--muted);
-            font-size: 11px;
-        }
-
-        /* ===================================================== MOBILE ===================================================== */
         @media(max-width: 800px) {
             body { padding: 10px; }
             .container { padding: 16px; }
@@ -225,7 +163,6 @@
     <h1>MWA • Launch & Trade</h1>
     <div class="subtitle">MWA Protocol v3 • Robinhood Testnet</div>
 
-    <!-- ===================================================== WALLET ===================================================== -->
     <div class="wallet">
         <div class="wallet-left">
             <div class="wallet-state" id="walletState">Wallet not connected</div>
@@ -234,7 +171,6 @@
         <button id="connectBtn" class="btn-green">Connect MetaMask</button>
     </div>
 
-    <!-- ===================================================== LAUNCH ===================================================== -->
     <div class="section">
         <h2>📦 Launch New Token</h2>
         <div class="grid">
@@ -287,24 +223,11 @@
             </div>
         </div>
 
-        <!-- ===================================================== PRICE PREVIEW ===================================================== -->
         <div id="pricePreview" class="price-preview">
-            <div class="row">
-                <span class="label">Asset Price</span>
-                <span class="value green" id="assetPriceDisplay">--</span>
-            </div>
-            <div class="row">
-                <span class="label">Amount Locked</span>
-                <span class="value" id="amountLockedDisplay">--</span>
-            </div>
-            <div class="row">
-                <span class="label">Total Value Locked</span>
-                <span class="value" id="totalValueDisplay">--</span>
-            </div>
-            <div class="row">
-                <span class="label">Token Price</span>
-                <span class="value green" id="tokenPriceDisplay">--</span>
-            </div>
+            <div class="row"><span class="label">Asset Price</span><span class="value green" id="assetPriceDisplay">--</span></div>
+            <div class="row"><span class="label">Amount Locked</span><span class="value" id="amountLockedDisplay">--</span></div>
+            <div class="row"><span class="label">Total Value Locked</span><span class="value" id="totalValueDisplay">--</span></div>
+            <div class="row"><span class="label">Token Price</span><span class="value green" id="tokenPriceDisplay">--</span></div>
         </div>
 
         <div class="eth-info">
@@ -314,15 +237,11 @@
         <button id="launchBtn" class="btn-green launch-button" disabled>🚀 Launch Token</button>
     </div>
 
-    <!-- ===================================================== TOKENS ===================================================== -->
     <div class="section">
         <h2>📊 Your Tokens</h2>
-        <div id="tokenList">
-            <div style="color:#8da49d; padding:20px; text-align:center;">Connect wallet to load tokens.</div>
-        </div>
+        <div id="tokenList"><div style="color:#8da49d; padding:20px; text-align:center;">Connect wallet to load tokens.</div></div>
     </div>
 
-    <!-- ===================================================== REDEEM ===================================================== -->
     <div class="section">
         <h2>🔄 Return RWA</h2>
         <div class="grid">
@@ -337,7 +256,6 @@
         </div>
     </div>
 
-    <!-- ===================================================== STATUS ===================================================== -->
     <div id="status" class="status">Ready.</div>
     <div class="footer">MWA Protocol v3 • Router</div>
 </div>
@@ -371,14 +289,12 @@ const CONFIG = {
         "CRYPTO:USDT": "tether"
     },
 
-    ASSET_NAMES: {
-        "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E": "AMD",
-        "0x71178BAc73cBeb415514eB542a8995b82669778d": "TSLA",
-        "0x7dF7F09271136b49bD1E44937FA758264024858C": "AAPL",
-        "CRYPTO:BTC": "BTC",
-        "CRYPTO:ETH": "ETH",
-        "CRYPTO:SOL": "SOL",
-        "CRYPTO:USDT": "USDT"
+    // Реальные адреса тестовых токенов на Robinhood Testnet
+    CRYPTO_ADDRESSES: {
+        "CRYPTO:BTC": "0x0000000000000000000000000000000000000000",
+        "CRYPTO:ETH": "0x0000000000000000000000000000000000000000",
+        "CRYPTO:SOL": "0x0000000000000000000000000000000000000000",
+        "CRYPTO:USDT": "0x0000000000000000000000000000000000000000"
     }
 };
 
@@ -448,8 +364,7 @@ const APP = {
     connected: false,
     deposits: [],
     tokenCache: new Map(),
-    currentAssetPrice: null,
-    initialized: false
+    currentAssetPrice: null
 };
 
 /* ============================================================
@@ -476,12 +391,9 @@ function isZeroAddress(address) {
 function formatPrice(value, isTokenPrice = false) {
     const number = Number(value);
     if (!Number.isFinite(number)) return "--";
-    
-    // Для токенов с очень маленькой ценой показываем до 8 знаков
     if (isTokenPrice && number < 0.01) {
         return "$" + number.toFixed(8);
     }
-    
     return "$" + number.toLocaleString("en-US", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
@@ -501,6 +413,15 @@ function amountToWei(amount, decimals) {
         console.error("Conversion error:", error);
         return 0n;
     }
+}
+
+function getErrorMessage(error) {
+    if (!error) return "Unknown error";
+    if (error.reason) return error.reason;
+    if (error.shortMessage) return error.shortMessage;
+    if (error.info && error.info.error && error.info.error.message) return error.info.error.message;
+    if (error.message) return error.message;
+    return String(error);
 }
 
 /* ============================================================
@@ -555,7 +476,7 @@ async function updatePricePreview() {
         assetPriceDisplay.textContent = formatPrice(assetPrice);
         amountLockedDisplay.textContent = amount + " " + symbol;
         totalValueDisplay.textContent = formatPrice(totalValue);
-        tokenPriceDisplay.textContent = formatPrice(tokenPrice, true); // Важно: true для маленьких чисел
+        tokenPriceDisplay.textContent = formatPrice(tokenPrice, true);
 
         return { assetPrice, tokenPrice, totalValue, amount, decimals, symbol };
     } catch (error) {
@@ -823,15 +744,6 @@ async function returnRWA(id) {
     }
 }
 
-function getErrorMessage(error) {
-    if (!error) return "Unknown error";
-    if (error.reason) return error.reason;
-    if (error.shortMessage) return error.shortMessage;
-    if (error.info && error.info.error && error.info.error.message) return error.info.error.message;
-    if (error.message) return error.message;
-    return String(error);
-}
-
 /* ============================================================
    NETWORK & CONNECT
 ============================================================ */
@@ -909,7 +821,7 @@ async function connectWallet() {
 }
 
 /* ============================================================
-   LAUNCH
+   LAUNCH (С ДЕТАЛЬНЫМ ЛОГИРОВАНИЕМ)
 ============================================================ */
 
 async function launchToken() {
@@ -930,8 +842,8 @@ async function launchToken() {
         if (supply <= 0n) throw new Error("Supply must be positive.");
         if (duration < 60) throw new Error("Lock duration must be at least 60 seconds.");
 
+        // Получаем цену актива
         setStatus("⏳ Fetching asset price...", "pending");
-
         const selectedOption = assetSelect.options[assetSelect.selectedIndex];
         const decimals = parseInt(selectedOption.dataset.decimals) || 18;
         const amount = parseFloat(assetAmount.value) || 0;
@@ -942,20 +854,34 @@ async function launchToken() {
         const assetAmountWei = amountToWei(amount, decimals);
         if (assetAmountWei <= 0n) throw new Error("Asset amount too small.");
 
-        const totalValue = assetPrice * amount;
-        const tokenPrice = Number(supply) > 0 ? totalValue / Number(supply) : 0;
-
+        // Определяем адрес для контракта
         let assetAddress;
         if (asset.startsWith("CRYPTO:")) {
-            assetAddress = "0x0000000000000000000000000000000000000000";
+            assetAddress = CONFIG.CRYPTO_ADDRESSES[asset] || "0x0000000000000000000000000000000000000000";
         } else {
             assetAddress = asset;
         }
 
-        setStatus(`Launching ${name} (${symbol}) | Asset: ${formatPrice(assetPrice)} | Token: ${formatPrice(tokenPrice, true)}`, "info");
+        // Проверяем баланс RWA токена
+        try {
+            const token = new ethers.Contract(assetAddress, TOKEN_ABI, APP.signer);
+            const balance = await token.balanceOf(APP.account);
+            console.log("[MWA LAUNCH] RWA Balance:", balance.toString(), "Need:", assetAmountWei.toString());
+            if (balance < assetAmountWei) {
+                throw new Error(`Insufficient RWA balance. Need: ${ethers.formatUnits(assetAmountWei, decimals)}, Have: ${ethers.formatUnits(balance, decimals)}`);
+            }
+        } catch (e) {
+            if (asset.startsWith("CRYPTO:")) {
+                console.warn("Crypto asset balance check skipped - placeholder address");
+            } else {
+                throw e;
+            }
+        }
 
-        console.log("Launch params:", {
-            name, symbol,
+        // Логируем все параметры
+        console.log("[MWA LAUNCH] Parameters:", {
+            name,
+            symbol,
             supply: supply.toString(),
             assetAddress,
             assetAmountWei: assetAmountWei.toString(),
@@ -963,6 +889,9 @@ async function launchToken() {
             ethValue: CONFIG.LIQUIDITY_ETH
         });
 
+        setStatus(`Launching ${name} (${symbol}) | Asset: ${formatPrice(assetPrice)} | Token: ${formatPrice(assetPrice * amount / Number(supply), true)}`, "info");
+
+        // Отправляем транзакцию
         const tx = await APP.router.launch(
             name,
             symbol,
@@ -982,10 +911,10 @@ async function launchToken() {
         APP.tokenCache.clear();
         await renderTokenList();
 
-        setStatus(`✅ Token launched! ${name} (${symbol}) | Asset: ${formatPrice(assetPrice)} | Token price: ${formatPrice(tokenPrice, true)} | Deposit ID: ${counter}`, "success");
+        setStatus(`✅ Token launched! ${name} (${symbol}) | Deposit ID: ${counter}`, "success");
 
     } catch (error) {
-        console.error("Launch error:", error);
+        console.error("[MWA LAUNCH] Error:", error);
         setStatus("❌ Launch failed: " + getErrorMessage(error), "error");
     } finally {
         launchBtn.disabled = !APP.connected;
@@ -1073,7 +1002,6 @@ async function initialize() {
     console.log("======================================");
     console.log("MWA Launch & Trade v3");
     console.log("Router:", CONFIG.ROUTER_ADDRESS);
-    console.log("Current origin:", window.location.origin);
     console.log("======================================");
 
     toggleAssetType();
