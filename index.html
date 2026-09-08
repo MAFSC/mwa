@@ -76,6 +76,7 @@
         .btn-red { background: var(--red); color: white; }
         .btn-yellow { background: var(--yellow); color: #171000; }
         .btn-small { padding: 7px 12px; font-size: 12px; }
+        .btn-approve { background: var(--blue); color: #00101e; }
 
         .section {
             margin-top: 22px;
@@ -234,6 +235,7 @@
             ⚡ ETH needed for liquidity: <strong id="ethNeeded">0.001</strong> ETH
         </div>
 
+        <button id="approveBtn" class="btn-approve" style="width:100%; margin-top:10px; display:none;">🔓 Approve RWA Token</button>
         <button id="launchBtn" class="btn-green launch-button" disabled>🚀 Launch Token</button>
     </div>
 
@@ -289,7 +291,6 @@ const CONFIG = {
         "CRYPTO:USDT": "tether"
     },
 
-    // Реальные адреса тестовых токенов на Robinhood Testnet
     CRYPTO_ADDRESSES: {
         "CRYPTO:BTC": "0x0000000000000000000000000000000000000000",
         "CRYPTO:ETH": "0x0000000000000000000000000000000000000000",
@@ -306,6 +307,7 @@ const connectBtn = document.getElementById("connectBtn");
 const walletState = document.getElementById("walletState");
 const walletAddress = document.getElementById("walletAddress");
 const launchBtn = document.getElementById("launchBtn");
+const approveBtn = document.getElementById("approveBtn");
 const redeemBtn = document.getElementById("redeemBtn");
 const tokenList = document.getElementById("tokenList");
 const statusBox = document.getElementById("status");
@@ -346,8 +348,6 @@ const ROUTER_ABI = [
 
 const TOKEN_ABI = [
     "function balanceOf(address) view returns(uint256)",
-    "function name() view returns(string)",
-    "function symbol() view returns(string)",
     "function approve(address,uint256) returns(bool)",
     "function allowance(address,address) view returns(uint256)"
 ];
@@ -364,7 +364,8 @@ const APP = {
     connected: false,
     deposits: [],
     tokenCache: new Map(),
-    currentAssetPrice: null
+    currentAssetPrice: null,
+    needApprove: false
 };
 
 /* ============================================================
@@ -521,6 +522,81 @@ function toggleAssetType() {
         }
     }
     updatePricePreview();
+}
+
+/* ============================================================
+   CHECK ALLOWANCE
+============================================================ */
+
+async function checkAllowance(assetAddress, amountWei) {
+    try {
+        if (isZeroAddress(assetAddress) || assetAddress.startsWith("CRYPTO:")) {
+            return true;
+        }
+        const token = new ethers.Contract(assetAddress, TOKEN_ABI, APP.signer);
+        const allowance = await token.allowance(APP.account, CONFIG.ROUTER_ADDRESS);
+        const needApprove = allowance < amountWei;
+        APP.needApprove = needApprove;
+        
+        if (needApprove) {
+            approveBtn.style.display = "block";
+            approveBtn.textContent = `🔓 Approve ${assetSelect.options[assetSelect.selectedIndex].dataset.symbol || "Token"}`;
+            setStatus(`⚠️ Need to approve RWA token first.`, "info");
+            launchBtn.disabled = true;
+        } else {
+            approveBtn.style.display = "none";
+            launchBtn.disabled = false;
+        }
+        return !needApprove;
+    } catch (error) {
+        console.error("Allowance check error:", error);
+        return false;
+    }
+}
+
+/* ============================================================
+   APPROVE RWA
+============================================================ */
+
+async function approveRWA() {
+    if (!APP.connected) {
+        setStatus("Connect wallet first.", "error");
+        return;
+    }
+
+    const asset = assetSelect.value;
+    if (asset.startsWith("CRYPTO:")) {
+        setStatus("Crypto assets don't need approve in testnet.", "info");
+        return;
+    }
+
+    const amount = parseFloat(assetAmount.value) || 0;
+    if (amount <= 0) {
+        setStatus("Enter valid asset amount.", "error");
+        return;
+    }
+
+    const selectedOption = assetSelect.options[assetSelect.selectedIndex];
+    const decimals = parseInt(selectedOption.dataset.decimals) || 18;
+    const amountWei = amountToWei(amount, decimals);
+
+    approveBtn.disabled = true;
+    setStatus(`⏳ Approving ${selectedOption.dataset.symbol}...`, "pending");
+
+    try {
+        const token = new ethers.Contract(asset, TOKEN_ABI, APP.signer);
+        const tx = await token.approve(CONFIG.ROUTER_ADDRESS, ethers.MaxUint256);
+        await tx.wait();
+        setStatus(`✅ ${selectedOption.dataset.symbol} approved!`, "success");
+        approveBtn.style.display = "none";
+        launchBtn.disabled = false;
+        APP.needApprove = false;
+    } catch (error) {
+        console.error("Approve error:", error);
+        setStatus("❌ Approve failed: " + getErrorMessage(error), "error");
+    } finally {
+        approveBtn.disabled = false;
+    }
 }
 
 /* ============================================================
@@ -774,8 +850,8 @@ function updateWalletUI() {
         walletAddress.textContent = shortAddress(APP.account);
         connectBtn.textContent = "Connected";
         connectBtn.disabled = false;
-        launchBtn.disabled = false;
         redeemBtn.disabled = false;
+        validateForm();
     } else {
         walletState.textContent = "Wallet not connected";
         walletAddress.textContent = "—";
@@ -810,6 +886,7 @@ async function connectWallet() {
         } catch (error) {
             console.warn("depositCounter unavailable", error);
         }
+        validateForm();
     } catch (error) {
         console.error("Wallet connection error:", error);
         APP.connected = false;
@@ -821,7 +898,7 @@ async function connectWallet() {
 }
 
 /* ============================================================
-   LAUNCH (С ДЕТАЛЬНЫМ ЛОГИРОВАНИЕМ)
+   LAUNCH (С АВТОМАТИЧЕСКИМ APPROVE)
 ============================================================ */
 
 async function launchToken() {
@@ -829,12 +906,28 @@ async function launchToken() {
         setStatus("Connect wallet first.", "error");
         return;
     }
+
+    // Проверяем approve перед запуском
+    const asset = assetSelect.value;
+    if (!asset.startsWith("CRYPTO:")) {
+        const amount = parseFloat(assetAmount.value) || 0;
+        if (amount > 0) {
+            const selectedOption = assetSelect.options[assetSelect.selectedIndex];
+            const decimals = parseInt(selectedOption.dataset.decimals) || 18;
+            const amountWei = amountToWei(amount, decimals);
+            const approved = await checkAllowance(asset, amountWei);
+            if (!approved) {
+                setStatus("⚠️ Please approve RWA token first.", "info");
+                return;
+            }
+        }
+    }
+
     launchBtn.disabled = true;
     try {
         const name = tokenName.value.trim();
         const symbol = tokenSymbol.value.trim();
         const supply = BigInt(tokenSupply.value);
-        const asset = assetSelect.value;
         const duration = Number(lockDuration.value);
 
         if (!name) throw new Error("Token name required.");
@@ -842,8 +935,8 @@ async function launchToken() {
         if (supply <= 0n) throw new Error("Supply must be positive.");
         if (duration < 60) throw new Error("Lock duration must be at least 60 seconds.");
 
-        // Получаем цену актива
         setStatus("⏳ Fetching asset price...", "pending");
+
         const selectedOption = assetSelect.options[assetSelect.selectedIndex];
         const decimals = parseInt(selectedOption.dataset.decimals) || 18;
         const amount = parseFloat(assetAmount.value) || 0;
@@ -854,7 +947,6 @@ async function launchToken() {
         const assetAmountWei = amountToWei(amount, decimals);
         if (assetAmountWei <= 0n) throw new Error("Asset amount too small.");
 
-        // Определяем адрес для контракта
         let assetAddress;
         if (asset.startsWith("CRYPTO:")) {
             assetAddress = CONFIG.CRYPTO_ADDRESSES[asset] || "0x0000000000000000000000000000000000000000";
@@ -862,26 +954,11 @@ async function launchToken() {
             assetAddress = asset;
         }
 
-        // Проверяем баланс RWA токена
-        try {
-            const token = new ethers.Contract(assetAddress, TOKEN_ABI, APP.signer);
-            const balance = await token.balanceOf(APP.account);
-            console.log("[MWA LAUNCH] RWA Balance:", balance.toString(), "Need:", assetAmountWei.toString());
-            if (balance < assetAmountWei) {
-                throw new Error(`Insufficient RWA balance. Need: ${ethers.formatUnits(assetAmountWei, decimals)}, Have: ${ethers.formatUnits(balance, decimals)}`);
-            }
-        } catch (e) {
-            if (asset.startsWith("CRYPTO:")) {
-                console.warn("Crypto asset balance check skipped - placeholder address");
-            } else {
-                throw e;
-            }
-        }
+        const totalValue = assetPrice * amount;
+        const tokenPrice = Number(supply) > 0 ? totalValue / Number(supply) : 0;
 
-        // Логируем все параметры
         console.log("[MWA LAUNCH] Parameters:", {
-            name,
-            symbol,
+            name, symbol,
             supply: supply.toString(),
             assetAddress,
             assetAmountWei: assetAmountWei.toString(),
@@ -889,9 +966,8 @@ async function launchToken() {
             ethValue: CONFIG.LIQUIDITY_ETH
         });
 
-        setStatus(`Launching ${name} (${symbol}) | Asset: ${formatPrice(assetPrice)} | Token: ${formatPrice(assetPrice * amount / Number(supply), true)}`, "info");
+        setStatus(`Launching ${name} (${symbol}) | Asset: ${formatPrice(assetPrice)} | Token: ${formatPrice(tokenPrice, true)}`, "info");
 
-        // Отправляем транзакцию
         const tx = await APP.router.launch(
             name,
             symbol,
@@ -917,7 +993,8 @@ async function launchToken() {
         console.error("[MWA LAUNCH] Error:", error);
         setStatus("❌ Launch failed: " + getErrorMessage(error), "error");
     } finally {
-        launchBtn.disabled = !APP.connected;
+        launchBtn.disabled = false;
+        validateForm();
     }
 }
 
@@ -925,20 +1002,33 @@ async function launchToken() {
    INPUT VALIDATION
 ============================================================ */
 
-function validateForm() {
-    launchBtn.disabled = !(
-        APP.connected &&
+async function validateForm() {
+    const isValid = APP.connected &&
         tokenName.value.trim() &&
         tokenSymbol.value.trim() &&
         tokenSupply.value &&
         Number(tokenSupply.value) > 0 &&
         assetAmount.value &&
         Number(assetAmount.value) > 0 &&
-        Number(lockDuration.value) >= 60
-    );
+        Number(lockDuration.value) >= 60;
+
+    launchBtn.disabled = !isValid;
 
     if (APP.connected && tokenSupply.value && assetAmount.value) {
-        updatePricePreview();
+        await updatePricePreview();
+        // Проверяем allowance для выбранного актива
+        const asset = assetSelect.value;
+        if (!asset.startsWith("CRYPTO:")) {
+            const amount = parseFloat(assetAmount.value) || 0;
+            if (amount > 0) {
+                const selectedOption = assetSelect.options[assetSelect.selectedIndex];
+                const decimals = parseInt(selectedOption.dataset.decimals) || 18;
+                const amountWei = amountToWei(amount, decimals);
+                await checkAllowance(asset, amountWei);
+            }
+        } else {
+            approveBtn.style.display = "none";
+        }
     }
 }
 
@@ -948,6 +1038,7 @@ function validateForm() {
 
 connectBtn.addEventListener("click", connectWallet);
 launchBtn.addEventListener("click", launchToken);
+approveBtn.addEventListener("click", approveRWA);
 
 redeemBtn.addEventListener("click", async () => {
     const id = Number(depositId.value);
@@ -964,7 +1055,7 @@ assetSelect.addEventListener("change", () => {
     const selectedOption = assetSelect.options[assetSelect.selectedIndex];
     const symbol = selectedOption.dataset.symbol || "Units";
     assetUnitLabel.textContent = "(" + symbol + ")";
-    updatePricePreview();
+    validateForm();
 });
 
 [tokenName, tokenSymbol, tokenSupply, assetAmount, lockDuration].forEach(element => {
@@ -1035,7 +1126,7 @@ document.addEventListener("visibilitychange", async () => {
         await renderTokenList();
     }
     if (APP.connected && tokenSupply.value && assetAmount.value) {
-        await updatePricePreview();
+        await validateForm();
     }
 });
 
