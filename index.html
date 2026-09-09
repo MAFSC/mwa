@@ -98,7 +98,7 @@
             outline: none;
         }
         input:focus, select:focus { border-color: rgba(0,211,149,0.5); }
-        .eth-info { margin-top: 15px; color: var(--muted); font-size: 12px; }
+
         .launch-button { width: 100%; margin-top: 18px; }
 
         .price-preview {
@@ -231,10 +231,6 @@
             <div class="row"><span class="label">Token Price</span><span class="value green" id="tokenPriceDisplay">--</span></div>
         </div>
 
-        <div class="eth-info">
-            ⚡ ETH needed for liquidity: <strong id="ethNeeded">0.001</strong> ETH
-        </div>
-
         <button id="approveBtn" class="btn-approve" style="width:100%; margin-top:10px; display:none;">🔓 Approve RWA Token</button>
         <button id="launchBtn" class="btn-green launch-button" disabled>🚀 Launch Token</button>
     </div>
@@ -254,7 +250,7 @@
         </div>
         <button id="redeemBtn" class="btn-yellow" style="margin-top:15px;" disabled>🔄 Return RWA</button>
         <div style="margin-top:10px; color:#8da49d; font-size:12px;">
-            After the lock period expires, the borrower can attempt to return the required token position and receive the RWA back, provided the Router contract permits the operation.
+            After the lock period expires, you can return the required token amount and receive the RWA back.
         </div>
     </div>
 
@@ -276,7 +272,9 @@ const CONFIG = {
     RPC_URL: "https://rpc.testnet.chain.robinhood.com",
     EXPLORER: "https://explorer.testnet.chain.robinhood.com",
     ROUTER_ADDRESS: "0x0e5b59459F8F0315E4eF513bF64BD154EE3A2B6A",
-    LIQUIDITY_ETH: "0.001",
+
+    // NO ETH needed for liquidity — RWA asset provides liquidity
+    LAUNCH_ETH: "0",
 
     STOCK_PRICES: {
         "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E": 489.28,
@@ -320,7 +318,6 @@ const assetAmount = document.getElementById("assetAmount");
 const assetUnitLabel = document.getElementById("assetUnitLabel");
 const lockDuration = document.getElementById("lockDuration");
 const depositId = document.getElementById("depositId");
-const ethNeeded = document.getElementById("ethNeeded");
 const pricePreview = document.getElementById("pricePreview");
 const assetPriceDisplay = document.getElementById("assetPriceDisplay");
 const amountLockedDisplay = document.getElementById("amountLockedDisplay");
@@ -349,7 +346,9 @@ const ROUTER_ABI = [
 const TOKEN_ABI = [
     "function balanceOf(address) view returns(uint256)",
     "function approve(address,uint256) returns(bool)",
-    "function allowance(address,address) view returns(uint256)"
+    "function allowance(address,address) view returns(uint256)",
+    "function name() view returns(string)",
+    "function symbol() view returns(string)"
 ];
 
 /* ============================================================
@@ -537,7 +536,7 @@ async function checkAllowance(assetAddress, amountWei) {
         const allowance = await token.allowance(APP.account, CONFIG.ROUTER_ADDRESS);
         const needApprove = allowance < amountWei;
         APP.needApprove = needApprove;
-        
+
         if (needApprove) {
             approveBtn.style.display = "block";
             approveBtn.textContent = `🔓 Approve ${assetSelect.options[assetSelect.selectedIndex].dataset.symbol || "Token"}`;
@@ -620,7 +619,7 @@ async function getTokenInfo(tokenAddress) {
 
 async function getTokenBalance(tokenAddress) {
     try {
-        const token = new ethers.Contract(tokenAddress, TOKEN_ABI, APP.provider);
+        const token = new ethers.Contract(tokenAddress, TOKEN_ABI, APP.signer);
         return await token.balanceOf(APP.account);
     } catch (error) {
         console.error("Balance error:", error);
@@ -632,11 +631,18 @@ async function loadDeposits() {
     if (!APP.connected || !APP.router) return [];
     try {
         const counter = Number(await APP.router.depositCounter());
+        console.log("[MWA] Total deposits:", counter);
         const result = [];
         for (let id = 1; id <= counter; id++) {
             try {
                 const d = await APP.router.getDeposit(id);
                 if (isZeroAddress(d.memeToken)) continue;
+                console.log(`[MWA] Deposit ${id}:`, {
+                    assetAddress: d.assetAddress,
+                    memeToken: d.memeToken,
+                    memeTokenAmount: d.memeTokenAmount,
+                    isRedeemed: d.isRedeemed
+                });
                 result.push({
                     id,
                     assetAddress: d.assetAddress,
@@ -664,27 +670,38 @@ async function renderTokenList() {
         tokenList.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">Connect wallet to load tokens.</div>`;
         return;
     }
+
     tokenList.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">Loading blockchain data...</div>`;
+
     const deposits = await loadDeposits();
+
     if (deposits.length === 0) {
-        tokenList.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">No deposits/tokens found.</div>`;
+        tokenList.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">No deposits/tokens found. Launch your first token!</div>`;
         return;
     }
+
     let rows = "";
     for (const deposit of deposits) {
+        // Пропускаем депозиты без токена или уже выкупленные
+        if (isZeroAddress(deposit.memeToken) || deposit.isRedeemed) continue;
+
         const info = await getTokenInfo(deposit.memeToken);
         if (!info) continue;
+
         const balance = await getTokenBalance(deposit.memeToken);
         const totalSupply = BigInt(deposit.memeTokenAmount);
         const deadline = Number(deposit.redemptionDeadline);
         const now = Math.floor(Date.now() / 1000);
         const expired = now >= deadline;
+
         let stateText, stateClass;
         if (deposit.isRedeemed) { stateText = "REDEEMED"; stateClass = "redeemed"; }
         else if (expired) { stateText = "EXPIRED"; stateClass = "expired"; }
         else { stateText = "ACTIVE"; stateClass = "active"; }
+
         const balanceFormatted = ethers.formatUnits(balance, 18);
         const supplyFormatted = ethers.formatUnits(totalSupply, 18);
+
         rows += `
         <tr>
             <td>
@@ -711,10 +728,12 @@ async function renderTokenList() {
             </td>
         </tr>`;
     }
+
     if (!rows) {
-        tokenList.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">Tokens could not be loaded.</div>`;
+        tokenList.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">No active tokens found.</div>`;
         return;
     }
+
     tokenList.innerHTML = `
         <div class="table-wrapper">
             <table>
@@ -796,6 +815,7 @@ async function returnRWA(id) {
         const now = Math.floor(Date.now() / 1000);
         if (now >= deadline) setStatus("⏳ Lock expired. Preparing RWA return...", "pending");
         else setStatus("⏳ Lock is still active. Checking Router rules...", "pending");
+
         const token = new ethers.Contract(deposit.memeToken, TOKEN_ABI, APP.signer);
         const required = BigInt(deposit.memeTokenAmount);
         const balance = await token.balanceOf(APP.account);
@@ -898,7 +918,7 @@ async function connectWallet() {
 }
 
 /* ============================================================
-   LAUNCH (С АВТОМАТИЧЕСКИМ APPROVE)
+   LAUNCH (БЕЗ ETH)
 ============================================================ */
 
 async function launchToken() {
@@ -963,11 +983,12 @@ async function launchToken() {
             assetAddress,
             assetAmountWei: assetAmountWei.toString(),
             duration,
-            ethValue: CONFIG.LIQUIDITY_ETH
+            ethValue: CONFIG.LAUNCH_ETH
         });
 
         setStatus(`Launching ${name} (${symbol}) | Asset: ${formatPrice(assetPrice)} | Token: ${formatPrice(tokenPrice, true)}`, "info");
 
+        // No ETH needed for liquidity — RWA asset provides liquidity
         const tx = await APP.router.launch(
             name,
             symbol,
@@ -975,7 +996,7 @@ async function launchToken() {
             assetAddress,
             assetAmountWei,
             duration,
-            { value: ethers.parseEther(CONFIG.LIQUIDITY_ETH) }
+            { value: ethers.parseEther(CONFIG.LAUNCH_ETH) }
         );
 
         setStatus("⏳ Waiting for blockchain confirmation...", "pending");
@@ -1063,8 +1084,6 @@ assetSelect.addEventListener("change", () => {
     element.addEventListener("change", validateForm);
 });
 
-ethNeeded.textContent = CONFIG.LIQUIDITY_ETH;
-
 /* ============================================================
    METAMASK EVENTS
 ============================================================ */
@@ -1096,7 +1115,6 @@ async function initialize() {
     console.log("======================================");
 
     toggleAssetType();
-    ethNeeded.textContent = CONFIG.LIQUIDITY_ETH;
 
     if (typeof window.ethereum === "undefined") {
         setStatus("MetaMask not detected.", "info");
