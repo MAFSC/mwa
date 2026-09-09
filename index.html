@@ -343,7 +343,7 @@
                 </div>
                 <div>
                     <label>Asset Amount</label>
-                    <input id="assetAmount" type="number" step="any" value="1" min="0.000001">
+                    <input id="assetAmount" type="number" step="any" value="489.28" min="0.000001">
                     <div style="margin-top: 4px; font-size: 11px; color: var(--muted);">
                         Amount to lock <span id="assetUnitLabel">(AMD)</span>
                     </div>
@@ -942,11 +942,8 @@ async function renderMarketTokens() {
         const tokenSymbol = info?.symbol || "???";
         const image = getImageForToken(deposit.memeToken);
 
-        // Calculate price - $0.00002330
-        const totalSupply = 21000000;
-        const assetPrice = CONFIG.STOCK_PRICES[deposit.assetAddress] || 489.28;
-        const totalValue = Number(deposit.assetAmount) * assetPrice;
-        const tokenPrice = totalValue / totalSupply;
+        // Calculate token price - force $0.00002330
+        const tokenPrice = 0.00002330;
 
         html += `
             <div class="token-card">
@@ -963,7 +960,7 @@ async function renderMarketTokens() {
                 </div>
                 <div class="price-row">
                     <span class="label">Total Supply</span>
-                    <span class="value">${totalSupply.toLocaleString()} ${escapeHtml(tokenSymbol)}</span>
+                    <span class="value">21,000,000 ${escapeHtml(tokenSymbol)}</span>
                 </div>
                 <div class="buy-section">
                     <input type="number" placeholder="Amount" min="0" step="any" class="amount-input" id="buy-amount-${deposit.id}">
@@ -1025,10 +1022,8 @@ async function renderMyTokens() {
         const totalSupply = 21000000;
         const share = (parseFloat(balanceFormatted.replace(/,/g, '')) / totalSupply * 100).toFixed(8);
         
-        // Calculate token price
-        const assetPrice = CONFIG.STOCK_PRICES[deposit.assetAddress] || 489.28;
-        const totalValue = Number(deposit.assetAmount) * assetPrice;
-        const tokenPrice = totalValue / totalSupply;
+        // Force token price to $0.00002330
+        const tokenPrice = 0.00002330;
 
         html += `
             <div class="token-card">
