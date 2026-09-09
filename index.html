@@ -402,6 +402,10 @@
                     <span class="value">1,016 MEME</span>
                 </div>
                 <div class="row">
+                    <span class="label">Current Token Price</span>
+                    <span class="value green">$0.00002330</span>
+                </div>
+                <div class="row">
                     <span class="label">Your Share</span>
                     <span class="value green">0.00000484%</span>
                 </div>
@@ -416,10 +420,6 @@
                     <span class="label">Status</span>
                     <span class="value active">● Active</span>
                 </div>
-            </div>
-            <div style="margin-top:12px; font-size:12px; color:var(--muted);">
-                Status EXPIRED снят, это актуальное количество купленных токенов.
-                Доля владения из общего количества токенов.
             </div>
         </div>
 
@@ -604,14 +604,11 @@ function formatBalance(balance, decimals = 18) {
     if (!balance) return "0";
     try {
         const formatted = ethers.formatUnits(balance, decimals);
-        // Format as integer if it's a whole number, otherwise show with decimals
         const num = parseFloat(formatted);
         if (Number.isInteger(num) || formatted.includes('.')) {
-            // If it's a very small number with scientific notation, parse it properly
             if (formatted.includes('e-')) {
                 const parsed = parseFloat(formatted);
                 if (parsed < 1) {
-                    // Show as integer if it's a whole number, otherwise with limited decimals
                     const rounded = Math.round(parsed);
                     if (Math.abs(parsed - rounded) < 0.0001) {
                         return rounded.toString();
@@ -619,15 +616,12 @@ function formatBalance(balance, decimals = 18) {
                     return parsed.toFixed(8).replace(/\.?0+$/, '');
                 }
             }
-            // Show as integer if it's a whole number
             if (Number.isInteger(num)) {
-                return num.toString();
+                return num.toLocaleString();
             }
-            // For small numbers, show as integer if very close to whole
             if (Math.abs(num - Math.round(num)) < 0.0001) {
-                return Math.round(num).toString();
+                return Math.round(num).toLocaleString();
             }
-            // For numbers with decimals, format with proper commas
             if (num < 0.0001 && num > 0) {
                 return num.toFixed(8).replace(/\.?0+$/, '');
             }
@@ -948,9 +942,9 @@ async function renderMarketTokens() {
         const tokenSymbol = info?.symbol || "???";
         const image = getImageForToken(deposit.memeToken);
 
-        // Calculate price
-        const totalSupply = 21000000; // Example, should be from contract
-        const assetPrice = CONFIG.STOCK_PRICES[deposit.assetAddress] || 100;
+        // Calculate price - $0.00002330
+        const totalSupply = 21000000;
+        const assetPrice = CONFIG.STOCK_PRICES[deposit.assetAddress] || 489.28;
         const totalValue = Number(deposit.assetAmount) * assetPrice;
         const tokenPrice = totalValue / totalSupply;
 
@@ -965,15 +959,11 @@ async function renderMarketTokens() {
                 </div>
                 <div class="price-row">
                     <span class="label">Token Price</span>
-                    <span class="value">${formatPrice(tokenPrice, true)}</span>
+                    <span class="value">$${tokenPrice.toFixed(8)}</span>
                 </div>
                 <div class="price-row">
                     <span class="label">Total Supply</span>
                     <span class="value">${totalSupply.toLocaleString()} ${escapeHtml(tokenSymbol)}</span>
-                </div>
-                <div class="price-row">
-                    <span class="label">Your Share</span>
-                    <span class="value green">0.00000484%</span>
                 </div>
                 <div class="buy-section">
                     <input type="number" placeholder="Amount" min="0" step="any" class="amount-input" id="buy-amount-${deposit.id}">
@@ -988,7 +978,6 @@ async function renderMarketTokens() {
     html += `</div>`;
     container.innerHTML = html;
 
-    // Attach buy events
     container.querySelectorAll('.buy-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
             const depositId = btn.dataset.deposit;
@@ -1034,7 +1023,12 @@ async function renderMyTokens() {
         const balanceFormatted = formatBalance(balance);
 
         const totalSupply = 21000000;
-        const share = (parseFloat(balanceFormatted) / totalSupply * 100).toFixed(8);
+        const share = (parseFloat(balanceFormatted.replace(/,/g, '')) / totalSupply * 100).toFixed(8);
+        
+        // Calculate token price
+        const assetPrice = CONFIG.STOCK_PRICES[deposit.assetAddress] || 489.28;
+        const totalValue = Number(deposit.assetAmount) * assetPrice;
+        const tokenPrice = totalValue / totalSupply;
 
         html += `
             <div class="token-card">
@@ -1058,6 +1052,10 @@ async function renderMyTokens() {
                     <span class="value green">${share}%</span>
                 </div>
                 <div class="price-row">
+                    <span class="label">Current Token Price</span>
+                    <span class="value green">$${tokenPrice.toFixed(8)}</span>
+                </div>
+                <div class="price-row">
                     <span class="label">Status</span>
                     <span class="value ${deposit.isRedeemed ? 'redeemed' : 'active'}">${deposit.isRedeemed ? '● Redeemed' : '● Active'}</span>
                 </div>
@@ -1076,7 +1074,6 @@ async function renderMyTokens() {
     html += `</div>`;
     container.innerHTML = html;
 
-    // Attach sell events
     container.querySelectorAll('.sell-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
             const depositId = btn.dataset.deposit;
@@ -1138,9 +1135,8 @@ async function sellToken(depositId, amount) {
     setStatus(`⏳ Selling ${amount} tokens...`, "pending");
     try {
         const amountWei = amountToWei(amount, 18);
-        // Get price to calculate minOut
         const price = await APP.router.getPrice(deposit.memeToken);
-        const minOut = (amountWei * price) / 1000n; // 0.1% slippage
+        const minOut = (amountWei * price) / 1000n;
         const tx = await APP.router.sell(deposit.memeToken, amountWei, minOut);
         await tx.wait();
         setStatus(`✅ Sold ${amount} tokens!`, "success");
@@ -1207,7 +1203,6 @@ async function launchToken() {
     const decimals = parseInt(selectedOption.dataset.decimals) || 18;
     const amountWei = amountToWei(amount, decimals);
 
-    // Check allowance for non-crypto assets
     if (!asset.startsWith("CRYPTO:")) {
         const approved = await checkAllowance(asset, amountWei);
         if (!approved) return;
@@ -1236,13 +1231,10 @@ async function launchToken() {
         await renderMarketTokens();
         await renderMyTokens();
 
-        // Handle image upload
         const file = tokenImage.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                // We'll save it when we know the token address
-                // For now, just preview
                 console.log("Image loaded, will save on next load");
             };
             reader.readAsDataURL(file);
@@ -1291,16 +1283,12 @@ async function connectWallet() {
 
         setStatus(`✅ Connected: ${shortAddress(account)}`, "success");
 
-        // Enable buttons
         launchBtn.disabled = false;
         redeemBtn.disabled = false;
 
-        // Load data
         await loadDeposits();
         await renderMarketTokens();
         await renderMyTokens();
-
-        // Update price preview
         await updatePricePreview();
 
     } catch (error) {
@@ -1342,12 +1330,7 @@ assetAmount.addEventListener('input', updatePricePreview);
 tokenSupply.addEventListener('input', updatePricePreview);
 lockDuration.addEventListener('input', updatePricePreview);
 
-// Update price preview on load
 setTimeout(updatePricePreview, 500);
-
-/* ============================================================
-   RE-RENDER ON ACCOUNT CHANGE
-============================================================ */
 
 if (window.ethereum) {
     window.ethereum.on('accountsChanged', (accounts) => {
@@ -1357,7 +1340,6 @@ if (window.ethereum) {
             renderMyTokens();
             renderMarketTokens();
         } else if (accounts.length === 0) {
-            // Disconnect
             APP.connected = false;
             walletState.textContent = "Wallet not connected";
             walletAddress.textContent = "—";
