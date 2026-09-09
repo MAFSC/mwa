@@ -49,6 +49,7 @@
             margin-bottom: 25px;
             border-bottom: 1px solid var(--border);
             padding-bottom: 15px;
+            flex-wrap: wrap;
         }
 
         .nav button {
@@ -73,13 +74,8 @@
             background: rgba(0,211,149,0.1);
         }
 
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
+        .page { display: none; }
+        .page.active { display: block; }
 
         h1 { font-size: 30px; margin-bottom: 8px; }
         .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 25px; }
@@ -94,6 +90,7 @@
             border-radius: 14px;
             gap: 15px;
             margin-bottom: 25px;
+            flex-wrap: wrap;
         }
         .wallet-left { display: flex; flex-direction: column; gap: 6px; }
         .wallet-state { font-weight: 700; }
@@ -418,7 +415,6 @@ const walletAddress = document.getElementById("walletAddress");
 const launchBtn = document.getElementById("launchBtn");
 const approveBtn = document.getElementById("approveBtn");
 const redeemBtn = document.getElementById("redeemBtn");
-const tokenList = document.getElementById("tokenList");
 const marketTokenList = document.getElementById("marketTokenList");
 const myTokenList = document.getElementById("myTokenList");
 const statusBox = document.getElementById("status");
@@ -486,6 +482,16 @@ const APP = {
 /* ============================================================
    HELPERS
 ============================================================ */
+
+function escapeHtml(value) {
+    if (!value) return '';
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
 function setStatus(message, type = "success") {
     statusBox.textContent = message;
@@ -821,8 +827,8 @@ async function renderMarketTokens() {
         if (!info) continue;
 
         const totalSupply = Number(deposit.memeTokenAmount);
-        const price = await fetchAssetPrice(deposit.assetAddress);
-        const tokenPrice = totalSupply > 0 ? price.price / totalSupply : 0;
+        const priceResult = await fetchAssetPrice(deposit.assetAddress);
+        const tokenPrice = totalSupply > 0 ? (priceResult.price || 0) / totalSupply : 0;
 
         const image = getImageForToken(deposit.memeToken);
         const dexLink = getDexScreenerLink(deposit.memeToken);
@@ -830,7 +836,7 @@ async function renderMarketTokens() {
         html += `
             <div class="token-card">
                 <div class="header">
-                    ${image ? `<img src="${image}" class="token-image" alt="${info.name}">` : `<div class="token-image" style="background: var(--panel2); display:flex; align-items:center; justify-content:center; font-size:20px;">🪙</div>`}
+                    ${image ? `<img src="${image}" class="token-image" alt="${escapeHtml(info.name)}">` : `<div class="token-image" style="background: var(--panel2); display:flex; align-items:center; justify-content:center; font-size:20px;">🪙</div>`}
                     <div class="info">
                         <div class="name">${escapeHtml(info.name)}</div>
                         <div class="symbol">${escapeHtml(info.symbol)}</div>
@@ -847,7 +853,7 @@ async function renderMarketTokens() {
                 </div>
                 <div class="price-row">
                     <span class="label">RWA Locked</span>
-                    <span class="value">${formatPrice(price.price)}</span>
+                    <span class="value">${formatPrice(priceResult.price || 0)}</span>
                 </div>
                 <div style="margin-top:6px;">
                     <a href="${dexLink}" target="_blank" class="dex-link">📊 View on DexScreener</a>
@@ -906,7 +912,7 @@ async function renderMyTokens() {
         html += `
             <div class="token-card">
                 <div class="header">
-                    ${image ? `<img src="${image}" class="token-image" alt="${info.name}">` : `<div class="token-image" style="background: var(--panel2); display:flex; align-items:center; justify-content:center; font-size:20px;">🪙</div>`}
+                    ${image ? `<img src="${image}" class="token-image" alt="${escapeHtml(info.name)}">` : `<div class="token-image" style="background: var(--panel2); display:flex; align-items:center; justify-content:center; font-size:20px;">🪙</div>`}
                     <div class="info">
                         <div class="name">${escapeHtml(info.name)}</div>
                         <div class="symbol">${escapeHtml(info.symbol)}</div>
@@ -944,10 +950,15 @@ async function renderMyTokens() {
    BUY MARKET TOKEN
 ============================================================ */
 
-async function buyMarketToken(tokenAddress, id) {
+window.buyMarketToken = async function(tokenAddress, id) {
     try {
+        if (!APP.connected) {
+            setStatus("Connect wallet first.", "error");
+            return;
+        }
+
         const input = document.getElementById(`market_amount_${id}`) || document.getElementById(`my_amount_${id}`);
-        const amount = BigInt(input.value);
+        const amount = BigInt(input.value || 1);
         if (amount <= 0n) throw new Error("Amount must be positive.");
 
         setStatus("Calculating buy...", "pending");
@@ -970,16 +981,21 @@ async function buyMarketToken(tokenAddress, id) {
         console.error(error);
         setStatus("❌ Buy failed: " + getErrorMessage(error), "error");
     }
-}
+};
 
 /* ============================================================
    SELL MY TOKEN
 ============================================================ */
 
-async function sellMyToken(tokenAddress, id) {
+window.sellMyToken = async function(tokenAddress, id) {
     try {
+        if (!APP.connected) {
+            setStatus("Connect wallet first.", "error");
+            return;
+        }
+
         const input = document.getElementById(`my_amount_${id}`);
-        const amount = BigInt(input.value);
+        const amount = BigInt(input.value || 1);
         if (amount <= 0n) throw new Error("Amount must be positive.");
 
         const token = new ethers.Contract(tokenAddress, TOKEN_ABI, APP.signer);
@@ -1010,7 +1026,7 @@ async function sellMyToken(tokenAddress, id) {
         console.error(error);
         setStatus("❌ Sell failed: " + getErrorMessage(error), "error");
     }
-}
+};
 
 /* ============================================================
    REDEEM
@@ -1226,7 +1242,6 @@ async function launchToken() {
 
         // Save image if uploaded
         if (imageDataUrl) {
-            // We need to get the token address from the deposit
             const counter = await APP.router.depositCounter();
             const deposit = await APP.router.getDeposit(counter);
             if (deposit.memeToken && !isZeroAddress(deposit.memeToken)) {
@@ -1256,17 +1271,13 @@ async function launchToken() {
 ============================================================ */
 
 function navigateTo(pageName) {
-    // Hide all pages
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    // Show target page
     const target = document.getElementById('page-' + pageName);
     if (target) target.classList.add('active');
-    // Update nav buttons
     document.querySelectorAll('.nav button').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.page === pageName);
     });
 
-    // Refresh content when switching to market or my-tokens
     if (pageName === 'market') {
         renderMarketTokens();
     } else if (pageName === 'my-tokens') {
@@ -1394,7 +1405,6 @@ async function initialize() {
     }
 
     validateForm();
-    // Load market data initially
     setTimeout(() => renderMarketTokens(), 1000);
 }
 
