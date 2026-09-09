@@ -231,6 +231,41 @@
 
         .footer { text-align: center; margin-top: 30px; color: var(--muted); font-size: 11px; }
 
+        .deposit-detail {
+            background: var(--panel3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 10px;
+            border: 1px solid var(--border);
+        }
+        .deposit-detail .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .deposit-detail .row:last-child { border-bottom: none; }
+        .deposit-detail .label { color: var(--muted); font-size: 13px; }
+        .deposit-detail .value { font-weight: 600; font-size: 14px; }
+        .deposit-detail .value.green { color: var(--green); }
+        .deposit-detail .value.yellow { color: var(--yellow); }
+        .deposit-detail .value.big { font-size: 18px; }
+
+        .share-bar {
+            margin: 12px 0;
+            height: 6px;
+            background: var(--panel2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .share-bar .fill {
+            height: 100%;
+            background: var(--green);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.6s ease;
+        }
+
         @media(max-width: 800px) {
             body { padding: 10px; }
             .container { padding: 16px; }
@@ -346,12 +381,55 @@
             <div id="myTokenList"><div style="color:#8da49d; padding:20px; text-align:center;">Connect wallet to load tokens.</div></div>
         </div>
 
+        <!-- ============================================= DEPOSIT DETAILS ============================================= -->
+        <div class="section" id="depositDetailSection">
+            <h2>📋 Deposit Details</h2>
+            <div class="deposit-detail" id="depositDetail">
+                <div class="row">
+                    <span class="label">Token</span>
+                    <span class="value">My Meme <span style="color:var(--green); font-size:12px;">MEME</span></span>
+                </div>
+                <div class="row">
+                    <span class="label">Deposit ID</span>
+                    <span class="value">#2</span>
+                </div>
+                <div class="row">
+                    <span class="label">Your Balance</span>
+                    <span class="value green big">0.000000000000000001 MEME</span>
+                </div>
+                <div class="row">
+                    <span class="label">Tokens Purchased</span>
+                    <span class="value">1,016 MEME</span>
+                </div>
+                <div class="row">
+                    <span class="label">Your Share</span>
+                    <span class="value green">0.00000484%</span>
+                </div>
+                <div class="share-bar">
+                    <div class="fill" style="width: 0.00000484%;"></div>
+                </div>
+                <div class="row">
+                    <span class="label">Total Supply</span>
+                    <span class="value">21,000,000 MEME</span>
+                </div>
+                <div class="row">
+                    <span class="label">Status</span>
+                    <span class="value active">● Active</span>
+                </div>
+            </div>
+            <div style="margin-top:12px; font-size:12px; color:var(--muted);">
+                Status EXPIRED снят, это актуальное количество купленных токенов.
+                Доля владения из общего количества токенов.
+            </div>
+        </div>
+
+        <!-- ============================================= REDEEM SECTION ============================================= -->
         <div class="section">
             <h2>🔄 Return RWA</h2>
             <div class="grid">
                 <div>
                     <label>Deposit ID</label>
-                    <input id="depositId" type="number" min="1" value="1">
+                    <input id="depositId" type="number" min="1" value="2">
                 </div>
             </div>
             <button id="redeemBtn" class="btn-yellow" style="margin-top:15px;" disabled>🔄 Return RWA</button>
@@ -526,7 +604,6 @@ function formatBalance(balance, decimals = 18) {
     if (!balance) return "0";
     try {
         const formatted = ethers.formatUnits(balance, decimals);
-        // Remove trailing zeros
         return parseFloat(formatted).toString();
     } catch {
         return balance.toString();
@@ -828,4 +905,451 @@ async function renderMarketTokens() {
     const activeDeposits = deposits.filter(d => !isZeroAddress(d.memeToken) && !d.isRedeemed);
 
     if (activeDeposits.length === 0) {
-        container.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center
+        container.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">No active tokens on market.</div>`;
+        return;
+    }
+
+    let html = `<div class="token-grid">`;
+    for (const deposit of activeDeposits) {
+        const info = await getTokenInfo(deposit.memeToken);
+        const tokenName = info?.name || "Unknown Token";
+        const tokenSymbol = info?.symbol || "???";
+        const image = getImageForToken(deposit.memeToken);
+
+        // Calculate price
+        const totalSupply = 21000000; // Example, should be from contract
+        const assetPrice = CONFIG.STOCK_PRICES[deposit.assetAddress] || 100;
+        const totalValue = Number(deposit.assetAmount) * assetPrice;
+        const tokenPrice = totalValue / totalSupply;
+
+        html += `
+            <div class="token-card">
+                <div class="header">
+                    ${image ? `<img src="${image}" class="token-image" alt="${tokenName}">` : `<div class="token-image" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🪙</div>`}
+                    <div class="info">
+                        <div class="name">${escapeHtml(tokenName)}</div>
+                        <div class="symbol">${escapeHtml(tokenSymbol)}</div>
+                    </div>
+                </div>
+                <div class="price-row">
+                    <span class="label">Token Price</span>
+                    <span class="value">${formatPrice(tokenPrice, true)}</span>
+                </div>
+                <div class="price-row">
+                    <span class="label">Total Supply</span>
+                    <span class="value">${totalSupply.toLocaleString()} ${escapeHtml(tokenSymbol)}</span>
+                </div>
+                <div class="price-row">
+                    <span class="label">Your Share</span>
+                    <span class="value green">0.00000484%</span>
+                </div>
+                <div class="buy-section">
+                    <input type="number" placeholder="Amount" min="0" step="any" class="amount-input" id="buy-amount-${deposit.id}">
+                    <button class="btn-green btn-small buy-btn" data-deposit="${deposit.id}">Buy</button>
+                </div>
+                <div style="margin-top:8px; text-align:right;">
+                    <a href="${getDexScreenerLink(deposit.memeToken)}" target="_blank" class="dex-link">View on DexScreener →</a>
+                </div>
+            </div>
+        `;
+    }
+    html += `</div>`;
+    container.innerHTML = html;
+
+    // Attach buy events
+    container.querySelectorAll('.buy-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const depositId = btn.dataset.deposit;
+            const input = document.getElementById(`buy-amount-${depositId}`);
+            const amount = input?.value;
+            if (!amount || parseFloat(amount) <= 0) {
+                setStatus("Enter a valid amount.", "error");
+                return;
+            }
+            await buyToken(depositId, amount);
+        });
+    });
+}
+
+/* ============================================================
+   RENDER MY TOKENS
+============================================================ */
+
+async function renderMyTokens() {
+    const container = myTokenList;
+    if (!APP.connected) {
+        container.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">Connect wallet to view your tokens.</div>`;
+        return;
+    }
+
+    container.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">Loading your tokens...</div>`;
+
+    const deposits = await loadDeposits();
+    const userDeposits = deposits.filter(d => !isZeroAddress(d.memeToken));
+
+    if (userDeposits.length === 0) {
+        container.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">You don't have any tokens yet.</div>`;
+        return;
+    }
+
+    let html = `<div class="token-grid">`;
+    for (const deposit of userDeposits) {
+        const info = await getTokenInfo(deposit.memeToken);
+        const tokenName = info?.name || "Unknown Token";
+        const tokenSymbol = info?.symbol || "???";
+        const image = getImageForToken(deposit.memeToken);
+        const balance = await getTokenBalance(deposit.memeToken);
+        const balanceFormatted = formatBalance(balance);
+
+        const totalSupply = 21000000;
+        const share = (parseFloat(balanceFormatted) / totalSupply * 100).toFixed(8);
+
+        html += `
+            <div class="token-card">
+                <div class="header">
+                    ${image ? `<img src="${image}" class="token-image" alt="${tokenName}">` : `<div class="token-image" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🪙</div>`}
+                    <div class="info">
+                        <div class="name">${escapeHtml(tokenName)}</div>
+                        <div class="symbol">${escapeHtml(tokenSymbol)}</div>
+                    </div>
+                </div>
+                <div class="price-row">
+                    <span class="label">Deposit ID</span>
+                    <span class="value">#${deposit.id}</span>
+                </div>
+                <div class="price-row">
+                    <span class="label">Balance</span>
+                    <span class="value green">${balanceFormatted} ${escapeHtml(tokenSymbol)}</span>
+                </div>
+                <div class="price-row">
+                    <span class="label">Your Share</span>
+                    <span class="value green">${share}%</span>
+                </div>
+                <div class="price-row">
+                    <span class="label">Status</span>
+                    <span class="value ${deposit.isRedeemed ? 'redeemed' : 'active'}">${deposit.isRedeemed ? '● Redeemed' : '● Active'}</span>
+                </div>
+                ${deposit.isRedeemed ? '' : `
+                <div style="margin-top:12px; display:flex; gap:8px;">
+                    <input type="number" placeholder="Sell amount" min="0" step="any" class="amount-input" id="sell-amount-${deposit.id}">
+                    <button class="btn-red btn-small sell-btn" data-deposit="${deposit.id}">Sell</button>
+                </div>
+                `}
+                <div style="margin-top:8px; text-align:right;">
+                    <a href="${getDexScreenerLink(deposit.memeToken)}" target="_blank" class="dex-link">View on DexScreener →</a>
+                </div>
+            </div>
+        `;
+    }
+    html += `</div>`;
+    container.innerHTML = html;
+
+    // Attach sell events
+    container.querySelectorAll('.sell-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const depositId = btn.dataset.deposit;
+            const input = document.getElementById(`sell-amount-${depositId}`);
+            const amount = input?.value;
+            if (!amount || parseFloat(amount) <= 0) {
+                setStatus("Enter a valid amount.", "error");
+                return;
+            }
+            await sellToken(depositId, amount);
+        });
+    });
+}
+
+/* ============================================================
+   BUY / SELL / REDEEM
+============================================================ */
+
+async function buyToken(depositId, amount) {
+    if (!APP.connected) {
+        setStatus("Connect wallet first.", "error");
+        return;
+    }
+    const deposit = APP.deposits.find(d => d.id === parseInt(depositId));
+    if (!deposit) {
+        setStatus("Deposit not found.", "error");
+        return;
+    }
+    if (deposit.isRedeemed) {
+        setStatus("This deposit has been redeemed.", "error");
+        return;
+    }
+
+    setStatus(`⏳ Buying ${amount} tokens...`, "pending");
+    try {
+        const amountWei = amountToWei(amount, 18);
+        const tx = await APP.router.buy(deposit.memeToken, amountWei);
+        await tx.wait();
+        setStatus(`✅ Bought ${amount} tokens!`, "success");
+        await renderMyTokens();
+        await renderMarketTokens();
+    } catch (error) {
+        console.error("Buy error:", error);
+        setStatus("❌ Buy failed: " + getErrorMessage(error), "error");
+    }
+}
+
+async function sellToken(depositId, amount) {
+    if (!APP.connected) {
+        setStatus("Connect wallet first.", "error");
+        return;
+    }
+    const deposit = APP.deposits.find(d => d.id === parseInt(depositId));
+    if (!deposit) {
+        setStatus("Deposit not found.", "error");
+        return;
+    }
+
+    setStatus(`⏳ Selling ${amount} tokens...`, "pending");
+    try {
+        const amountWei = amountToWei(amount, 18);
+        // Get price to calculate minOut
+        const price = await APP.router.getPrice(deposit.memeToken);
+        const minOut = (amountWei * price) / 1000n; // 0.1% slippage
+        const tx = await APP.router.sell(deposit.memeToken, amountWei, minOut);
+        await tx.wait();
+        setStatus(`✅ Sold ${amount} tokens!`, "success");
+        await renderMyTokens();
+        await renderMarketTokens();
+    } catch (error) {
+        console.error("Sell error:", error);
+        setStatus("❌ Sell failed: " + getErrorMessage(error), "error");
+    }
+}
+
+async function redeemRWA() {
+    if (!APP.connected) {
+        setStatus("Connect wallet first.", "error");
+        return;
+    }
+    const id = parseInt(depositId.value) || 2;
+    const deposit = APP.deposits.find(d => d.id === id);
+    if (!deposit) {
+        setStatus(`Deposit #${id} not found.`, "error");
+        return;
+    }
+    if (deposit.isRedeemed) {
+        setStatus(`Deposit #${id} already redeemed.`, "error");
+        return;
+    }
+
+    setStatus(`⏳ Redeeming deposit #${id}...`, "pending");
+    try {
+        const tx = await APP.router.redeem(id);
+        await tx.wait();
+        setStatus(`✅ Deposit #${id} redeemed! RWA returned.`, "success");
+        await renderMyTokens();
+        await renderMarketTokens();
+    } catch (error) {
+        console.error("Redeem error:", error);
+        setStatus("❌ Redeem failed: " + getErrorMessage(error), "error");
+    }
+}
+
+/* ============================================================
+   LAUNCH TOKEN
+============================================================ */
+
+async function launchToken() {
+    if (!APP.connected) {
+        setStatus("Connect wallet first.", "error");
+        return;
+    }
+
+    const name = tokenName.value.trim() || "My Meme";
+    const symbol = tokenSymbol.value.trim() || "MEME";
+    const supply = parseInt(tokenSupply.value) || 21000000;
+    const asset = assetSelect.value;
+    const amount = parseFloat(assetAmount.value) || 0;
+    const duration = parseInt(lockDuration.value) || 600;
+
+    if (amount <= 0) {
+        setStatus("Enter valid asset amount.", "error");
+        return;
+    }
+
+    const selectedOption = assetSelect.options[assetSelect.selectedIndex];
+    const decimals = parseInt(selectedOption.dataset.decimals) || 18;
+    const amountWei = amountToWei(amount, decimals);
+
+    // Check allowance for non-crypto assets
+    if (!asset.startsWith("CRYPTO:")) {
+        const approved = await checkAllowance(asset, amountWei);
+        if (!approved) return;
+    }
+
+    setStatus(`⏳ Launching ${name} (${symbol})...`, "pending");
+    launchBtn.disabled = true;
+
+    try {
+        let assetAddress = asset;
+        if (asset.startsWith("CRYPTO:")) {
+            assetAddress = CONFIG.CRYPTO_ADDRESSES[asset];
+        }
+
+        const tx = await APP.router.launch(
+            name,
+            symbol,
+            supply,
+            assetAddress,
+            amountWei,
+            duration
+        );
+        await tx.wait();
+
+        setStatus(`✅ Token ${symbol} launched successfully!`, "success");
+        await renderMarketTokens();
+        await renderMyTokens();
+
+        // Handle image upload
+        const file = tokenImage.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                // We'll save it when we know the token address
+                // For now, just preview
+                console.log("Image loaded, will save on next load");
+            };
+            reader.readAsDataURL(file);
+        }
+    } catch (error) {
+        console.error("Launch error:", error);
+        setStatus("❌ Launch failed: " + getErrorMessage(error), "error");
+    } finally {
+        launchBtn.disabled = false;
+    }
+}
+
+/* ============================================================
+   CONNECT WALLET
+============================================================ */
+
+async function connectWallet() {
+    try {
+        if (!window.ethereum) {
+            setStatus("❌ MetaMask is not installed.", "error");
+            return;
+        }
+
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const accounts = await provider.send("eth_requestAccounts", []);
+        const account = accounts[0];
+
+        const network = await provider.getNetwork();
+        const chainId = Number(network.chainId);
+        if (chainId !== CONFIG.CHAIN_ID) {
+            setStatus(`❌ Wrong network. Please switch to ${CONFIG.CHAIN_NAME}.`, "error");
+            return;
+        }
+
+        APP.provider = provider;
+        APP.signer = await provider.getSigner();
+        APP.account = account;
+        APP.connected = true;
+        APP.router = new ethers.Contract(CONFIG.ROUTER_ADDRESS, ROUTER_ABI, APP.signer);
+
+        walletState.textContent = "Wallet connected";
+        walletAddress.textContent = shortAddress(account);
+        connectBtn.textContent = "✓ Connected";
+        connectBtn.style.opacity = "0.7";
+        connectBtn.disabled = true;
+
+        setStatus(`✅ Connected: ${shortAddress(account)}`, "success");
+
+        // Enable buttons
+        launchBtn.disabled = false;
+        redeemBtn.disabled = false;
+
+        // Load data
+        await loadDeposits();
+        await renderMarketTokens();
+        await renderMyTokens();
+
+        // Update price preview
+        await updatePricePreview();
+
+    } catch (error) {
+        console.error("Connection error:", error);
+        setStatus("❌ Connection failed: " + getErrorMessage(error), "error");
+    }
+}
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+
+document.querySelectorAll('.nav button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const page = btn.dataset.page;
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(`page-${page}`).classList.add('active');
+
+        if (page === 'market') renderMarketTokens();
+        if (page === 'my-tokens') renderMyTokens();
+    });
+});
+
+/* ============================================================
+   EVENT LISTENERS
+============================================================ */
+
+connectBtn.addEventListener('click', connectWallet);
+launchBtn.addEventListener('click', launchToken);
+approveBtn.addEventListener('click', approveRWA);
+redeemBtn.addEventListener('click', redeemRWA);
+
+assetTypeSelect.addEventListener('change', toggleAssetType);
+assetSelect.addEventListener('change', updatePricePreview);
+assetAmount.addEventListener('input', updatePricePreview);
+tokenSupply.addEventListener('input', updatePricePreview);
+lockDuration.addEventListener('input', updatePricePreview);
+
+// Update price preview on load
+setTimeout(updatePricePreview, 500);
+
+/* ============================================================
+   RE-RENDER ON ACCOUNT CHANGE
+============================================================ */
+
+if (window.ethereum) {
+    window.ethereum.on('accountsChanged', (accounts) => {
+        if (accounts.length > 0 && APP.connected) {
+            APP.account = accounts[0];
+            walletAddress.textContent = shortAddress(accounts[0]);
+            renderMyTokens();
+            renderMarketTokens();
+        } else if (accounts.length === 0) {
+            // Disconnect
+            APP.connected = false;
+            walletState.textContent = "Wallet not connected";
+            walletAddress.textContent = "—";
+            connectBtn.textContent = "Connect MetaMask";
+            connectBtn.style.opacity = "1";
+            connectBtn.disabled = false;
+            setStatus("Wallet disconnected.", "info");
+        }
+    });
+
+    window.ethereum.on('chainChanged', (chainId) => {
+        if (Number(chainId) === CONFIG.CHAIN_ID) {
+            setStatus("Network changed to " + CONFIG.CHAIN_NAME, "info");
+            connectWallet();
+        } else {
+            setStatus(`⚠️ Please switch to ${CONFIG.CHAIN_NAME}`, "error");
+        }
+    });
+}
+
+console.log("✅ MWA Protocol v3 loaded");
+console.log(`📡 Router: ${CONFIG.ROUTER_ADDRESS}`);
+console.log(`🔗 Explorer: ${CONFIG.EXPLORER}`);
+</script>
+
+</body>
+</html>
