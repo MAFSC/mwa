@@ -395,7 +395,7 @@
                 </div>
                 <div class="row">
                     <span class="label">Your Balance</span>
-                    <span class="value green big">0.000000000000000001 MEME</span>
+                    <span class="value green big">1,000 MEME</span>
                 </div>
                 <div class="row">
                     <span class="label">Tokens Purchased</span>
@@ -604,7 +604,39 @@ function formatBalance(balance, decimals = 18) {
     if (!balance) return "0";
     try {
         const formatted = ethers.formatUnits(balance, decimals);
-        return parseFloat(formatted).toString();
+        // Format as integer if it's a whole number, otherwise show with decimals
+        const num = parseFloat(formatted);
+        if (Number.isInteger(num) || formatted.includes('.')) {
+            // If it's a very small number with scientific notation, parse it properly
+            if (formatted.includes('e-')) {
+                const parsed = parseFloat(formatted);
+                if (parsed < 1) {
+                    // Show as integer if it's a whole number, otherwise with limited decimals
+                    const rounded = Math.round(parsed);
+                    if (Math.abs(parsed - rounded) < 0.0001) {
+                        return rounded.toString();
+                    }
+                    return parsed.toFixed(8).replace(/\.?0+$/, '');
+                }
+            }
+            // Show as integer if it's a whole number
+            if (Number.isInteger(num)) {
+                return num.toString();
+            }
+            // For small numbers, show as integer if very close to whole
+            if (Math.abs(num - Math.round(num)) < 0.0001) {
+                return Math.round(num).toString();
+            }
+            // For numbers with decimals, format with proper commas
+            if (num < 0.0001 && num > 0) {
+                return num.toFixed(8).replace(/\.?0+$/, '');
+            }
+            return num.toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 8
+            });
+        }
+        return num.toString();
     } catch {
         return balance.toString();
     }
