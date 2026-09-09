@@ -266,6 +266,17 @@
             transition: width 0.6s ease;
         }
 
+        .eth-required {
+            background: var(--panel3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            border: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .eth-required .label { color: var(--muted); }
+        .eth-required .value { color: var(--green); font-weight: 700; }
+
         @media(max-width: 800px) {
             body { padding: 10px; }
             .container { padding: 16px; }
@@ -359,6 +370,16 @@
                 <div class="row"><span class="label">Amount Locked</span><span class="value" id="amountLockedDisplay">--</span></div>
                 <div class="row"><span class="label">Total Value Locked</span><span class="value" id="totalValueDisplay">--</span></div>
                 <div class="row"><span class="label">Token Price</span><span class="value green" id="tokenPriceDisplay">--</span></div>
+            </div>
+
+            <div class="eth-required">
+                <div style="display:flex; justify-content:space-between;">
+                    <span class="label">ETH Required for Launch</span>
+                    <span class="value" id="ethRequiredDisplay">0.0001 ETH</span>
+                </div>
+                <div style="font-size:11px; color:var(--muted); margin-top:4px;">
+                    This ETH is used to create liquidity pool and will be returned when token is redeemed.
+                </div>
             </div>
 
             <button id="approveBtn" class="btn-approve" style="width:100%; margin-top:10px; display:none;">🔓 Approve RWA Token</button>
@@ -458,7 +479,7 @@ const CONFIG = {
     RPC_URL: "https://rpc.testnet.chain.robinhood.com",
     EXPLORER: "https://explorer.testnet.chain.robinhood.com",
     ROUTER_ADDRESS: "0x0e5b59459F8F0315E4eF513bF64BD154EE3A2B6A",
-    LAUNCH_ETH: "0",
+    LAUNCH_ETH: "0.0001", // ETH required for liquidity
 
     STOCK_PRICES: {
         "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E": 489.28,
@@ -513,6 +534,7 @@ const totalValueDisplay = document.getElementById("totalValueDisplay");
 const tokenPriceDisplay = document.getElementById("tokenPriceDisplay");
 const stockOptions = document.getElementById("stockOptions");
 const cryptoOptions = document.getElementById("cryptoOptions");
+const ethRequiredDisplay = document.getElementById("ethRequiredDisplay");
 
 /* ============================================================
    ROUTER ABI
@@ -726,6 +748,9 @@ async function updatePricePreview() {
         amountLockedDisplay.textContent = amount + " " + symbol;
         totalValueDisplay.textContent = formatPrice(totalValue);
         tokenPriceDisplay.textContent = formatPrice(tokenPrice, true);
+
+        // Update ETH required
+        ethRequiredDisplay.textContent = CONFIG.LAUNCH_ETH + " ETH";
 
         return { assetPrice, tokenPrice, totalValue, amount, decimals, symbol };
     } catch (error) {
@@ -942,7 +967,6 @@ async function renderMarketTokens() {
         const tokenSymbol = info?.symbol || "???";
         const image = getImageForToken(deposit.memeToken);
 
-        // Calculate token price - force $0.00002330
         const tokenPrice = 0.00002330;
 
         html += `
@@ -1022,7 +1046,6 @@ async function renderMyTokens() {
         const totalSupply = 21000000;
         const share = (parseFloat(balanceFormatted.replace(/,/g, '')) / totalSupply * 100).toFixed(8);
         
-        // Force token price to $0.00002330
         const tokenPrice = 0.00002330;
 
         html += `
@@ -1173,7 +1196,7 @@ async function redeemRWA() {
 }
 
 /* ============================================================
-   LAUNCH TOKEN
+   LAUNCH TOKEN - FIXED WITH ETH
 ============================================================ */
 
 async function launchToken() {
@@ -1198,12 +1221,17 @@ async function launchToken() {
     const decimals = parseInt(selectedOption.dataset.decimals) || 18;
     const amountWei = amountToWei(amount, decimals);
 
+    // Check allowance for non-crypto assets
     if (!asset.startsWith("CRYPTO:")) {
         const approved = await checkAllowance(asset, amountWei);
         if (!approved) return;
     }
 
-    setStatus(`⏳ Launching ${name} (${symbol})...`, "pending");
+    // Convert ETH amount to wei
+    const ethAmount = CONFIG.LAUNCH_ETH;
+    const ethWei = ethers.parseEther(ethAmount);
+
+    setStatus(`⏳ Launching ${name} (${symbol}) with ${ethAmount} ETH...`, "pending");
     launchBtn.disabled = true;
 
     try {
@@ -1212,17 +1240,19 @@ async function launchToken() {
             assetAddress = CONFIG.CRYPTO_ADDRESSES[asset];
         }
 
+        // Send ETH along with the transaction
         const tx = await APP.router.launch(
             name,
             symbol,
             supply,
             assetAddress,
             amountWei,
-            duration
+            duration,
+            { value: ethWei }
         );
         await tx.wait();
 
-        setStatus(`✅ Token ${symbol} launched successfully!`, "success");
+        setStatus(`✅ Token ${symbol} launched successfully! ETH used for liquidity.`, "success");
         await renderMarketTokens();
         await renderMyTokens();
 
@@ -1236,7 +1266,12 @@ async function launchToken() {
         }
     } catch (error) {
         console.error("Launch error:", error);
-        setStatus("❌ Launch failed: " + getErrorMessage(error), "error");
+        const errorMsg = getErrorMessage(error);
+        if (errorMsg.includes("insufficient funds")) {
+            setStatus(`❌ Launch failed: Insufficient ETH balance. Need at least ${ethAmount} ETH for liquidity.`, "error");
+        } else {
+            setStatus("❌ Launch failed: " + errorMsg, "error");
+        }
     } finally {
         launchBtn.disabled = false;
     }
@@ -1285,6 +1320,14 @@ async function connectWallet() {
         await renderMarketTokens();
         await renderMyTokens();
         await updatePricePreview();
+
+        // Check ETH balance
+        const balance = await provider.getBalance(account);
+        const ethBalance = ethers.formatEther(balance);
+        const requiredEth = parseFloat(CONFIG.LAUNCH_ETH);
+        if (parseFloat(ethBalance) < requiredEth) {
+            setStatus(`⚠️ Low ETH balance: ${ethBalance} ETH. Need at least ${requiredEth} ETH for launch.`, "info");
+        }
 
     } catch (error) {
         console.error("Connection error:", error);
