@@ -172,6 +172,7 @@
         .price-preview .row .value { color: var(--text2); font-weight: 600; }
         .price-preview .row .value.green { color: var(--green); }
         .price-preview .row .value.yellow { color: var(--yellow); }
+        .price-preview .row .value.purple { color: var(--purple); }
 
         .table-wrapper { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 700px; }
@@ -305,18 +306,6 @@
             margin-left: 8px;
         }
 
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 6px 0;
-            font-size: 13px;
-        }
-        .info-row .label { color: var(--muted); }
-        .info-row .value { font-weight: 600; }
-        .info-row .value.green { color: var(--green); }
-        .info-row .value.yellow { color: var(--yellow); }
-        .info-row .value.purple { color: var(--purple); }
-
         @media(max-width: 800px) {
             body { padding: 10px; }
             .container { padding: 16px; }
@@ -408,28 +397,21 @@
                 </div>
             </div>
 
-            <!-- ============================================= NEW: POOL & PREMIUM ============================================= -->
             <div class="grid" style="margin-top:15px;">
                 <div>
-                    <label>Pool Currency</label>
+                    <label>Pool Currency (display only)</label>
                     <select id="poolCurrencySelect">
                         <option value="ETH" selected>ETH (Ethereum)</option>
                         <option value="USDC">USDC (USD Coin)</option>
                     </select>
-                    <div style="margin-top:4px; font-size:11px; color:var(--muted);">
-                        Currency used for buying/selling tokens
-                    </div>
                 </div>
                 <div>
-                    <label>Premium Rate (%)</label>
+                    <label>Premium Rate (display only)</label>
                     <select id="premiumRateSelect">
                         <option value="3" selected>3%</option>
                         <option value="5">5%</option>
                         <option value="10">10%</option>
                     </select>
-                    <div style="margin-top:4px; font-size:11px; color:var(--muted);">
-                        Extra % you commit to pay on buyback
-                    </div>
                 </div>
             </div>
 
@@ -455,10 +437,10 @@
             <div class="mechanism-info">
                 <strong>🔒 How it works:</strong><br>
                 1. Author locks RWA asset + ETH as collateral<br>
-                2. Users can buy MEME tokens with <strong id="poolCurrencyInfo">ETH</strong><br>
-                3. After <strong id="durationDisplay">600</strong> seconds, author can call <strong>redeemCollateral()</strong><br>
-                4. Author buys back all tokens at current price <strong>+ <span id="premiumInfo">3%</span> premium</strong> and burns them<br>
-                5. Author receives back RWA asset + remaining collateral
+                2. Users can buy MEME tokens with ETH<br>
+                3. After <strong id="durationDisplay">600</strong> seconds, author can call <strong>redeem()</strong><br>
+                4. Author buys back all tokens and burns them<br>
+                5. Author receives back RWA asset + ETH collateral
             </div>
 
             <button id="approveBtn" class="btn-approve" style="width:100%; margin-top:10px; display:none;">🔓 Approve RWA Token</button>
@@ -471,7 +453,7 @@
             <div class="mechanism-info" style="margin-bottom:15px;">
                 <strong>📋 Process:</strong><br>
                 1. Time lock must be expired<br>
-                2. You need to deposit enough ETH/USDC to buyback all tokens + premium<br>
+                2. You need to deposit enough ETH to buyback all tokens<br>
                 3. Click "Buyback & Burn" to purchase all tokens from holders<br>
                 4. Tokens are burned and you receive back your RWA collateral
             </div>
@@ -481,16 +463,13 @@
                     <input id="buybackDepositId" type="number" min="1" value="2">
                 </div>
                 <div>
-                    <label>Buyback Amount (ETH/USDC)</label>
+                    <label>Buyback Amount (ETH)</label>
                     <input id="buybackAmount" type="number" step="any" placeholder="0.0" min="0">
-                    <div style="margin-top:4px; font-size:11px; color:var(--muted);">
-                        Amount to deposit for buyback + premium
-                    </div>
                 </div>
             </div>
             <button id="buybackBtn" class="btn-purple" style="margin-top:15px; width:100%;" disabled>🔥 Buyback & Burn Tokens</button>
             <div style="margin-top:10px; color:#8da49d; font-size:12px;">
-                This will automatically buy back all tokens from holders at current market price + your committed premium, then burn them.
+                This will automatically buy back all tokens from holders and burn them.
             </div>
         </div>
     </div>
@@ -546,14 +525,6 @@
                     <span class="value">21,000,000 MEME</span>
                 </div>
                 <div class="row">
-                    <span class="label">Pool Currency</span>
-                    <span class="value">ETH</span>
-                </div>
-                <div class="row">
-                    <span class="label">Premium (Buyback)</span>
-                    <span class="value purple">3%</span>
-                </div>
-                <div class="row">
                     <span class="label">Lock Expires In</span>
                     <span class="value yellow" id="countdownDisplay">--</span>
                 </div>
@@ -570,7 +541,7 @@
             <div class="mechanism-info" style="margin-bottom:15px;">
                 <strong>📋 Process:</strong><br>
                 1. Time lock must be expired<br>
-                2. Author buys back all remaining tokens (automatic)<br>
+                2. Author buys back all remaining tokens<br>
                 3. Tokens are burned<br>
                 4. Author receives back RWA asset + ETH collateral
             </div>
@@ -583,7 +554,6 @@
             <button id="redeemBtn" class="btn-purple" style="margin-top:15px;" disabled>🔓 Redeem Collateral & Burn Tokens</button>
             <div style="margin-top:10px; color:#8da49d; font-size:12px;">
                 Only the token author can redeem collateral after lock period expires.
-                This will buy back all tokens at current market price and burn them.
             </div>
         </div>
     </div>
@@ -608,7 +578,7 @@ const CONFIG = {
     EXPLORER: "https://explorer.testnet.chain.robinhood.com",
     ROUTER_ADDRESS: "0x0e5b59459F8F0315E4eF513bF64BD154EE3A2B6A",
     LAUNCH_ETH: "0.0001",
-    USDC_ADDRESS: "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168", // USDG on Robinhood Chain
+    USDC_ADDRESS: "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
 
     STOCK_PRICES: {
         "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E": 489.28,
@@ -673,31 +643,22 @@ const poolCurrencySelect = document.getElementById("poolCurrencySelect");
 const premiumRateSelect = document.getElementById("premiumRateSelect");
 const poolCurrencyDisplay = document.getElementById("poolCurrencyDisplay");
 const premiumDisplay = document.getElementById("premiumDisplay");
-const poolCurrencyInfo = document.getElementById("poolCurrencyInfo");
-const premiumInfo = document.getElementById("premiumInfo");
 
 /* ============================================================
-   ROUTER ABI - Updated with new functions
+   ROUTER ABI — ОРИГИНАЛЬНАЯ СИГНАТУРА (6 ПАРАМЕТРОВ)
 ============================================================ */
 
 const ROUTER_ABI = [
-    // Launch with pool currency and premium
-    "function launch(string,string,uint256,address,uint256,uint256,address,uint256) payable",
+    "function launch(string,string,uint256,address,uint256,uint256) payable",
     "function buy(address,uint256) payable",
-    "function buyWithUSDC(address,uint256,uint256)",
     "function sell(address,uint256,uint256)",
-    "function sellForUSDC(address,uint256,uint256)",
     "function redeem(uint256)",
-    "function redeemCollateral(uint256)",
-    "function buybackAndBurn(uint256) payable",
-    "function buybackAndBurnUSDC(uint256,uint256)",
-    "function getDeposit(uint256) view returns(tuple(address assetAddress,uint256 assetAmount,address memeToken,uint256 memeTokenAmount,uint256 redemptionDeadline,bool isRedeemed,bool isClaimed,address poolCurrency,uint256 premiumRate))",
+    "function getDeposit(uint256) view returns(tuple(address assetAddress,uint256 assetAmount,address memeToken,uint256 memeTokenAmount,uint256 redemptionDeadline,bool isRedeemed,bool isClaimed))",
     "function getActiveTokens() view returns(address[])",
     "function getReserves(address) view returns(uint256,uint256)",
     "function getPrice(address) view returns(uint256)",
     "function depositCounter() view returns(uint256)",
-    "function tokenInfoMap(address) view returns(address tokenAddress,string name,string symbol,uint256 totalSupply,uint256 reserveETH,uint256 reserveTokens,uint256 price,uint256 lastUpdate,bool isActive)",
-    "function depositOwners(uint256) view returns(address)"
+    "function tokenInfoMap(address) view returns(address tokenAddress,string name,string symbol,uint256 totalSupply,uint256 reserveETH,uint256 reserveTokens,uint256 price,uint256 lastUpdate,bool isActive)"
 ];
 
 const TOKEN_ABI = [
@@ -705,15 +666,7 @@ const TOKEN_ABI = [
     "function approve(address,uint256) returns(bool)",
     "function allowance(address,address) view returns(uint256)",
     "function name() view returns(string)",
-    "function symbol() view returns(string)",
-    "function burn(uint256)"
-];
-
-const ERC20_ABI = [
-    "function balanceOf(address) view returns(uint256)",
-    "function approve(address,uint256) returns(bool)",
-    "function allowance(address,address) view returns(uint256)",
-    "function decimals() view returns(uint8)"
+    "function symbol() view returns(string)"
 ];
 
 /* ============================================================
@@ -732,9 +685,8 @@ const APP = {
     currentAssetPrice: null,
     needApprove: false,
     tokenImages: JSON.parse(localStorage.getItem('mwa_token_images') || '{}'),
-    countdownInterval: null,
-    usdcContract: null,
-    usdcDecimals: 6
+    tokenMeta: JSON.parse(localStorage.getItem('mwa_token_meta') || '{}'),
+    countdownInterval: null
 };
 
 /* ============================================================
@@ -785,32 +737,19 @@ function formatBalance(balance, decimals = 18) {
     try {
         const formatted = ethers.formatUnits(balance, decimals);
         const num = parseFloat(formatted);
-        if (Number.isInteger(num) || formatted.includes('.')) {
-            if (formatted.includes('e-')) {
-                const parsed = parseFloat(formatted);
-                if (parsed < 1) {
-                    const rounded = Math.round(parsed);
-                    if (Math.abs(parsed - rounded) < 0.0001) {
-                        return rounded.toString();
-                    }
-                    return parsed.toFixed(8).replace(/\.?0+$/, '');
-                }
-            }
-            if (Number.isInteger(num)) {
-                return num.toLocaleString();
-            }
-            if (Math.abs(num - Math.round(num)) < 0.0001) {
-                return Math.round(num).toLocaleString();
-            }
-            if (num < 0.0001 && num > 0) {
-                return num.toFixed(8).replace(/\.?0+$/, '');
-            }
-            return num.toLocaleString('en-US', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 8
-            });
+        if (Number.isInteger(num)) {
+            return num.toLocaleString();
         }
-        return num.toString();
+        if (Math.abs(num - Math.round(num)) < 0.0001) {
+            return Math.round(num).toLocaleString();
+        }
+        if (num < 0.0001 && num > 0) {
+            return num.toFixed(8).replace(/\.?0+$/, '');
+        }
+        return num.toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 8
+        });
     } catch {
         return balance.toString();
     }
@@ -859,21 +798,16 @@ function formatTime(seconds) {
     const hours = Math.floor((seconds % 86400) / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
-    
+
     if (days > 0) return `${days}d ${hours}h ${mins}m`;
     if (hours > 0) return `${hours}h ${mins}m ${secs}s`;
     if (mins > 0) return `${mins}m ${secs}s`;
     return `${secs}s`;
 }
 
-function getPoolCurrencySymbol(deposit) {
-    if (!deposit.poolCurrency || isZeroAddress(deposit.poolCurrency)) {
-        return "ETH";
-    }
-    if (deposit.poolCurrency.toLowerCase() === CONFIG.USDC_ADDRESS.toLowerCase()) {
-        return "USDC";
-    }
-    return "ETH";
+function getTokenMeta(deposit) {
+    const key = `deposit_${deposit.id}`;
+    return APP.tokenMeta[key] || { poolCurrency: "ETH", premiumRate: 3 };
 }
 
 /* ============================================================
@@ -891,7 +825,7 @@ async function fetchAssetPrice(assetValue) {
             const data = await response.json();
             const price = data[coinId] && data[coinId].usd;
             if (typeof price !== "number") throw new Error("Price not found for " + coinId);
-            return { price: price, change: data[coinId] && data[coinId].usd_24h_change || null };
+            return { price: price, change: data[coinId] && data[coinId].usd_24hr_change || null };
         } else {
             const price = CONFIG.STOCK_PRICES[assetValue];
             if (!price) throw new Error("Unknown stock asset: " + assetValue);
@@ -913,7 +847,6 @@ async function updatePricePreview() {
     const amount = Number(assetAmount.value) || 0;
 
     const selectedOption = assetSelect.options[assetSelect.selectedIndex];
-    const decimals = parseInt(selectedOption.dataset.decimals) || 18;
     const symbol = selectedOption.dataset.symbol || "Units";
     assetUnitLabel.textContent = "(" + symbol + ")";
 
@@ -937,14 +870,9 @@ async function updatePricePreview() {
         tokenPriceDisplay.textContent = formatPrice(tokenPrice, true);
         poolCurrencyDisplay.textContent = poolCurrency;
         premiumDisplay.textContent = premiumRate + "%";
-        premiumDisplay.className = "value purple";
-        
-        // Update mechanism info
-        poolCurrencyInfo.textContent = poolCurrency;
-        premiumInfo.textContent = premiumRate + "%";
         ethRequiredDisplay.textContent = CONFIG.LAUNCH_ETH + " ETH";
 
-        return { assetPrice, tokenPrice, totalValue, amount, decimals, symbol, poolCurrency, premiumRate };
+        return { assetPrice, tokenPrice, totalValue, amount, symbol, poolCurrency, premiumRate };
     } catch (error) {
         console.error("Price preview error:", error);
         pricePreview.className = "price-preview";
@@ -970,8 +898,7 @@ function toggleAssetType() {
             if (stockOptionsList.length > 0) {
                 assetSelect.value = stockOptionsList[0].value;
                 const opt = stockOptionsList[0];
-                const symbol = opt.dataset.symbol || "Stock";
-                assetUnitLabel.textContent = "(" + symbol + ")";
+                assetUnitLabel.textContent = "(" + (opt.dataset.symbol || "Stock") + ")";
             }
         }
     } else {
@@ -981,8 +908,7 @@ function toggleAssetType() {
             const cryptoOpts = cryptoOptions.querySelectorAll("option");
             if (cryptoOpts.length > 0) {
                 assetSelect.value = cryptoOpts[0].value;
-                const symbol = cryptoOpts[0].dataset.symbol || "Crypto";
-                assetUnitLabel.textContent = "(" + symbol + ")";
+                assetUnitLabel.textContent = "(" + (cryptoOpts[0].dataset.symbol || "Crypto") + ")";
             }
         }
     }
@@ -1065,7 +991,7 @@ async function approveRWA() {
 }
 
 /* ============================================================
-   TOKEN INFO, BALANCE, LOAD DEPOSITS
+   TOKEN INFO / BALANCE / LOAD DEPOSITS
 ============================================================ */
 
 async function getTokenInfo(tokenAddress) {
@@ -1099,38 +1025,29 @@ async function loadDeposits() {
         const counter = Number(await APP.router.depositCounter());
         console.log("[MWA] Total deposits:", counter);
         const result = [];
+
         for (let id = 1; id <= counter; id++) {
             try {
                 const d = await APP.router.getDeposit(id);
-                if (isZeroAddress(d.memeToken)) continue;
-                const owner = await APP.router.depositOwners(id);
-                console.log(`[MWA] Deposit ${id}:`, {
-                    assetAddress: d.assetAddress,
-                    memeToken: d.memeToken,
-                    memeTokenAmount: d.memeTokenAmount,
-                    isRedeemed: d.isRedeemed,
-                    owner: owner,
-                    deadline: d.redemptionDeadline,
-                    poolCurrency: d.poolCurrency,
-                    premiumRate: d.premiumRate
-                });
+                const memeToken = d.memeToken !== undefined ? d.memeToken : d[2];
+                if (!memeToken || isZeroAddress(memeToken)) continue;
+
                 result.push({
-                    id,
-                    assetAddress: d.assetAddress,
-                    assetAmount: d.assetAmount,
-                    memeToken: d.memeToken,
-                    memeTokenAmount: d.memeTokenAmount,
-                    redemptionDeadline: d.redemptionDeadline,
-                    isRedeemed: d.isRedeemed,
-                    isClaimed: d.isClaimed,
-                    owner: owner,
-                    poolCurrency: d.poolCurrency,
-                    premiumRate: d.premiumRate
+                    id: id,
+                    assetAddress: d.assetAddress !== undefined ? d.assetAddress : d[0],
+                    assetAmount: d.assetAmount !== undefined ? d.assetAmount : d[1],
+                    memeToken: memeToken,
+                    memeTokenAmount: d.memeTokenAmount !== undefined ? d.memeTokenAmount : d[3],
+                    redemptionDeadline: d.redemptionDeadline !== undefined ? d.redemptionDeadline : d[4],
+                    isRedeemed: d.isRedeemed !== undefined ? d.isRedeemed : (d[5] || false),
+                    isClaimed: d.isClaimed !== undefined ? d.isClaimed : (d[6] || false),
+                    owner: null
                 });
             } catch (error) {
-                console.warn("Deposit read error:", id, error);
+                console.warn(`Deposit read error id ${id}:`, error);
             }
         }
+
         APP.deposits = result;
         return result;
     } catch (error) {
@@ -1152,81 +1069,85 @@ async function renderMarketTokens() {
 
     container.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">Loading market data...</div>`;
 
-    const deposits = await loadDeposits();
-    const activeDeposits = deposits.filter(d => !isZeroAddress(d.memeToken) && !d.isRedeemed);
+    try {
+        const deposits = await loadDeposits();
+        const activeDeposits = deposits.filter(d => !isZeroAddress(d.memeToken) && !d.isRedeemed);
 
-    if (activeDeposits.length === 0) {
-        container.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">No active tokens on market.</div>`;
-        return;
-    }
+        if (activeDeposits.length === 0) {
+            container.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">No active tokens on market.</div>`;
+            return;
+        }
 
-    let html = `<div class="token-grid">`;
-    for (const deposit of activeDeposits) {
-        const info = await getTokenInfo(deposit.memeToken);
-        const tokenName = info?.name || "Unknown Token";
-        const tokenSymbol = info?.symbol || "???";
-        const image = getImageForToken(deposit.memeToken);
+        let html = `<div class="token-grid">`;
+        for (const deposit of activeDeposits) {
+            const info = await getTokenInfo(deposit.memeToken);
+            const tokenName = info?.name || "Unknown Token";
+            const tokenSymbol = info?.symbol || "???";
+            const image = getImageForToken(deposit.memeToken);
 
-        const tokenPrice = 0.00002330;
-        const now = Math.floor(Date.now() / 1000);
-        const timeLeft = Number(deposit.redemptionDeadline) - now;
-        const poolCurrency = getPoolCurrencySymbol(deposit);
-        const premiumRate = deposit.premiumRate || 3;
+            const tokenPrice = 0.00002330;
+            const now = Math.floor(Date.now() / 1000);
+            const timeLeft = Number(deposit.redemptionDeadline) - now;
+            const meta = getTokenMeta(deposit);
 
-        html += `
-            <div class="token-card">
-                <div class="header">
-                    ${image ? `<img src="${image}" class="token-image" alt="${tokenName}">` : `<div class="token-image" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🪙</div>`}
-                    <div class="info">
-                        <div class="name">${escapeHtml(tokenName)} <span class="premium-badge">+${premiumRate}%</span></div>
-                        <div class="symbol">${escapeHtml(tokenSymbol)}</div>
+            html += `
+                <div class="token-card">
+                    <div class="header">
+                        ${image ? `<img src="${image}" class="token-image" alt="${tokenName}">` : `<div class="token-image" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🪙</div>`}
+                        <div class="info">
+                            <div class="name">${escapeHtml(tokenName)} <span class="premium-badge">+${meta.premiumRate}%</span></div>
+                            <div class="symbol">${escapeHtml(tokenSymbol)}</div>
+                        </div>
+                    </div>
+                    <div class="price-row">
+                        <span class="label">Token Price</span>
+                        <span class="value">$${tokenPrice.toFixed(8)}</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="label">Total Supply</span>
+                        <span class="value">21,000,000 ${escapeHtml(tokenSymbol)}</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="label">Pool Currency</span>
+                        <span class="value">${meta.poolCurrency}</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="label">Buyback Premium</span>
+                        <span class="value" style="color:var(--purple);">+${meta.premiumRate}%</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="label">Lock Expires</span>
+                        <span class="value ${timeLeft > 0 ? 'active' : 'expired'}">${timeLeft > 0 ? formatTime(timeLeft) : 'Expired ✅'}</span>
+                    </div>
+                    <div class="buy-section">
+                        <input type="number" placeholder="Amount" min="0" step="any" class="amount-input" id="buy-amount-${deposit.id}">
+                        <button class="btn-green btn-small buy-btn" data-deposit="${deposit.id}">Buy</button>
+                    </div>
+                    <div style="margin-top:8px; text-align:right;">
+                        <a href="${getDexScreenerLink(deposit.memeToken)}" target="_blank" class="dex-link">View on DexScreener →</a>
                     </div>
                 </div>
-                <div class="price-row">
-                    <span class="label">Token Price</span>
-                    <span class="value">$${tokenPrice.toFixed(8)}</span>
-                </div>
-                <div class="price-row">
-                    <span class="label">Total Supply</span>
-                    <span class="value">21,000,000 ${escapeHtml(tokenSymbol)}</span>
-                </div>
-                <div class="price-row">
-                    <span class="label">Pool Currency</span>
-                    <span class="value">${poolCurrency}</span>
-                </div>
-                <div class="price-row">
-                    <span class="label">Buyback Premium</span>
-                    <span class="value purple">+${premiumRate}%</span>
-                </div>
-                <div class="price-row">
-                    <span class="label">Lock Expires</span>
-                    <span class="value ${timeLeft > 0 ? 'active' : 'expired'}">${timeLeft > 0 ? formatTime(timeLeft) : 'Expired ✅'}</span>
-                </div>
-                <div class="buy-section">
-                    <input type="number" placeholder="Amount" min="0" step="any" class="amount-input" id="buy-amount-${deposit.id}">
-                    <button class="btn-green btn-small buy-btn" data-deposit="${deposit.id}">Buy</button>
-                </div>
-                <div style="margin-top:8px; text-align:right;">
-                    <a href="${getDexScreenerLink(deposit.memeToken)}" target="_blank" class="dex-link">View on DexScreener →</a>
-                </div>
-            </div>
-        `;
-    }
-    html += `</div>`;
-    container.innerHTML = html;
+            `;
+        }
+        html += `</div>`;
+        container.innerHTML = html;
 
-    container.querySelectorAll('.buy-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const depositId = btn.dataset.deposit;
-            const input = document.getElementById(`buy-amount-${depositId}`);
-            const amount = input?.value;
-            if (!amount || parseFloat(amount) <= 0) {
-                setStatus("Enter a valid amount.", "error");
-                return;
-            }
-            await buyToken(depositId, amount);
+        container.querySelectorAll('.buy-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const dId = btn.dataset.deposit;
+                const input = document.getElementById(`buy-amount-${dId}`);
+                const amt = input?.value;
+                if (!amt || parseFloat(amt) <= 0) {
+                    setStatus("Enter a valid amount.", "error");
+                    return;
+                }
+                await buyToken(dId, amt);
+            });
         });
-    });
+    } catch (error) {
+        console.error("Render market error:", error);
+        container.innerHTML = `<div style="color:#ff5555; padding:20px; text-align:center;">Error: ${getErrorMessage(error)}</div>`;
+    }
 }
 
 /* ============================================================
@@ -1242,115 +1163,118 @@ async function renderMyTokens() {
 
     container.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">Loading your tokens...</div>`;
 
-    const deposits = await loadDeposits();
-    const userDeposits = deposits.filter(d => !isZeroAddress(d.memeToken));
+    try {
+        const deposits = await loadDeposits();
+        const userDeposits = [];
 
-    if (userDeposits.length === 0) {
-        container.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">You don't have any tokens yet.</div>`;
-        return;
-    }
+        for (const deposit of deposits) {
+            if (isZeroAddress(deposit.memeToken)) continue;
+            const balance = await getTokenBalance(deposit.memeToken);
+            const balanceFormatted = formatBalance(balance);
+            const hasBalance = parseFloat(balanceFormatted.replace(/,/g, '')) > 0;
+            if (hasBalance) {
+                userDeposits.push({ ...deposit, balance, balanceFormatted });
+            }
+        }
 
-    let html = `<div class="token-grid">`;
-    for (const deposit of userDeposits) {
-        const info = await getTokenInfo(deposit.memeToken);
-        const tokenName = info?.name || "Unknown Token";
-        const tokenSymbol = info?.symbol || "???";
-        const image = getImageForToken(deposit.memeToken);
-        const balance = await getTokenBalance(deposit.memeToken);
-        const balanceFormatted = formatBalance(balance);
+        if (userDeposits.length === 0) {
+            container.innerHTML = `<div style="color:#8da49d; padding:20px; text-align:center;">You don't have any tokens yet.</div>`;
+            return;
+        }
 
-        const totalSupply = 21000000;
-        const share = (parseFloat(balanceFormatted.replace(/,/g, '')) / totalSupply * 100).toFixed(8);
-        
-        const tokenPrice = 0.00002330;
-        const now = Math.floor(Date.now() / 1000);
-        const timeLeft = Number(deposit.redemptionDeadline) - now;
-        const isExpired = timeLeft <= 0;
-        const isAuthor = deposit.owner && deposit.owner.toLowerCase() === APP.account.toLowerCase();
-        const poolCurrency = getPoolCurrencySymbol(deposit);
-        const premiumRate = deposit.premiumRate || 3;
+        let html = `<div class="token-grid">`;
+        for (const deposit of userDeposits) {
+            const info = await getTokenInfo(deposit.memeToken);
+            const tokenName = info?.name || "Unknown Token";
+            const tokenSymbol = info?.symbol || "???";
+            const image = getImageForToken(deposit.memeToken);
 
-        html += `
-            <div class="token-card">
-                <div class="header">
-                    ${image ? `<img src="${image}" class="token-image" alt="${tokenName}">` : `<div class="token-image" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🪙</div>`}
-                    <div class="info">
-                        <div class="name">${escapeHtml(tokenName)} <span class="premium-badge">+${premiumRate}%</span></div>
-                        <div class="symbol">${escapeHtml(tokenSymbol)}</div>
-                        ${isAuthor ? '<span style="color:var(--yellow);font-size:10px;">👑 Author</span>' : ''}
+            const totalSupply = 21000000;
+            const balanceNum = parseFloat(deposit.balanceFormatted.replace(/,/g, '')) || 0;
+            const share = (balanceNum / totalSupply * 100).toFixed(8);
+
+            const tokenPrice = 0.00002330;
+            const now = Math.floor(Date.now() / 1000);
+            const timeLeft = Number(deposit.redemptionDeadline) - now;
+            const isExpired = timeLeft <= 0;
+            const meta = getTokenMeta(deposit);
+
+            html += `
+                <div class="token-card">
+                    <div class="header">
+                        ${image ? `<img src="${image}" class="token-image" alt="${tokenName}">` : `<div class="token-image" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🪙</div>`}
+                        <div class="info">
+                            <div class="name">${escapeHtml(tokenName)} <span class="premium-badge">+${meta.premiumRate}%</span></div>
+                            <div class="symbol">${escapeHtml(tokenSymbol)}</div>
+                        </div>
+                    </div>
+                    <div class="price-row">
+                        <span class="label">Deposit ID</span>
+                        <span class="value">#${deposit.id}</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="label">Balance</span>
+                        <span class="value green">${deposit.balanceFormatted} ${escapeHtml(tokenSymbol)}</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="label">Your Share</span>
+                        <span class="value green">${share}%</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="label">Current Token Price</span>
+                        <span class="value green">$${tokenPrice.toFixed(8)}</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="label">Pool Currency</span>
+                        <span class="value">${meta.poolCurrency}</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="label">Buyback Premium</span>
+                        <span class="value" style="color:var(--purple);">+${meta.premiumRate}%</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="label">Lock Status</span>
+                        <span class="value ${isExpired ? 'expired' : 'active'}">${isExpired ? '🔓 Expired' : `⏳ ${formatTime(timeLeft)}`}</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="label">Status</span>
+                        <span class="value ${deposit.isRedeemed ? 'redeemed' : 'active'}">${deposit.isRedeemed ? '● Redeemed' : '● Active'}</span>
+                    </div>
+                    ${deposit.isRedeemed ? '' : `
+                    <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+                        <input type="number" placeholder="Sell amount" min="0" step="any" class="amount-input" id="sell-amount-${deposit.id}">
+                        <button class="btn-red btn-small sell-btn" data-deposit="${deposit.id}">Sell</button>
+                    </div>
+                    `}
+                    <div style="margin-top:8px; text-align:right;">
+                        <a href="${getDexScreenerLink(deposit.memeToken)}" target="_blank" class="dex-link">View on DexScreener →</a>
                     </div>
                 </div>
-                <div class="price-row">
-                    <span class="label">Deposit ID</span>
-                    <span class="value">#${deposit.id}</span>
-                </div>
-                <div class="price-row">
-                    <span class="label">Balance</span>
-                    <span class="value green">${balanceFormatted} ${escapeHtml(tokenSymbol)}</span>
-                </div>
-                <div class="price-row">
-                    <span class="label">Your Share</span>
-                    <span class="value green">${share}%</span>
-                </div>
-                <div class="price-row">
-                    <span class="label">Current Token Price</span>
-                    <span class="value green">$${tokenPrice.toFixed(8)}</span>
-                </div>
-                <div class="price-row">
-                    <span class="label">Pool Currency</span>
-                    <span class="value">${poolCurrency}</span>
-                </div>
-                <div class="price-row">
-                    <span class="label">Buyback Premium</span>
-                    <span class="value purple">+${premiumRate}%</span>
-                </div>
-                <div class="price-row">
-                    <span class="label">Lock Status</span>
-                    <span class="value ${isExpired ? 'expired' : 'active'}">${isExpired ? '🔓 Expired' : `⏳ ${formatTime(timeLeft)}`}</span>
-                </div>
-                <div class="price-row">
-                    <span class="label">Status</span>
-                    <span class="value ${deposit.isRedeemed ? 'redeemed' : 'active'}">${deposit.isRedeemed ? '● Redeemed' : '● Active'}</span>
-                </div>
-                ${deposit.isRedeemed ? '' : `
-                <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
-                    <input type="number" placeholder="Sell amount" min="0" step="any" class="amount-input" id="sell-amount-${deposit.id}">
-                    <button class="btn-red btn-small sell-btn" data-deposit="${deposit.id}">Sell</button>
-                    ${isAuthor && isExpired ? `<button class="btn-purple btn-small redeem-collateral-btn" data-deposit="${deposit.id}">🔓 Redeem</button>` : ''}
-                </div>
-                `}
-                <div style="margin-top:8px; text-align:right;">
-                    <a href="${getDexScreenerLink(deposit.memeToken)}" target="_blank" class="dex-link">View on DexScreener →</a>
-                </div>
-            </div>
-        `;
+            `;
+        }
+        html += `</div>`;
+        container.innerHTML = html;
+
+        container.querySelectorAll('.sell-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const dId = btn.dataset.deposit;
+                const input = document.getElementById(`sell-amount-${dId}`);
+                const amt = input?.value;
+                if (!amt || parseFloat(amt) <= 0) {
+                    setStatus("Enter a valid amount.", "error");
+                    return;
+                }
+                await sellToken(dId, amt);
+            });
+        });
+    } catch (error) {
+        console.error("Render my tokens error:", error);
+        container.innerHTML = `<div style="color:#ff5555; padding:20px; text-align:center;">Error: ${getErrorMessage(error)}</div>`;
     }
-    html += `</div>`;
-    container.innerHTML = html;
-
-    container.querySelectorAll('.sell-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const depositId = btn.dataset.deposit;
-            const input = document.getElementById(`sell-amount-${depositId}`);
-            const amount = input?.value;
-            if (!amount || parseFloat(amount) <= 0) {
-                setStatus("Enter a valid amount.", "error");
-                return;
-            }
-            await sellToken(depositId, amount);
-        });
-    });
-
-    container.querySelectorAll('.redeem-collateral-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const depositId = btn.dataset.deposit;
-            await redeemCollateral(depositId);
-        });
-    });
 }
 
 /* ============================================================
-   BUY / SELL / REDEEM COLLATERAL / BUYBACK & BURN
+   BUY / SELL
 ============================================================ */
 
 async function buyToken(depositId, amount) {
@@ -1358,7 +1282,8 @@ async function buyToken(depositId, amount) {
         setStatus("Connect wallet first.", "error");
         return;
     }
-    const deposit = APP.deposits.find(d => d.id === parseInt(depositId));
+    const id = parseInt(depositId);
+    const deposit = APP.deposits.find(d => d.id === id);
     if (!deposit) {
         setStatus("Deposit not found.", "error");
         return;
@@ -1368,24 +1293,13 @@ async function buyToken(depositId, amount) {
         return;
     }
 
-    const poolCurrency = getPoolCurrencySymbol(deposit);
-    setStatus(`⏳ Buying ${amount} tokens with ${poolCurrency}...`, "pending");
-    
+    setStatus(`⏳ Buying ${amount} tokens...`, "pending");
     try {
         const amountWei = amountToWei(amount, 18);
-        
-        if (poolCurrency === "USDC") {
-            // Buy with USDC
-            const usdcAmount = amountWei; // Simplified - in reality need price conversion
-            const tx = await APP.router.buyWithUSDC(deposit.memeToken, amountWei, usdcAmount);
-            await tx.wait();
-        } else {
-            // Buy with ETH
-            const tx = await APP.router.buy(deposit.memeToken, amountWei);
-            await tx.wait();
-        }
-        
+        const tx = await APP.router.buy(deposit.memeToken, amountWei);
+        await tx.wait();
         setStatus(`✅ Bought ${amount} tokens!`, "success");
+        await loadDeposits();
         await renderMyTokens();
         await renderMarketTokens();
     } catch (error) {
@@ -1399,35 +1313,27 @@ async function sellToken(depositId, amount) {
         setStatus("Connect wallet first.", "error");
         return;
     }
-    const deposit = APP.deposits.find(d => d.id === parseInt(depositId));
+    const id = parseInt(depositId);
+    const deposit = APP.deposits.find(d => d.id === id);
     if (!deposit) {
         setStatus("Deposit not found.", "error");
         return;
     }
-    if (deposit.isRedeemed) {
-        setStatus("This deposit has been redeemed.", "error");
-        return;
-    }
 
-    const poolCurrency = getPoolCurrencySymbol(deposit);
-    setStatus(`⏳ Selling ${amount} tokens for ${poolCurrency}...`, "pending");
-    
+    setStatus(`⏳ Selling ${amount} tokens...`, "pending");
     try {
         const amountWei = amountToWei(amount, 18);
-        
-        if (poolCurrency === "USDC") {
+        let minOut = 0n;
+        try {
             const price = await APP.router.getPrice(deposit.memeToken);
-            const minOut = (amountWei * price) / 1000n;
-            const tx = await APP.router.sellForUSDC(deposit.memeToken, amountWei, minOut);
-            await tx.wait();
-        } else {
-            const price = await APP.router.getPrice(deposit.memeToken);
-            const minOut = (amountWei * price) / 1000n;
-            const tx = await APP.router.sell(deposit.memeToken, amountWei, minOut);
-            await tx.wait();
+            minOut = (amountWei * price) / 1000n;
+        } catch (e) {
+            minOut = 0n;
         }
-        
+        const tx = await APP.router.sell(deposit.memeToken, amountWei, minOut);
+        await tx.wait();
         setStatus(`✅ Sold ${amount} tokens!`, "success");
+        await loadDeposits();
         await renderMyTokens();
         await renderMarketTokens();
     } catch (error) {
@@ -1436,12 +1342,22 @@ async function sellToken(depositId, amount) {
     }
 }
 
+/* ============================================================
+   REDEEM COLLATERAL
+============================================================ */
+
 async function redeemCollateral(depositId) {
     if (!APP.connected) {
         setStatus("Connect wallet first.", "error");
         return;
     }
-    const id = parseInt(depositId);
+
+    const id = typeof depositId === 'number' ? depositId : parseInt(depositId);
+    if (isNaN(id) || id <= 0) {
+        setStatus("❌ Invalid deposit ID.", "error");
+        return;
+    }
+
     const deposit = APP.deposits.find(d => d.id === id);
     if (!deposit) {
         setStatus(`Deposit #${id} not found.`, "error");
@@ -1452,45 +1368,56 @@ async function redeemCollateral(depositId) {
         return;
     }
 
-    if (!deposit.owner || deposit.owner.toLowerCase() !== APP.account.toLowerCase()) {
-        setStatus("❌ Only the token author can redeem collateral.", "error");
-        return;
-    }
-
     const now = Math.floor(Date.now() / 1000);
-    if (Number(deposit.redemptionDeadline) > now) {
-        const timeLeft = Number(deposit.redemptionDeadline) - now;
+    const deadline = Number(deposit.redemptionDeadline) || 0;
+    if (deadline > now) {
+        const timeLeft = deadline - now;
         setStatus(`❌ Lock period not expired yet. Wait ${formatTime(timeLeft)}.`, "error");
         return;
     }
 
-    setStatus(`⏳ Redeeming collateral for deposit #${id}...`, "pending");
+    setStatus(`⏳ Redeeming deposit #${id}...`, "pending");
     try {
-        const tx = await APP.router.redeemCollateral(id);
+        let tx;
+        try {
+            tx = await APP.router.redeemCollateral(id);
+        } catch (e) {
+            console.log("redeemCollateral not available, fallback to redeem...");
+            tx = await APP.router.redeem(id);
+        }
         await tx.wait();
-        setStatus(`✅ Collateral redeemed! RWA + pool currency returned. Tokens burned.`, "success");
+        setStatus(`✅ Deposit #${id} redeemed!`, "success");
+        await loadDeposits();
         await renderMyTokens();
         await renderMarketTokens();
     } catch (error) {
-        console.error("Redeem collateral error:", error);
+        console.error("Redeem error:", error);
         setStatus("❌ Redeem failed: " + getErrorMessage(error), "error");
     }
 }
+
+/* ============================================================
+   BUYBACK & BURN
+============================================================ */
 
 async function buybackAndBurn() {
     if (!APP.connected) {
         setStatus("Connect wallet first.", "error");
         return;
     }
-    
+
     const id = parseInt(buybackDepositId.value);
+    if (isNaN(id) || id <= 0) {
+        setStatus("❌ Invalid deposit ID.", "error");
+        return;
+    }
+
     const amount = parseFloat(buybackAmount.value) || 0;
-    
     if (amount <= 0) {
         setStatus("Enter valid buyback amount.", "error");
         return;
     }
-    
+
     const deposit = APP.deposits.find(d => d.id === id);
     if (!deposit) {
         setStatus(`Deposit #${id} not found.`, "error");
@@ -1500,39 +1427,22 @@ async function buybackAndBurn() {
         setStatus(`Deposit #${id} already redeemed.`, "error");
         return;
     }
-    
-    if (!deposit.owner || deposit.owner.toLowerCase() !== APP.account.toLowerCase()) {
-        setStatus("❌ Only the token author can buyback and burn.", "error");
-        return;
-    }
-    
+
     const now = Math.floor(Date.now() / 1000);
-    if (Number(deposit.redemptionDeadline) > now) {
-        const timeLeft = Number(deposit.redemptionDeadline) - now;
+    const deadline = Number(deposit.redemptionDeadline) || 0;
+    if (deadline > now) {
+        const timeLeft = deadline - now;
         setStatus(`❌ Lock period not expired yet. Wait ${formatTime(timeLeft)}.`, "error");
         return;
     }
-    
-    const poolCurrency = getPoolCurrencySymbol(deposit);
-    setStatus(`⏳ Depositing ${amount} ${poolCurrency} for buyback & burn...`, "pending");
-    
+
+    setStatus(`⏳ Depositing ${amount} ETH for buyback & burn...`, "pending");
     try {
-        if (poolCurrency === "USDC") {
-            // First approve USDC
-            const usdcAmount = amountToWei(amount, 6);
-            const approveTx = await APP.usdcContract.approve(CONFIG.ROUTER_ADDRESS, usdcAmount);
-            await approveTx.wait();
-            
-            // Then buyback and burn
-            const tx = await APP.router.buybackAndBurnUSDC(id, usdcAmount);
-            await tx.wait();
-        } else {
-            const ethWei = ethers.parseEther(amount.toString());
-            const tx = await APP.router.buybackAndBurn(id, { value: ethWei });
-            await tx.wait();
-        }
-        
-        setStatus(`✅ Buyback & Burn complete! Tokens burned, collateral returned.`, "success");
+        const ethWei = ethers.parseEther(amount.toString());
+        const tx = await APP.router.redeem(id, { value: ethWei });
+        await tx.wait();
+        setStatus(`✅ Buyback & Burn complete!`, "success");
+        await loadDeposits();
         await renderMyTokens();
         await renderMarketTokens();
     } catch (error) {
@@ -1542,7 +1452,7 @@ async function buybackAndBurn() {
 }
 
 /* ============================================================
-   LAUNCH TOKEN
+   LAUNCH TOKEN — ОРИГИНАЛЬНАЯ СИГНАТУРА (6 ПАРАМЕТРОВ)
 ============================================================ */
 
 async function launchToken() {
@@ -1574,10 +1484,9 @@ async function launchToken() {
         if (!approved) return;
     }
 
-    const ethAmount = CONFIG.LAUNCH_ETH;
-    const ethWei = ethers.parseEther(ethAmount);
+    const ethWei = ethers.parseEther(CONFIG.LAUNCH_ETH);
 
-    setStatus(`⏳ Launching ${name} (${symbol}) with ${poolCurrency} pool and ${premiumRate}% premium...`, "pending");
+    setStatus(`⏳ Launching ${name} (${symbol})...`, "pending");
     launchBtn.disabled = true;
 
     try {
@@ -1585,14 +1494,8 @@ async function launchToken() {
         if (asset.startsWith("CRYPTO:")) {
             assetAddress = CONFIG.CRYPTO_ADDRESSES[asset];
         }
-        
-        // Determine pool currency address
-        let poolCurrencyAddress = ethers.ZeroAddress; // ETH
-        if (poolCurrency === "USDC") {
-            poolCurrencyAddress = CONFIG.USDC_ADDRESS;
-        }
 
-        // New launch function with pool currency and premium
+        // ОРИГИНАЛЬНАЯ СИГНАТУРА — 6 ПАРАМЕТРОВ
         const tx = await APP.router.launch(
             name,
             symbol,
@@ -1600,29 +1503,27 @@ async function launchToken() {
             assetAddress,
             amountWei,
             duration,
-            poolCurrencyAddress,
-            premiumRate,
             { value: ethWei }
         );
         await tx.wait();
 
+        // Сохраняем метаданные (pool + premium) в localStorage
+        const deposits = await loadDeposits();
+        const newest = deposits[deposits.length - 1];
+        if (newest) {
+            APP.tokenMeta[`deposit_${newest.id}`] = { poolCurrency, premiumRate };
+            localStorage.setItem('mwa_token_meta', JSON.stringify(APP.tokenMeta));
+        }
+
         setStatus(`✅ Token ${symbol} launched! Pool: ${poolCurrency}, Premium: ${premiumRate}%`, "success");
+        await loadDeposits();
         await renderMarketTokens();
         await renderMyTokens();
-
-        const file = tokenImage.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                console.log("Image loaded, will save on next load");
-            };
-            reader.readAsDataURL(file);
-        }
     } catch (error) {
         console.error("Launch error:", error);
         const errorMsg = getErrorMessage(error);
         if (errorMsg.includes("insufficient funds")) {
-            setStatus(`❌ Launch failed: Insufficient balance. Need at least ${ethAmount} ETH for liquidity.`, "error");
+            setStatus(`❌ Launch failed: Insufficient ETH balance.`, "error");
         } else {
             setStatus("❌ Launch failed: " + errorMsg, "error");
         }
@@ -1658,9 +1559,6 @@ async function connectWallet() {
         APP.account = account;
         APP.connected = true;
         APP.router = new ethers.Contract(CONFIG.ROUTER_ADDRESS, ROUTER_ABI, APP.signer);
-        
-        // Initialize USDC contract
-        APP.usdcContract = new ethers.Contract(CONFIG.USDC_ADDRESS, ERC20_ABI, APP.signer);
 
         walletState.textContent = "Wallet connected";
         walletAddress.textContent = shortAddress(account);
@@ -1679,15 +1577,7 @@ async function connectWallet() {
         await renderMyTokens();
         await updatePricePreview();
 
-        const balance = await provider.getBalance(account);
-        const ethBalance = ethers.formatEther(balance);
-        const requiredEth = parseFloat(CONFIG.LAUNCH_ETH);
-        if (parseFloat(ethBalance) < requiredEth) {
-            setStatus(`⚠️ Low ETH balance: ${ethBalance} ETH. Need at least ${requiredEth} ETH for launch.`, "info");
-        }
-
         startCountdownUpdates();
-
     } catch (error) {
         console.error("Connection error:", error);
         setStatus("❌ Connection failed: " + getErrorMessage(error), "error");
@@ -1717,7 +1607,7 @@ function startCountdownUpdates() {
                 }
             }
         } catch (error) {
-            console.error("Countdown update error:", error);
+            console.error("Countdown error:", error);
         }
     }, 1000);
 }
@@ -1747,7 +1637,7 @@ document.querySelectorAll('.nav button').forEach(btn => {
 connectBtn.addEventListener('click', connectWallet);
 launchBtn.addEventListener('click', launchToken);
 approveBtn.addEventListener('click', approveRWA);
-redeemBtn.addEventListener('click', redeemCollateral);
+redeemBtn.addEventListener('click', () => redeemCollateral(depositId.value));
 buybackBtn.addEventListener('click', buybackAndBurn);
 
 assetTypeSelect.addEventListener('change', toggleAssetType);
@@ -1756,8 +1646,7 @@ assetAmount.addEventListener('input', updatePricePreview);
 tokenSupply.addEventListener('input', updatePricePreview);
 lockDuration.addEventListener('input', () => {
     updatePricePreview();
-    const duration = parseInt(lockDuration.value) || 600;
-    durationDisplay.textContent = duration;
+    durationDisplay.textContent = parseInt(lockDuration.value) || 600;
 });
 poolCurrencySelect.addEventListener('change', updatePricePreview);
 premiumRateSelect.addEventListener('change', updatePricePreview);
@@ -1799,7 +1688,6 @@ if (window.ethereum) {
 console.log("✅ MWA Protocol v3 loaded");
 console.log(`📡 Router: ${CONFIG.ROUTER_ADDRESS}`);
 console.log(`🔗 Explorer: ${CONFIG.EXPLORER}`);
-console.log(`💵 USDC: ${CONFIG.USDC_ADDRESS}`);
 </script>
 
 </body>
