@@ -108,7 +108,7 @@
 <body>
 
 <div class="container">
-    <h1>MWA • Launch & Trade</h1>
+    <h1>MWA • Launch &amp; Trade</h1>
     <div class="subtitle">MWA Protocol v4 • Robinhood Testnet • Variant C (Premium)</div>
 
     <!-- WALLET -->
@@ -133,10 +133,10 @@
             <h2>📦 Launch New Token</h2>
             <div class="mechanism-info">
                 <strong>🔒 Variant C:</strong><br>
-                1. Вы блокируете RWA (ERC20) в Vault<br>
-                2. Создаётся MEME-токен, покупатели платят ETH/USDC<br>
-                3. После истечения срока вы вносите сумму выкупа + премию<br>
-                4. Токены сжигаются, RWA возвращается вам
+                1. You lock RWA (ERC20) in the Vault<br>
+                2. A MEME token is created, buyers pay ETH/USDC<br>
+                3. After the lock expires, you deposit buyback funds + premium<br>
+                4. Tokens are burned, and your RWA collateral is returned
             </div>
 
             <div class="grid" style="margin-top:15px;">
@@ -201,13 +201,13 @@
 
         <!-- BUYBACK & BURN (Author) -->
         <div class="section">
-            <h2>🔥 Buyback & Burn (Author Only)</h2>
+            <h2>🔥 Buyback &amp; Burn (Author Only)</h2>
             <div class="mechanism-info">
-                <strong>📋 Порядок:</strong><br>
-                1. Дождитесь истечения lock-периода<br>
-                2. Внесите ETH/USDC в <code>depositBuyback</code><br>
-                3. Вызовите <code>executeBuyback</code><br>
-                4. Токены сжигаются, RWA возвращается вам
+                <strong>📋 Steps:</strong><br>
+                1. Wait for the lock period to expire<br>
+                2. Deposit ETH/USDC via <code>depositBuyback</code><br>
+                3. Call <code>executeBuyback</code><br>
+                4. Tokens are burned, and your RWA collateral is returned
             </div>
             <div class="grid" style="margin-top:15px;">
                 <div>
@@ -220,7 +220,7 @@
                 </div>
             </div>
             <button id="depositBuybackBtn" class="btn-yellow" style="margin-top:15px; width:100%;" disabled>💰 1. Deposit Buyback Funds</button>
-            <button id="executeBuybackBtn" class="btn-purple" style="margin-top:10px; width:100%;" disabled>🔥 2. Execute Buyback & Burn</button>
+            <button id="executeBuybackBtn" class="btn-purple" style="margin-top:10px; width:100%;" disabled>🔥 2. Execute Buyback &amp; Burn</button>
         </div>
     </div>
 
@@ -293,17 +293,14 @@ const tokenPriceDisplay = $("tokenPriceDisplay"), poolCurrencyDisplay = $("poolC
    ABI
 ============================================================ */
 const VAULT_ABI = [
-    // write
     "function depositRWA20(address assetAddress, uint256 assetAmount, uint256 tokenAmount, uint256 lockDuration, address poolCurrency, uint256 premiumRate, string tokenName, string tokenSymbol) returns (uint256)",
     "function depositRWA(address assetAddress, uint256 assetId, uint256 tokenAmount, uint256 lockDuration, address poolCurrency, uint256 premiumRate, string tokenName, string tokenSymbol) returns (uint256)",
-    "function setFactory(address) ",
+    "function setFactory(address)",
     "function setOracle(address)",
     "function setRedemption(address)",
     "function setUsdc(address)",
-    // read
     "function depositCounter() view returns (uint256)",
     "function getDeposit(uint256 id) view returns (tuple(address assetAddress, uint256 assetId, uint256 assetAmount, address memeToken, uint256 memeTokenAmount, uint256 redemptionDeadline, bool isRedeemed, bool isClaimed, address poolCurrency, uint256 premiumRate, address owner))",
-    "function deposits(uint256) view returns (address, uint256, uint256, address, uint256, uint256, bool, bool, address, uint256, address)",
     "function owner() view returns (address)",
     "function mwaTokenFactory() view returns (address)",
     "function redemption() view returns (address)",
@@ -312,13 +309,11 @@ const VAULT_ABI = [
 ];
 
 const REDEMPTION_ABI = [
-    // write
     "function buyWithETH(uint256 depositId, uint256 memeAmount) payable",
     "function buyWithUSDC(uint256 depositId, uint256 memeAmount, uint256 maxUSDC)",
     "function sell(uint256 depositId, uint256 memeAmount, uint256 minOut)",
     "function depositBuyback(uint256 depositId, uint256 amount) payable",
     "function executeBuyback(uint256 depositId)",
-    // read
     "function vault() view returns (address)",
     "function buybackPool(uint256) view returns (uint256)"
 ];
@@ -376,7 +371,7 @@ function amountToWei(a, d) {
     } catch { return 0n; }
 }
 function getError(e) {
-    if (!e) return "Unknown";
+    if (!e) return "Unknown error";
     return e.reason || e.shortMessage || (e.info && e.info.error && e.info.error.message) || e.message || String(e);
 }
 function formatTime(s) {
@@ -388,13 +383,11 @@ function formatTime(s) {
     return `${sec}s`;
 }
 function getImage(a) { return APP.tokenImages[a.toLowerCase()] || null; }
-function saveImage(a, u) { APP.tokenImages[a.toLowerCase()] = u; localStorage.setItem('mwa_token_images', JSON.stringify(APP.tokenImages)); }
 
 /* ============================================================
    PRICE
 ============================================================ */
 async function fetchAssetPrice(assetAddress) {
-    // Простая заглушка: 1 RWA ≈ 1 USD. В реальности — через оракул.
     try {
         const oracle = await APP.vault.priceOracle();
         if (!isZeroAddress(oracle)) {
@@ -404,8 +397,11 @@ async function fetchAssetPrice(assetAddress) {
             return Number(ethers.formatUnits(raw, 8));
         }
     } catch (e) { /* ignore */ }
-    // fallback
-    const fallback = { "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E": 489.28, "0x71178BAc73cBeb415514eB542a8995b82669778d": 319.53, "0x7dF7F09271136b49bD1E44937FA758264024858C": 312.41 };
+    const fallback = {
+        "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E": 489.28,
+        "0x71178BAc73cBeb415514eB542a8995b82669778d": 319.53,
+        "0x7dF7F09271136b49bD1E44937FA758264024858C": 312.41
+    };
     return fallback[assetAddress] || 100;
 }
 
@@ -434,7 +430,7 @@ async function updatePricePreview() {
 }
 
 /* ============================================================
-   CHECK ALLOWANCE
+   ALLOWANCE
 ============================================================ */
 async function checkAllowance(asset, amountWei) {
     try {
@@ -456,7 +452,7 @@ async function checkAllowance(asset, amountWei) {
 }
 
 async function approveRWA() {
-    if (!APP.connected) return setStatus("Connect wallet", "error");
+    if (!APP.connected) return setStatus("Connect wallet first", "error");
     const asset = assetSelect.value;
     approveBtn.disabled = true;
     setStatus("⏳ Approving...", "pending");
@@ -464,7 +460,7 @@ async function approveRWA() {
         const token = new ethers.Contract(asset, TOKEN_ABI, APP.signer);
         const tx = await token.approve(CONFIG.VAULT_ADDRESS, ethers.MaxUint256);
         await tx.wait();
-        setStatus("✅ Approved!", "success");
+        setStatus("✅ Token approved!", "success");
         approveBtn.style.display = "none";
         launchBtn.disabled = false;
         APP.needApprove = false;
@@ -525,11 +521,11 @@ async function getBalance(addr, who) {
 }
 
 /* ============================================================
-   RENDER MARKET
+   MARKET
 ============================================================ */
 async function renderMarket() {
     const c = marketTokenList;
-    if (!APP.connected) { c.innerHTML = `<div style="color:#8da49d;padding:20px;text-align:center;">Connect wallet</div>`; return; }
+    if (!APP.connected) { c.innerHTML = `<div style="color:#8da49d;padding:20px;text-align:center;">Connect wallet to view market</div>`; return; }
     c.innerHTML = `<div style="color:#8da49d;padding:20px;text-align:center;">Loading...</div>`;
 
     const deposits = await loadDeposits();
@@ -576,18 +572,18 @@ async function renderMarket() {
             const id = btn.dataset.id;
             const pool = btn.dataset.pool;
             const amt = document.getElementById(`buy-amt-${id}`)?.value;
-            if (!amt || parseFloat(amt) <= 0) return setStatus("Enter amount", "error");
+            if (!amt || parseFloat(amt) <= 0) return setStatus("Enter a valid amount", "error");
             await buyToken(id, amt, pool);
         });
     });
 }
 
 /* ============================================================
-   RENDER MY TOKENS
+   MY TOKENS
 ============================================================ */
 async function renderMyTokens() {
     const c = myTokenList;
-    if (!APP.connected) { c.innerHTML = `<div style="color:#8da49d;padding:20px;text-align:center;">Connect wallet</div>`; return; }
+    if (!APP.connected) { c.innerHTML = `<div style="color:#8da49d;padding:20px;text-align:center;">Connect wallet first</div>`; return; }
     c.innerHTML = `<div style="color:#8da49d;padding:20px;text-align:center;">Loading...</div>`;
 
     const deposits = await loadDeposits();
@@ -600,7 +596,7 @@ async function renderMyTokens() {
         if (has || isAuthor) mine.push({ ...d, balance: bal, balanceF: balF, isAuthor });
     }
 
-    if (!mine.length) { c.innerHTML = `<div style="color:#8da49d;padding:20px;text-align:center;">No tokens</div>`; return; }
+    if (!mine.length) { c.innerHTML = `<div style="color:#8da49d;padding:20px;text-align:center;">You don't have any tokens yet</div>`; return; }
 
     let html = `<div class="token-grid">`;
     for (const d of mine) {
@@ -627,12 +623,12 @@ async function renderMyTokens() {
                 </div>
                 <div class="price-row"><span class="label">Deposit ID</span><span class="value">#${d.id}</span></div>
                 <div class="price-row"><span class="label">Balance</span><span class="value green">${d.balanceF} ${escapeHtml(sym)}</span></div>
-                <div class="price-row"><span class="label">Share</span><span class="value green">${share}%</span></div>
-                <div class="price-row"><span class="label">Lock</span><span class="value ${expired?'expired':'active'}">${expired?'🔓 Expired':`⏳ ${formatTime(left)}`}</span></div>
+                <div class="price-row"><span class="label">Your Share</span><span class="value green">${share}%</span></div>
+                <div class="price-row"><span class="label">Lock Status</span><span class="value ${expired?'expired':'active'}">${expired?'🔓 Expired':`⏳ ${formatTime(left)}`}</span></div>
                 <div class="price-row"><span class="label">Status</span><span class="value ${d.isRedeemed?'redeemed':'active'}">${d.isRedeemed?'● Redeemed':'● Active'}</span></div>
                 ${d.isRedeemed ? '' : `
                 <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
-                    <input type="number" placeholder="Sell" min="0" step="any" id="sell-amt-${d.id}" style="flex:1;padding:8px;font-size:13px;border-radius:8px;border:1px solid var(--border);background:var(--panel3);color:white;">
+                    <input type="number" placeholder="Sell amount" min="0" step="any" id="sell-amt-${d.id}" style="flex:1;padding:8px;font-size:13px;border-radius:8px;border:1px solid var(--border);background:var(--panel3);color:white;">
                     <button class="btn-red btn-small sell-btn" data-id="${d.id}">Sell</button>
                 </div>`}
             </div>`;
@@ -644,21 +640,21 @@ async function renderMyTokens() {
         btn.addEventListener('click', async () => {
             const id = btn.dataset.id;
             const amt = document.getElementById(`sell-amt-${id}`)?.value;
-            if (!amt || parseFloat(amt) <= 0) return setStatus("Enter amount", "error");
+            if (!amt || parseFloat(amt) <= 0) return setStatus("Enter a valid amount", "error");
             await sellToken(id, amt);
         });
     });
 }
 
 /* ============================================================
-   RENDER DEPOSIT DETAIL
+   DEPOSIT DETAIL
 ============================================================ */
 async function renderDepositDetail() {
     if (!APP.connected) return;
     try {
         const deposits = await loadDeposits();
         if (!deposits.length) {
-            depositDetail.innerHTML = `<div style="color:#8da49d;text-align:center;">No deposits</div>`;
+            depositDetail.innerHTML = `<div style="color:#8da49d;text-align:center;">No deposits yet</div>`;
             return;
         }
         const last = deposits[deposits.length - 1];
@@ -693,19 +689,17 @@ async function buyToken(id, amount, pool) {
     try {
         const amtWei = amountToWei(amount, 18);
         if (isZeroAddress(pool)) {
-            // ETH: используем простую формулу 1 MEME = 1 wei (контракт сам считает)
             const tx = await APP.redemption.buyWithETH(id, amtWei, { value: amtWei });
             await tx.wait();
         } else {
-            // USDC: нужен approve
             const usdc = new ethers.Contract(pool, TOKEN_ABI, APP.signer);
-            const cost = amtWei; // 1:1
+            const cost = amtWei;
             const approveTx = await usdc.approve(CONFIG.REDEMPTION_ADDRESS, cost);
             await approveTx.wait();
             const tx = await APP.redemption.buyWithUSDC(id, amtWei, cost);
             await tx.wait();
         }
-        setStatus(`✅ Bought ${amount}!`, "success");
+        setStatus(`✅ Bought ${amount} tokens!`, "success");
         await loadDeposits();
         await renderMarket();
         await renderMyTokens();
@@ -716,12 +710,12 @@ async function buyToken(id, amount, pool) {
 
 async function sellToken(id, amount) {
     if (!APP.connected) return;
-    setStatus(`⏳ Selling ${amount}...`, "pending");
+    setStatus(`⏳ Selling ${amount} tokens...`, "pending");
     try {
         const amtWei = amountToWei(amount, 18);
         const tx = await APP.redemption.sell(id, amtWei, 0);
         await tx.wait();
-        setStatus(`✅ Sold ${amount}!`, "success");
+        setStatus(`✅ Sold ${amount} tokens!`, "success");
         await loadDeposits();
         await renderMyTokens();
         await renderMarket();
@@ -741,8 +735,8 @@ async function launchToken() {
     const poolCur = poolCurrencySelect.value;
     const premium = parseInt(premiumRateSelect.value) || 3;
 
-    if (amount <= 0) return setStatus("Enter valid amount", "error");
-    if (duration < 30) return setStatus("Min lock 30s", "error");
+    if (amount <= 0) return setStatus("Enter a valid amount", "error");
+    if (duration < 30) return setStatus("Minimum lock duration is 30 seconds", "error");
 
     const opt = assetSelect.options[assetSelect.selectedIndex];
     const decimals = parseInt(opt.dataset.decimals) || 18;
@@ -760,7 +754,7 @@ async function launchToken() {
             asset, amountWei, supply, duration, poolAddr, premium, name, symbol
         );
         await tx.wait();
-        setStatus(`✅ ${symbol} launched!`, "success");
+        setStatus(`✅ ${symbol} launched successfully!`, "success");
         await loadDeposits();
         await renderMarket();
         await renderMyTokens();
@@ -777,7 +771,7 @@ async function depositBuyback() {
     const id = parseInt(buybackDepositId.value);
     const amount = parseFloat(buybackAmount.value) || 0;
     if (!id || id <= 0) return setStatus("Invalid deposit ID", "error");
-    if (amount <= 0) return setStatus("Enter amount", "error");
+    if (amount <= 0) return setStatus("Enter a valid amount", "error");
 
     const d = APP.deposits.find(x => x.id === id);
     if (!d) return setStatus("Deposit not found", "error");
@@ -791,13 +785,13 @@ async function depositBuyback() {
             await tx.wait();
         } else {
             const usdc = new ethers.Contract(d.poolCurrency, TOKEN_ABI, APP.signer);
-            const amt = amountToWei(amount, 6); // USDC 6 decimals
+            const amt = amountToWei(amount, 6);
             const approveTx = await usdc.approve(CONFIG.REDEMPTION_ADDRESS, amt);
             await approveTx.wait();
             const tx = await APP.redemption.depositBuyback(id, amt);
             await tx.wait();
         }
-        setStatus(`✅ Buyback deposited`, "success");
+        setStatus(`✅ Buyback funds deposited`, "success");
     } catch (e) {
         setStatus("❌ " + getError(e), "error");
     }
@@ -812,7 +806,7 @@ async function executeBuyback() {
     try {
         const tx = await APP.redemption.executeBuyback(id);
         await tx.wait();
-        setStatus(`✅ Buyback executed! RWA returned.`, "success");
+        setStatus(`✅ Buyback executed! RWA collateral returned.`, "success");
         await loadDeposits();
         await renderMarket();
         await renderMyTokens();
@@ -823,11 +817,11 @@ async function executeBuyback() {
 }
 
 /* ============================================================
-   CONNECT
+   CONNECT WALLET
 ============================================================ */
 async function connectWallet() {
     try {
-        if (!window.ethereum) return setStatus("MetaMask not installed", "error");
+        if (!window.ethereum) return setStatus("MetaMask is not installed", "error");
         const provider = new ethers.BrowserProvider(window.ethereum);
         const accounts = await provider.send("eth_requestAccounts", []);
         const account = accounts[0];
@@ -865,7 +859,7 @@ async function connectWallet() {
 }
 
 /* ============================================================
-   NAV
+   NAVIGATION
 ============================================================ */
 document.querySelectorAll('.nav button').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -906,7 +900,7 @@ if (window.ethereum) {
     });
     window.ethereum.on('chainChanged', (c) => {
         if (Number(c) === CONFIG.CHAIN_ID) connectWallet();
-        else setStatus("⚠️ Switch network", "error");
+        else setStatus("⚠️ Please switch network", "error");
     });
 }
 
