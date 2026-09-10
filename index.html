@@ -16,6 +16,7 @@
             --yellow: #f5b942;
             --red: #ff5555;
             --blue: #5aa9ff;
+            --purple: #8b5cf6;
             --text: #ffffff;
             --text2: #c9d6d2;
             --muted: #8da49d;
@@ -115,6 +116,8 @@
         .btn-approve { background: var(--blue); color: #00101e; }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text2); }
         .btn-outline:hover { background: var(--panel3); }
+        .btn-purple { background: var(--purple); color: white; }
+        .btn-purple:hover:not(:disabled) { background: #7c3aed; }
 
         .section {
             margin-top: 22px;
@@ -125,6 +128,7 @@
         }
         .section h2 { font-size: 18px; margin-bottom: 18px; }
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 12px; }
         input, select {
             width: 100%;
@@ -167,6 +171,7 @@
         .price-preview .row .label { color: var(--muted); }
         .price-preview .row .value { color: var(--text2); font-weight: 600; }
         .price-preview .row .value.green { color: var(--green); }
+        .price-preview .row .value.yellow { color: var(--yellow); }
 
         .table-wrapper { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 700px; }
@@ -250,6 +255,7 @@
         .deposit-detail .value.green { color: var(--green); }
         .deposit-detail .value.yellow { color: var(--yellow); }
         .deposit-detail .value.big { font-size: 18px; }
+        .deposit-detail .value.red { color: var(--red); }
 
         .share-bar {
             margin: 12px 0;
@@ -277,11 +283,45 @@
         .eth-required .label { color: var(--muted); }
         .eth-required .value { color: var(--green); font-weight: 700; }
 
+        .mechanism-info {
+            background: var(--panel3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--text2);
+        }
+        .mechanism-info strong { color: var(--green); }
+
+        .premium-badge {
+            display: inline-block;
+            background: var(--purple);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 13px;
+        }
+        .info-row .label { color: var(--muted); }
+        .info-row .value { font-weight: 600; }
+        .info-row .value.green { color: var(--green); }
+        .info-row .value.yellow { color: var(--yellow); }
+        .info-row .value.purple { color: var(--purple); }
+
         @media(max-width: 800px) {
             body { padding: 10px; }
             .container { padding: 16px; }
             .wallet { flex-direction: column; align-items: stretch; }
-            .grid { grid-template-columns: 1fr; }
+            .grid, .grid-3 { grid-template-columns: 1fr; }
             .token-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -362,14 +402,44 @@
                 <div>
                     <label>Lock Duration (seconds)</label>
                     <input id="lockDuration" type="number" value="600" min="60">
+                    <div style="margin-top:4px; font-size:11px; color:var(--muted);">
+                        After this time, author can redeem collateral
+                    </div>
                 </div>
             </div>
 
-            <div id="pricePreview" class="price-preview">
+            <!-- ============================================= NEW: POOL & PREMIUM ============================================= -->
+            <div class="grid" style="margin-top:15px;">
+                <div>
+                    <label>Pool Currency</label>
+                    <select id="poolCurrencySelect">
+                        <option value="ETH" selected>ETH (Ethereum)</option>
+                        <option value="USDC">USDC (USD Coin)</option>
+                    </select>
+                    <div style="margin-top:4px; font-size:11px; color:var(--muted);">
+                        Currency used for buying/selling tokens
+                    </div>
+                </div>
+                <div>
+                    <label>Premium Rate (%)</label>
+                    <select id="premiumRateSelect">
+                        <option value="3" selected>3%</option>
+                        <option value="5">5%</option>
+                        <option value="10">10%</option>
+                    </select>
+                    <div style="margin-top:4px; font-size:11px; color:var(--muted);">
+                        Extra % you commit to pay on buyback
+                    </div>
+                </div>
+            </div>
+
+            <div class="price-preview" id="pricePreview">
                 <div class="row"><span class="label">Asset Price</span><span class="value green" id="assetPriceDisplay">--</span></div>
                 <div class="row"><span class="label">Amount Locked</span><span class="value" id="amountLockedDisplay">--</span></div>
                 <div class="row"><span class="label">Total Value Locked</span><span class="value" id="totalValueDisplay">--</span></div>
                 <div class="row"><span class="label">Token Price</span><span class="value green" id="tokenPriceDisplay">--</span></div>
+                <div class="row"><span class="label">Pool Currency</span><span class="value" id="poolCurrencyDisplay">ETH</span></div>
+                <div class="row"><span class="label">Premium (Buyback)</span><span class="value purple" id="premiumDisplay">3%</span></div>
             </div>
 
             <div class="eth-required">
@@ -382,8 +452,46 @@
                 </div>
             </div>
 
+            <div class="mechanism-info">
+                <strong>🔒 How it works:</strong><br>
+                1. Author locks RWA asset + ETH as collateral<br>
+                2. Users can buy MEME tokens with <strong id="poolCurrencyInfo">ETH</strong><br>
+                3. After <strong id="durationDisplay">600</strong> seconds, author can call <strong>redeemCollateral()</strong><br>
+                4. Author buys back all tokens at current price <strong>+ <span id="premiumInfo">3%</span> premium</strong> and burns them<br>
+                5. Author receives back RWA asset + remaining collateral
+            </div>
+
             <button id="approveBtn" class="btn-approve" style="width:100%; margin-top:10px; display:none;">🔓 Approve RWA Token</button>
             <button id="launchBtn" class="btn-green launch-button" disabled>🚀 Launch Token</button>
+        </div>
+
+        <!-- ============================================= BUYBACK & BURN SECTION ============================================= -->
+        <div class="section">
+            <h2>🔥 Buyback & Burn (Author Only)</h2>
+            <div class="mechanism-info" style="margin-bottom:15px;">
+                <strong>📋 Process:</strong><br>
+                1. Time lock must be expired<br>
+                2. You need to deposit enough ETH/USDC to buyback all tokens + premium<br>
+                3. Click "Buyback & Burn" to purchase all tokens from holders<br>
+                4. Tokens are burned and you receive back your RWA collateral
+            </div>
+            <div class="grid">
+                <div>
+                    <label>Deposit ID</label>
+                    <input id="buybackDepositId" type="number" min="1" value="2">
+                </div>
+                <div>
+                    <label>Buyback Amount (ETH/USDC)</label>
+                    <input id="buybackAmount" type="number" step="any" placeholder="0.0" min="0">
+                    <div style="margin-top:4px; font-size:11px; color:var(--muted);">
+                        Amount to deposit for buyback + premium
+                    </div>
+                </div>
+            </div>
+            <button id="buybackBtn" class="btn-purple" style="margin-top:15px; width:100%;" disabled>🔥 Buyback & Burn Tokens</button>
+            <div style="margin-top:10px; color:#8da49d; font-size:12px;">
+                This will automatically buy back all tokens from holders at current market price + your committed premium, then burn them.
+            </div>
         </div>
     </div>
 
@@ -438,6 +546,18 @@
                     <span class="value">21,000,000 MEME</span>
                 </div>
                 <div class="row">
+                    <span class="label">Pool Currency</span>
+                    <span class="value">ETH</span>
+                </div>
+                <div class="row">
+                    <span class="label">Premium (Buyback)</span>
+                    <span class="value purple">3%</span>
+                </div>
+                <div class="row">
+                    <span class="label">Lock Expires In</span>
+                    <span class="value yellow" id="countdownDisplay">--</span>
+                </div>
+                <div class="row">
                     <span class="label">Status</span>
                     <span class="value active">● Active</span>
                 </div>
@@ -446,16 +566,24 @@
 
         <!-- ============================================= REDEEM SECTION ============================================= -->
         <div class="section">
-            <h2>🔄 Return RWA</h2>
+            <h2>🔄 Redeem Collateral (Author Only)</h2>
+            <div class="mechanism-info" style="margin-bottom:15px;">
+                <strong>📋 Process:</strong><br>
+                1. Time lock must be expired<br>
+                2. Author buys back all remaining tokens (automatic)<br>
+                3. Tokens are burned<br>
+                4. Author receives back RWA asset + ETH collateral
+            </div>
             <div class="grid">
                 <div>
                     <label>Deposit ID</label>
                     <input id="depositId" type="number" min="1" value="2">
                 </div>
             </div>
-            <button id="redeemBtn" class="btn-yellow" style="margin-top:15px;" disabled>🔄 Return RWA</button>
+            <button id="redeemBtn" class="btn-purple" style="margin-top:15px;" disabled>🔓 Redeem Collateral & Burn Tokens</button>
             <div style="margin-top:10px; color:#8da49d; font-size:12px;">
-                Return the required token amount and receive your RWA back.
+                Only the token author can redeem collateral after lock period expires.
+                This will buy back all tokens at current market price and burn them.
             </div>
         </div>
     </div>
@@ -479,7 +607,8 @@ const CONFIG = {
     RPC_URL: "https://rpc.testnet.chain.robinhood.com",
     EXPLORER: "https://explorer.testnet.chain.robinhood.com",
     ROUTER_ADDRESS: "0x0e5b59459F8F0315E4eF513bF64BD154EE3A2B6A",
-    LAUNCH_ETH: "0.0001", // ETH required for liquidity
+    LAUNCH_ETH: "0.0001",
+    USDC_ADDRESS: "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168", // USDG on Robinhood Chain
 
     STOCK_PRICES: {
         "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E": 489.28,
@@ -514,6 +643,7 @@ const walletAddress = document.getElementById("walletAddress");
 const launchBtn = document.getElementById("launchBtn");
 const approveBtn = document.getElementById("approveBtn");
 const redeemBtn = document.getElementById("redeemBtn");
+const buybackBtn = document.getElementById("buybackBtn");
 const marketTokenList = document.getElementById("marketTokenList");
 const myTokenList = document.getElementById("myTokenList");
 const statusBox = document.getElementById("status");
@@ -527,6 +657,8 @@ const assetAmount = document.getElementById("assetAmount");
 const assetUnitLabel = document.getElementById("assetUnitLabel");
 const lockDuration = document.getElementById("lockDuration");
 const depositId = document.getElementById("depositId");
+const buybackDepositId = document.getElementById("buybackDepositId");
+const buybackAmount = document.getElementById("buybackAmount");
 const pricePreview = document.getElementById("pricePreview");
 const assetPriceDisplay = document.getElementById("assetPriceDisplay");
 const amountLockedDisplay = document.getElementById("amountLockedDisplay");
@@ -535,22 +667,37 @@ const tokenPriceDisplay = document.getElementById("tokenPriceDisplay");
 const stockOptions = document.getElementById("stockOptions");
 const cryptoOptions = document.getElementById("cryptoOptions");
 const ethRequiredDisplay = document.getElementById("ethRequiredDisplay");
+const durationDisplay = document.getElementById("durationDisplay");
+const countdownDisplay = document.getElementById("countdownDisplay");
+const poolCurrencySelect = document.getElementById("poolCurrencySelect");
+const premiumRateSelect = document.getElementById("premiumRateSelect");
+const poolCurrencyDisplay = document.getElementById("poolCurrencyDisplay");
+const premiumDisplay = document.getElementById("premiumDisplay");
+const poolCurrencyInfo = document.getElementById("poolCurrencyInfo");
+const premiumInfo = document.getElementById("premiumInfo");
 
 /* ============================================================
-   ROUTER ABI
+   ROUTER ABI - Updated with new functions
 ============================================================ */
 
 const ROUTER_ABI = [
-    "function launch(string,string,uint256,address,uint256,uint256) payable",
+    // Launch with pool currency and premium
+    "function launch(string,string,uint256,address,uint256,uint256,address,uint256) payable",
     "function buy(address,uint256) payable",
+    "function buyWithUSDC(address,uint256,uint256)",
     "function sell(address,uint256,uint256)",
+    "function sellForUSDC(address,uint256,uint256)",
     "function redeem(uint256)",
-    "function getDeposit(uint256) view returns(tuple(address assetAddress,uint256 assetAmount,address memeToken,uint256 memeTokenAmount,uint256 redemptionDeadline,bool isRedeemed,bool isClaimed))",
+    "function redeemCollateral(uint256)",
+    "function buybackAndBurn(uint256) payable",
+    "function buybackAndBurnUSDC(uint256,uint256)",
+    "function getDeposit(uint256) view returns(tuple(address assetAddress,uint256 assetAmount,address memeToken,uint256 memeTokenAmount,uint256 redemptionDeadline,bool isRedeemed,bool isClaimed,address poolCurrency,uint256 premiumRate))",
     "function getActiveTokens() view returns(address[])",
     "function getReserves(address) view returns(uint256,uint256)",
     "function getPrice(address) view returns(uint256)",
     "function depositCounter() view returns(uint256)",
-    "function tokenInfoMap(address) view returns(address tokenAddress,string name,string symbol,uint256 totalSupply,uint256 reserveETH,uint256 reserveTokens,uint256 price,uint256 lastUpdate,bool isActive)"
+    "function tokenInfoMap(address) view returns(address tokenAddress,string name,string symbol,uint256 totalSupply,uint256 reserveETH,uint256 reserveTokens,uint256 price,uint256 lastUpdate,bool isActive)",
+    "function depositOwners(uint256) view returns(address)"
 ];
 
 const TOKEN_ABI = [
@@ -558,7 +705,15 @@ const TOKEN_ABI = [
     "function approve(address,uint256) returns(bool)",
     "function allowance(address,address) view returns(uint256)",
     "function name() view returns(string)",
-    "function symbol() view returns(string)"
+    "function symbol() view returns(string)",
+    "function burn(uint256)"
+];
+
+const ERC20_ABI = [
+    "function balanceOf(address) view returns(uint256)",
+    "function approve(address,uint256) returns(bool)",
+    "function allowance(address,address) view returns(uint256)",
+    "function decimals() view returns(uint8)"
 ];
 
 /* ============================================================
@@ -576,7 +731,10 @@ const APP = {
     allTokens: [],
     currentAssetPrice: null,
     needApprove: false,
-    tokenImages: JSON.parse(localStorage.getItem('mwa_token_images') || '{}')
+    tokenImages: JSON.parse(localStorage.getItem('mwa_token_images') || '{}'),
+    countdownInterval: null,
+    usdcContract: null,
+    usdcDecimals: 6
 };
 
 /* ============================================================
@@ -695,6 +853,29 @@ function saveTokenImage(address, dataUrl) {
     localStorage.setItem('mwa_token_images', JSON.stringify(APP.tokenImages));
 }
 
+function formatTime(seconds) {
+    if (seconds <= 0) return "Expired";
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    
+    if (days > 0) return `${days}d ${hours}h ${mins}m`;
+    if (hours > 0) return `${hours}h ${mins}m ${secs}s`;
+    if (mins > 0) return `${mins}m ${secs}s`;
+    return `${secs}s`;
+}
+
+function getPoolCurrencySymbol(deposit) {
+    if (!deposit.poolCurrency || isZeroAddress(deposit.poolCurrency)) {
+        return "ETH";
+    }
+    if (deposit.poolCurrency.toLowerCase() === CONFIG.USDC_ADDRESS.toLowerCase()) {
+        return "USDC";
+    }
+    return "ETH";
+}
+
 /* ============================================================
    FETCH ASSET PRICE
 ============================================================ */
@@ -736,6 +917,12 @@ async function updatePricePreview() {
     const symbol = selectedOption.dataset.symbol || "Units";
     assetUnitLabel.textContent = "(" + symbol + ")";
 
+    const duration = parseInt(lockDuration.value) || 600;
+    durationDisplay.textContent = duration;
+
+    const poolCurrency = poolCurrencySelect.value;
+    const premiumRate = premiumRateSelect.value;
+
     try {
         const result = await fetchAssetPrice(assetValue);
         APP.currentAssetPrice = result.price;
@@ -748,11 +935,16 @@ async function updatePricePreview() {
         amountLockedDisplay.textContent = amount + " " + symbol;
         totalValueDisplay.textContent = formatPrice(totalValue);
         tokenPriceDisplay.textContent = formatPrice(tokenPrice, true);
-
-        // Update ETH required
+        poolCurrencyDisplay.textContent = poolCurrency;
+        premiumDisplay.textContent = premiumRate + "%";
+        premiumDisplay.className = "value purple";
+        
+        // Update mechanism info
+        poolCurrencyInfo.textContent = poolCurrency;
+        premiumInfo.textContent = premiumRate + "%";
         ethRequiredDisplay.textContent = CONFIG.LAUNCH_ETH + " ETH";
 
-        return { assetPrice, tokenPrice, totalValue, amount, decimals, symbol };
+        return { assetPrice, tokenPrice, totalValue, amount, decimals, symbol, poolCurrency, premiumRate };
     } catch (error) {
         console.error("Price preview error:", error);
         pricePreview.className = "price-preview";
@@ -911,11 +1103,16 @@ async function loadDeposits() {
             try {
                 const d = await APP.router.getDeposit(id);
                 if (isZeroAddress(d.memeToken)) continue;
+                const owner = await APP.router.depositOwners(id);
                 console.log(`[MWA] Deposit ${id}:`, {
                     assetAddress: d.assetAddress,
                     memeToken: d.memeToken,
                     memeTokenAmount: d.memeTokenAmount,
-                    isRedeemed: d.isRedeemed
+                    isRedeemed: d.isRedeemed,
+                    owner: owner,
+                    deadline: d.redemptionDeadline,
+                    poolCurrency: d.poolCurrency,
+                    premiumRate: d.premiumRate
                 });
                 result.push({
                     id,
@@ -925,7 +1122,10 @@ async function loadDeposits() {
                     memeTokenAmount: d.memeTokenAmount,
                     redemptionDeadline: d.redemptionDeadline,
                     isRedeemed: d.isRedeemed,
-                    isClaimed: d.isClaimed
+                    isClaimed: d.isClaimed,
+                    owner: owner,
+                    poolCurrency: d.poolCurrency,
+                    premiumRate: d.premiumRate
                 });
             } catch (error) {
                 console.warn("Deposit read error:", id, error);
@@ -968,13 +1168,17 @@ async function renderMarketTokens() {
         const image = getImageForToken(deposit.memeToken);
 
         const tokenPrice = 0.00002330;
+        const now = Math.floor(Date.now() / 1000);
+        const timeLeft = Number(deposit.redemptionDeadline) - now;
+        const poolCurrency = getPoolCurrencySymbol(deposit);
+        const premiumRate = deposit.premiumRate || 3;
 
         html += `
             <div class="token-card">
                 <div class="header">
                     ${image ? `<img src="${image}" class="token-image" alt="${tokenName}">` : `<div class="token-image" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🪙</div>`}
                     <div class="info">
-                        <div class="name">${escapeHtml(tokenName)}</div>
+                        <div class="name">${escapeHtml(tokenName)} <span class="premium-badge">+${premiumRate}%</span></div>
                         <div class="symbol">${escapeHtml(tokenSymbol)}</div>
                     </div>
                 </div>
@@ -985,6 +1189,18 @@ async function renderMarketTokens() {
                 <div class="price-row">
                     <span class="label">Total Supply</span>
                     <span class="value">21,000,000 ${escapeHtml(tokenSymbol)}</span>
+                </div>
+                <div class="price-row">
+                    <span class="label">Pool Currency</span>
+                    <span class="value">${poolCurrency}</span>
+                </div>
+                <div class="price-row">
+                    <span class="label">Buyback Premium</span>
+                    <span class="value purple">+${premiumRate}%</span>
+                </div>
+                <div class="price-row">
+                    <span class="label">Lock Expires</span>
+                    <span class="value ${timeLeft > 0 ? 'active' : 'expired'}">${timeLeft > 0 ? formatTime(timeLeft) : 'Expired ✅'}</span>
                 </div>
                 <div class="buy-section">
                     <input type="number" placeholder="Amount" min="0" step="any" class="amount-input" id="buy-amount-${deposit.id}">
@@ -1047,14 +1263,21 @@ async function renderMyTokens() {
         const share = (parseFloat(balanceFormatted.replace(/,/g, '')) / totalSupply * 100).toFixed(8);
         
         const tokenPrice = 0.00002330;
+        const now = Math.floor(Date.now() / 1000);
+        const timeLeft = Number(deposit.redemptionDeadline) - now;
+        const isExpired = timeLeft <= 0;
+        const isAuthor = deposit.owner && deposit.owner.toLowerCase() === APP.account.toLowerCase();
+        const poolCurrency = getPoolCurrencySymbol(deposit);
+        const premiumRate = deposit.premiumRate || 3;
 
         html += `
             <div class="token-card">
                 <div class="header">
                     ${image ? `<img src="${image}" class="token-image" alt="${tokenName}">` : `<div class="token-image" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🪙</div>`}
                     <div class="info">
-                        <div class="name">${escapeHtml(tokenName)}</div>
+                        <div class="name">${escapeHtml(tokenName)} <span class="premium-badge">+${premiumRate}%</span></div>
                         <div class="symbol">${escapeHtml(tokenSymbol)}</div>
+                        ${isAuthor ? '<span style="color:var(--yellow);font-size:10px;">👑 Author</span>' : ''}
                     </div>
                 </div>
                 <div class="price-row">
@@ -1074,13 +1297,26 @@ async function renderMyTokens() {
                     <span class="value green">$${tokenPrice.toFixed(8)}</span>
                 </div>
                 <div class="price-row">
+                    <span class="label">Pool Currency</span>
+                    <span class="value">${poolCurrency}</span>
+                </div>
+                <div class="price-row">
+                    <span class="label">Buyback Premium</span>
+                    <span class="value purple">+${premiumRate}%</span>
+                </div>
+                <div class="price-row">
+                    <span class="label">Lock Status</span>
+                    <span class="value ${isExpired ? 'expired' : 'active'}">${isExpired ? '🔓 Expired' : `⏳ ${formatTime(timeLeft)}`}</span>
+                </div>
+                <div class="price-row">
                     <span class="label">Status</span>
                     <span class="value ${deposit.isRedeemed ? 'redeemed' : 'active'}">${deposit.isRedeemed ? '● Redeemed' : '● Active'}</span>
                 </div>
                 ${deposit.isRedeemed ? '' : `
-                <div style="margin-top:12px; display:flex; gap:8px;">
+                <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
                     <input type="number" placeholder="Sell amount" min="0" step="any" class="amount-input" id="sell-amount-${deposit.id}">
                     <button class="btn-red btn-small sell-btn" data-deposit="${deposit.id}">Sell</button>
+                    ${isAuthor && isExpired ? `<button class="btn-purple btn-small redeem-collateral-btn" data-deposit="${deposit.id}">🔓 Redeem</button>` : ''}
                 </div>
                 `}
                 <div style="margin-top:8px; text-align:right;">
@@ -1104,10 +1340,17 @@ async function renderMyTokens() {
             await sellToken(depositId, amount);
         });
     });
+
+    container.querySelectorAll('.redeem-collateral-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const depositId = btn.dataset.deposit;
+            await redeemCollateral(depositId);
+        });
+    });
 }
 
 /* ============================================================
-   BUY / SELL / REDEEM
+   BUY / SELL / REDEEM COLLATERAL / BUYBACK & BURN
 ============================================================ */
 
 async function buyToken(depositId, amount) {
@@ -1125,11 +1368,23 @@ async function buyToken(depositId, amount) {
         return;
     }
 
-    setStatus(`⏳ Buying ${amount} tokens...`, "pending");
+    const poolCurrency = getPoolCurrencySymbol(deposit);
+    setStatus(`⏳ Buying ${amount} tokens with ${poolCurrency}...`, "pending");
+    
     try {
         const amountWei = amountToWei(amount, 18);
-        const tx = await APP.router.buy(deposit.memeToken, amountWei);
-        await tx.wait();
+        
+        if (poolCurrency === "USDC") {
+            // Buy with USDC
+            const usdcAmount = amountWei; // Simplified - in reality need price conversion
+            const tx = await APP.router.buyWithUSDC(deposit.memeToken, amountWei, usdcAmount);
+            await tx.wait();
+        } else {
+            // Buy with ETH
+            const tx = await APP.router.buy(deposit.memeToken, amountWei);
+            await tx.wait();
+        }
+        
         setStatus(`✅ Bought ${amount} tokens!`, "success");
         await renderMyTokens();
         await renderMarketTokens();
@@ -1149,14 +1404,29 @@ async function sellToken(depositId, amount) {
         setStatus("Deposit not found.", "error");
         return;
     }
+    if (deposit.isRedeemed) {
+        setStatus("This deposit has been redeemed.", "error");
+        return;
+    }
 
-    setStatus(`⏳ Selling ${amount} tokens...`, "pending");
+    const poolCurrency = getPoolCurrencySymbol(deposit);
+    setStatus(`⏳ Selling ${amount} tokens for ${poolCurrency}...`, "pending");
+    
     try {
         const amountWei = amountToWei(amount, 18);
-        const price = await APP.router.getPrice(deposit.memeToken);
-        const minOut = (amountWei * price) / 1000n;
-        const tx = await APP.router.sell(deposit.memeToken, amountWei, minOut);
-        await tx.wait();
+        
+        if (poolCurrency === "USDC") {
+            const price = await APP.router.getPrice(deposit.memeToken);
+            const minOut = (amountWei * price) / 1000n;
+            const tx = await APP.router.sellForUSDC(deposit.memeToken, amountWei, minOut);
+            await tx.wait();
+        } else {
+            const price = await APP.router.getPrice(deposit.memeToken);
+            const minOut = (amountWei * price) / 1000n;
+            const tx = await APP.router.sell(deposit.memeToken, amountWei, minOut);
+            await tx.wait();
+        }
+        
         setStatus(`✅ Sold ${amount} tokens!`, "success");
         await renderMyTokens();
         await renderMarketTokens();
@@ -1166,12 +1436,12 @@ async function sellToken(depositId, amount) {
     }
 }
 
-async function redeemRWA() {
+async function redeemCollateral(depositId) {
     if (!APP.connected) {
         setStatus("Connect wallet first.", "error");
         return;
     }
-    const id = parseInt(depositId.value) || 2;
+    const id = parseInt(depositId);
     const deposit = APP.deposits.find(d => d.id === id);
     if (!deposit) {
         setStatus(`Deposit #${id} not found.`, "error");
@@ -1182,21 +1452,97 @@ async function redeemRWA() {
         return;
     }
 
-    setStatus(`⏳ Redeeming deposit #${id}...`, "pending");
+    if (!deposit.owner || deposit.owner.toLowerCase() !== APP.account.toLowerCase()) {
+        setStatus("❌ Only the token author can redeem collateral.", "error");
+        return;
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    if (Number(deposit.redemptionDeadline) > now) {
+        const timeLeft = Number(deposit.redemptionDeadline) - now;
+        setStatus(`❌ Lock period not expired yet. Wait ${formatTime(timeLeft)}.`, "error");
+        return;
+    }
+
+    setStatus(`⏳ Redeeming collateral for deposit #${id}...`, "pending");
     try {
-        const tx = await APP.router.redeem(id);
+        const tx = await APP.router.redeemCollateral(id);
         await tx.wait();
-        setStatus(`✅ Deposit #${id} redeemed! RWA returned.`, "success");
+        setStatus(`✅ Collateral redeemed! RWA + pool currency returned. Tokens burned.`, "success");
         await renderMyTokens();
         await renderMarketTokens();
     } catch (error) {
-        console.error("Redeem error:", error);
+        console.error("Redeem collateral error:", error);
         setStatus("❌ Redeem failed: " + getErrorMessage(error), "error");
     }
 }
 
+async function buybackAndBurn() {
+    if (!APP.connected) {
+        setStatus("Connect wallet first.", "error");
+        return;
+    }
+    
+    const id = parseInt(buybackDepositId.value);
+    const amount = parseFloat(buybackAmount.value) || 0;
+    
+    if (amount <= 0) {
+        setStatus("Enter valid buyback amount.", "error");
+        return;
+    }
+    
+    const deposit = APP.deposits.find(d => d.id === id);
+    if (!deposit) {
+        setStatus(`Deposit #${id} not found.`, "error");
+        return;
+    }
+    if (deposit.isRedeemed) {
+        setStatus(`Deposit #${id} already redeemed.`, "error");
+        return;
+    }
+    
+    if (!deposit.owner || deposit.owner.toLowerCase() !== APP.account.toLowerCase()) {
+        setStatus("❌ Only the token author can buyback and burn.", "error");
+        return;
+    }
+    
+    const now = Math.floor(Date.now() / 1000);
+    if (Number(deposit.redemptionDeadline) > now) {
+        const timeLeft = Number(deposit.redemptionDeadline) - now;
+        setStatus(`❌ Lock period not expired yet. Wait ${formatTime(timeLeft)}.`, "error");
+        return;
+    }
+    
+    const poolCurrency = getPoolCurrencySymbol(deposit);
+    setStatus(`⏳ Depositing ${amount} ${poolCurrency} for buyback & burn...`, "pending");
+    
+    try {
+        if (poolCurrency === "USDC") {
+            // First approve USDC
+            const usdcAmount = amountToWei(amount, 6);
+            const approveTx = await APP.usdcContract.approve(CONFIG.ROUTER_ADDRESS, usdcAmount);
+            await approveTx.wait();
+            
+            // Then buyback and burn
+            const tx = await APP.router.buybackAndBurnUSDC(id, usdcAmount);
+            await tx.wait();
+        } else {
+            const ethWei = ethers.parseEther(amount.toString());
+            const tx = await APP.router.buybackAndBurn(id, { value: ethWei });
+            await tx.wait();
+        }
+        
+        setStatus(`✅ Buyback & Burn complete! Tokens burned, collateral returned.`, "success");
+        await renderMyTokens();
+        await renderMarketTokens();
+    } catch (error) {
+        console.error("Buyback error:", error);
+        setStatus("❌ Buyback failed: " + getErrorMessage(error), "error");
+    }
+}
+
 /* ============================================================
-   LAUNCH TOKEN - FIXED WITH ETH
+   LAUNCH TOKEN
 ============================================================ */
 
 async function launchToken() {
@@ -1211,6 +1557,8 @@ async function launchToken() {
     const asset = assetSelect.value;
     const amount = parseFloat(assetAmount.value) || 0;
     const duration = parseInt(lockDuration.value) || 600;
+    const poolCurrency = poolCurrencySelect.value;
+    const premiumRate = parseInt(premiumRateSelect.value) || 3;
 
     if (amount <= 0) {
         setStatus("Enter valid asset amount.", "error");
@@ -1221,17 +1569,15 @@ async function launchToken() {
     const decimals = parseInt(selectedOption.dataset.decimals) || 18;
     const amountWei = amountToWei(amount, decimals);
 
-    // Check allowance for non-crypto assets
     if (!asset.startsWith("CRYPTO:")) {
         const approved = await checkAllowance(asset, amountWei);
         if (!approved) return;
     }
 
-    // Convert ETH amount to wei
     const ethAmount = CONFIG.LAUNCH_ETH;
     const ethWei = ethers.parseEther(ethAmount);
 
-    setStatus(`⏳ Launching ${name} (${symbol}) with ${ethAmount} ETH...`, "pending");
+    setStatus(`⏳ Launching ${name} (${symbol}) with ${poolCurrency} pool and ${premiumRate}% premium...`, "pending");
     launchBtn.disabled = true;
 
     try {
@@ -1239,8 +1585,14 @@ async function launchToken() {
         if (asset.startsWith("CRYPTO:")) {
             assetAddress = CONFIG.CRYPTO_ADDRESSES[asset];
         }
+        
+        // Determine pool currency address
+        let poolCurrencyAddress = ethers.ZeroAddress; // ETH
+        if (poolCurrency === "USDC") {
+            poolCurrencyAddress = CONFIG.USDC_ADDRESS;
+        }
 
-        // Send ETH along with the transaction
+        // New launch function with pool currency and premium
         const tx = await APP.router.launch(
             name,
             symbol,
@@ -1248,11 +1600,13 @@ async function launchToken() {
             assetAddress,
             amountWei,
             duration,
+            poolCurrencyAddress,
+            premiumRate,
             { value: ethWei }
         );
         await tx.wait();
 
-        setStatus(`✅ Token ${symbol} launched successfully! ETH used for liquidity.`, "success");
+        setStatus(`✅ Token ${symbol} launched! Pool: ${poolCurrency}, Premium: ${premiumRate}%`, "success");
         await renderMarketTokens();
         await renderMyTokens();
 
@@ -1268,7 +1622,7 @@ async function launchToken() {
         console.error("Launch error:", error);
         const errorMsg = getErrorMessage(error);
         if (errorMsg.includes("insufficient funds")) {
-            setStatus(`❌ Launch failed: Insufficient ETH balance. Need at least ${ethAmount} ETH for liquidity.`, "error");
+            setStatus(`❌ Launch failed: Insufficient balance. Need at least ${ethAmount} ETH for liquidity.`, "error");
         } else {
             setStatus("❌ Launch failed: " + errorMsg, "error");
         }
@@ -1304,6 +1658,9 @@ async function connectWallet() {
         APP.account = account;
         APP.connected = true;
         APP.router = new ethers.Contract(CONFIG.ROUTER_ADDRESS, ROUTER_ABI, APP.signer);
+        
+        // Initialize USDC contract
+        APP.usdcContract = new ethers.Contract(CONFIG.USDC_ADDRESS, ERC20_ABI, APP.signer);
 
         walletState.textContent = "Wallet connected";
         walletAddress.textContent = shortAddress(account);
@@ -1315,13 +1672,13 @@ async function connectWallet() {
 
         launchBtn.disabled = false;
         redeemBtn.disabled = false;
+        buybackBtn.disabled = false;
 
         await loadDeposits();
         await renderMarketTokens();
         await renderMyTokens();
         await updatePricePreview();
 
-        // Check ETH balance
         const balance = await provider.getBalance(account);
         const ethBalance = ethers.formatEther(balance);
         const requiredEth = parseFloat(CONFIG.LAUNCH_ETH);
@@ -1329,10 +1686,40 @@ async function connectWallet() {
             setStatus(`⚠️ Low ETH balance: ${ethBalance} ETH. Need at least ${requiredEth} ETH for launch.`, "info");
         }
 
+        startCountdownUpdates();
+
     } catch (error) {
         console.error("Connection error:", error);
         setStatus("❌ Connection failed: " + getErrorMessage(error), "error");
     }
+}
+
+/* ============================================================
+   COUNTDOWN UPDATES
+============================================================ */
+
+function startCountdownUpdates() {
+    if (APP.countdownInterval) clearInterval(APP.countdownInterval);
+    APP.countdownInterval = setInterval(async () => {
+        if (!APP.connected) return;
+        try {
+            const deposits = await loadDeposits();
+            const activeDeposit = deposits.find(d => !d.isRedeemed && !isZeroAddress(d.memeToken));
+            if (activeDeposit && countdownDisplay) {
+                const now = Math.floor(Date.now() / 1000);
+                const timeLeft = Number(activeDeposit.redemptionDeadline) - now;
+                if (timeLeft > 0) {
+                    countdownDisplay.textContent = formatTime(timeLeft);
+                    countdownDisplay.className = "value yellow";
+                } else {
+                    countdownDisplay.textContent = "Expired ✅";
+                    countdownDisplay.className = "value green";
+                }
+            }
+        } catch (error) {
+            console.error("Countdown update error:", error);
+        }
+    }, 1000);
 }
 
 /* ============================================================
@@ -1360,13 +1747,20 @@ document.querySelectorAll('.nav button').forEach(btn => {
 connectBtn.addEventListener('click', connectWallet);
 launchBtn.addEventListener('click', launchToken);
 approveBtn.addEventListener('click', approveRWA);
-redeemBtn.addEventListener('click', redeemRWA);
+redeemBtn.addEventListener('click', redeemCollateral);
+buybackBtn.addEventListener('click', buybackAndBurn);
 
 assetTypeSelect.addEventListener('change', toggleAssetType);
 assetSelect.addEventListener('change', updatePricePreview);
 assetAmount.addEventListener('input', updatePricePreview);
 tokenSupply.addEventListener('input', updatePricePreview);
-lockDuration.addEventListener('input', updatePricePreview);
+lockDuration.addEventListener('input', () => {
+    updatePricePreview();
+    const duration = parseInt(lockDuration.value) || 600;
+    durationDisplay.textContent = duration;
+});
+poolCurrencySelect.addEventListener('change', updatePricePreview);
+premiumRateSelect.addEventListener('change', updatePricePreview);
 
 setTimeout(updatePricePreview, 500);
 
@@ -1385,6 +1779,10 @@ if (window.ethereum) {
             connectBtn.style.opacity = "1";
             connectBtn.disabled = false;
             setStatus("Wallet disconnected.", "info");
+            if (APP.countdownInterval) {
+                clearInterval(APP.countdownInterval);
+                APP.countdownInterval = null;
+            }
         }
     });
 
@@ -1401,6 +1799,7 @@ if (window.ethereum) {
 console.log("✅ MWA Protocol v3 loaded");
 console.log(`📡 Router: ${CONFIG.ROUTER_ADDRESS}`);
 console.log(`🔗 Explorer: ${CONFIG.EXPLORER}`);
+console.log(`💵 USDC: ${CONFIG.USDC_ADDRESS}`);
 </script>
 
 </body>
