@@ -5,10 +5,10 @@ import {BaseHook} from "@openzeppelin/uniswap-hooks/src/base/BaseHook.sol";
 import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
 import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
+import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
 import {BalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 
-// Упрощенный интерфейс Chainlink AggregatorV3Interface
 interface AggregatorV3Interface {
     function latestRoundData()
         external
@@ -22,23 +22,55 @@ interface AggregatorV3Interface {
         );
 }
 
+/**
+ * @title MWAPriceHook
+ * @notice Uniswap v4 hook, который:
+ *         - Отслеживает цену RWA через Chainlink оракул
+ *         - Хранит anchor price для каждого пула
+ *         - Обеспечивает read-only доступ к цене для MWARedemption
+ *
+ *         ВАЖНО: в Uniswap v4 функции-хуки называются `_beforeSwap` / `_afterSwap`
+ *         и уже имеют проверку `onlyPoolManager` в BaseHook.
+ */
 contract MWAPriceHook is BaseHook {
-    AggregatorV3Interface public priceFeed;
-    
-    // Хранилище для "якорной" цены
-    mapping(bytes32 => uint256) public anchorPrices;
-    
-    // События
-    event PriceUpdated(bytes32 indexed poolId, uint256 newPrice);
-    event PriceFeedUpdated(address newPriceFeed);
+    using PoolIdLibrary for PoolKey;
 
-    constructor(IPoolManager _poolManager, address _priceFeed) BaseHook(_poolManager) {
-        priceFeed = AggregatorV3Interface(_priceFeed);
+    AggregatorV3Interface public priceFeed;
+
+    // Якорные цены по poolId
+    mapping(bytes32 => uint256) public anchorPrices;
+
+    // Цены по адресам RWA-активов (обновляется вручную или оракулом)
+    mapping(address => uint256) public referencePrices;
+
+    // Права на обновление цен
+    address public priceAdmin;
+
+    event PriceUpdated(bytes32 indexed poolId, uint256 newPrice);
+    event ReferencePriceUpdated(address indexed asset, uint256 price);
+    event PriceFeedUpdated(address newPriceFeed);
+    event PriceAdminUpdated(address newAdmin);
+
+    modifier onlyPriceAdmin() {
+        require(msg.sender == priceAdmin, "MWAPriceHook: only admin");
+        _;
     }
 
-    // Устанавливаем флаги хука (только afterSwap)
-    function getHookCalls() public pure override returns (Hooks.Calls memory) {
-        return Hooks.Calls({
+    constructor(IPoolManager _poolManager, address _priceFeed, address _priceAdmin)
+        BaseHook(_poolManager)
+    {
+        priceFeed = AggregatorV3Interface(_priceFeed);
+        priceAdmin = _priceAdmin;
+    }
+
+    /// @inheritdoc BaseHook
+    function getHookPermissions()
+        public
+        pure
+        override
+        returns (Hooks.Permissions memory)
+    {
+        return Hooks.Permissions({
             beforeInitialize: false,
             afterInitialize: false,
             beforeAddLiquidity: false,
@@ -48,47 +80,73 @@ contract MWAPriceHook is BaseHook {
             beforeSwap: false,
             afterSwap: true,
             beforeDonate: false,
-            afterDonate: false
+            afterDonate: false,
+            beforeSwapReturnDelta: false,
+            afterSwapReturnDelta: false,
+            afterAddLiquidityReturnDelta: false,
+            afterRemoveLiquidityReturnDelta: false
         });
     }
 
-    // Хук после свапа — обновляем якорную цену
-    function afterSwap(
-        address sender,
+    /**
+     * @notice Внутренний хук после свапа — обновляет anchor price
+     */
+    function _afterSwap(
+        address,
         PoolKey calldata key,
-        IPoolManager.SwapParams calldata params,
-        BalanceDelta delta,
-        bytes calldata hookData
-    ) external override returns (bytes4) {
-        // Получаем актуальную цену от оракула
+        IPoolManager.SwapParams calldata,
+        BalanceDelta,
+        bytes calldata
+    ) internal override returns (bytes4, int128) {
         (, int256 price, , , ) = priceFeed.latestRoundData();
         uint256 currentPrice = uint256(price);
-        
-        // Сохраняем цену для этого пула
-        bytes32 poolId = keccak256(abi.encode(key));
+
+        bytes32 poolId = PoolId.unwrap(key.toId());
         anchorPrices[poolId] = currentPrice;
-        
+
         emit PriceUpdated(poolId, currentPrice);
-        
-        return this.afterSwap.selector;
+
+        return (BaseHook.afterSwap.selector, 0);
     }
 
-    // Получение текущей цены от оракула
-    function getReferencePrice() external view returns (uint256) {
+    /**
+     * @notice Получить reference price для RWA-актива.
+     *         Если задана вручную — возвращает её, иначе — из Chainlink.
+     */
+    function getReferencePrice(address asset) external view returns (uint256) {
+        uint256 manual = referencePrices[asset];
+        if (manual > 0) return manual;
+
         (, int256 price, , , ) = priceFeed.latestRoundData();
         return uint256(price);
     }
-    
-    // Получение сохраненной якорной цены для пула
+
+    /// @notice Получить anchor price для пула
     function getAnchorPrice(PoolKey calldata key) external view returns (uint256) {
-        bytes32 poolId = keccak256(abi.encode(key));
-        return anchorPrices[poolId];
+        return anchorPrices[PoolId.unwrap(key.toId())];
     }
-    
-    // Обновление адреса оракула (только владелец)
-    function setPriceFeed(address newPriceFeed) external {
-        require(msg.sender == address(this), "Only hook itself can update");
+
+    /// @notice Установить reference price для RWA вручную (только admin)
+    function setReferencePrice(address asset, uint256 price) external onlyPriceAdmin {
+        referencePrices[asset] = price;
+        emit ReferencePriceUpdated(asset, price);
+    }
+
+    /// @notice Установить anchor price для пула (только admin)
+    function setAnchorPrice(address asset, uint256 price) external onlyPriceAdmin {
+        referencePrices[asset] = price;
+        emit ReferencePriceUpdated(asset, price);
+    }
+
+    /// @notice Обновить Chainlink оракул (только admin)
+    function setPriceFeed(address newPriceFeed) external onlyPriceAdmin {
         priceFeed = AggregatorV3Interface(newPriceFeed);
         emit PriceFeedUpdated(newPriceFeed);
+    }
+
+    /// @notice Сменить админа цен
+    function setPriceAdmin(address newAdmin) external onlyPriceAdmin {
+        priceAdmin = newAdmin;
+        emit PriceAdminUpdated(newAdmin);
     }
 }
